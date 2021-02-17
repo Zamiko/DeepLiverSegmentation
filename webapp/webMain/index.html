@@ -1,0 +1,44 @@
+<!-- This is a static file -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A webapp focused on provider a liver-segmentation interface for DICOM images">
+
+    <title>Liver Segmenter!</title>
+    <!-- stylesheets will be linked here-->
+    
+  </head>
+  <body>
+    <header>
+      <h1>
+       Welcome to the Liver Segmenter
+      </h1>
+      <div id = "Viewer">
+      </div>
+    </header>
+
+    <main>
+      <p>Here's the DICOM image:</p>
+      <!--Need to hook up the DICOM image viewer here-->
+      
+    </main>
+
+    <footer>
+       <p>
+        This Website is developed by the Banana Leaf Development Team!
+      </p>
+      <p>
+        Our goal is to build off the
+      </p>
+      <a href = "https://github.com/OHIF/Viewers"> OHIF DICOM Viewer</a>
+      <p>
+        to improve liver segmentation for the purposes of improving ability to detect cancer in the liver.
+      </p>
+      <script src="https://unpkg.com/@ohif/viewer@4.8.10/dist/index.umd.js"></script>
+      <script src="./client.js"></script>
+    </footer>
+  </body>
+</html>
