@@ -3,6 +3,26 @@ If we're not defining extensions inline
 (not being inline will probably be neater and easier for subsequent developers to understand)
 we should define them here:
 */
+/*
+The skeleton for an extension:
+// prettier-ignore
+export default {
+
+  //this is the only required item
+  id: 'example-extension',
+
+  // Lifecyle--there is only one to choose from.
+  preRegistration() { },
+  // Modules--we can use one or multiple, depending on the scope of our extension
+  //For current planned extensions, the masking implementation will make use of the toolbar module, and possibly the viewport module
+  //For UI extensions, I believe some of that may be handled by the SopClass Module, but most of it will likely be dealt with in the white labelling
+  getCommandsModule() {  },
+  getToolbarModule() { },
+  getPanelModule() { },
+  getSopClassHandler() { },
+  getViewportModule() {  },
+}
+*/
 
 //Code copied from https://docs.ohif.org/deployment/recipes/embedded-viewer.html
 
