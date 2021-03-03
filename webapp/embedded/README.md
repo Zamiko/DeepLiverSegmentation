@@ -7,7 +7,8 @@ This is the base files for our web-app.
 
 Current Progress
 
-- We're embedding the DICOM Viewer
+- We've embedded the DICOM Viewer
+- The configuration file (client.js) is prepped for integration of extensions, which will help with the implementation of the mask interface, as well as UI/UX changes.
 
 To do:
 
