@@ -1,3 +1,4 @@
+import DicomSegExt from "./Viewers/extensions/dicom-segmentation/src/index.js"
 /*
 If we're not defining extensions inline
 (not being inline will probably be neater and easier for subsequent developers to understand)
@@ -78,8 +79,8 @@ var config = {
 	MyFirstExtension being an example of how to register an extension declared prior to running this function,
 	MySecondExtension being an example of how to register an extension inline
 	I /believe/ that the "MyFirstExtension"/"MySecondExtension" refers to the extension id, which is unique for each extension
-	*/
-  extensions: [],
+  */
+  extensions: [DicomSegExt],
   enableGoogleCloudAdapter: true,
   healthcareApiEndpoint: "https://healthcare.googleapis.com/v1",
   servers: {
