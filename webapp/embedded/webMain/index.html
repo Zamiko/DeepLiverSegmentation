@@ -16,14 +16,13 @@
       <h1>
        Welcome to the Liver Segmenter
       </h1>
-      <div id = "Viewer">
-      </div>
     </header>
 
     <main>
       <p>Here's the DICOM image:</p>
       <!--Need to hook up the DICOM image viewer here-->
-      
+      <div id = "Viewer">
+      </div>
     </main>
 
     <footer>
@@ -37,8 +36,6 @@
       <p>
         to improve liver segmentation for the purposes of improving ability to detect cancer in the liver.
       </p>
-      <script src="https://unpkg.com/@ohif/viewer@4.8.10/dist/index.umd.js"></script>
-      <script src="./client.js"></script>
     </footer>
     <!-- The core Firebase JS SDK is always required and must be listed first -->
 <script src="/firebase/8.2.9/firebase-app.js"></script>
@@ -49,5 +46,9 @@
 
 <!-- Initialize Firebase -->
 <script src="firebase/init.js"></script>
+
+<script src="https://unpkg.com/@ohif/viewer@4.8.10/dist/index.umd.js"></script>
+<!--Note that we have to import this as a module-->
+<script type = "module" src="./client.js"></script>
   </body>
 </html>
