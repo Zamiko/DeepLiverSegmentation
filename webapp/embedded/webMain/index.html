@@ -1,276 +1,238 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
-    />
 
-    <!--link css sheets here-->
-    <link href="/style.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="container">
-      <div class="page-header">
-        <h1>Create DICOM Segmentation</h1>
-        <p>
-          This example demonstrates creation of a DICOM Segmentation object on
-          multiframe source data.
-        </p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <!--link css sheets here-->
+  <link href="/style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>Create DICOM Segmentation</h1>
+      <p>
+        This example demonstrates creation of a DICOM Segmentation object on
+        multiframe source data.
+      </p>
+    </div>
+    <div class="buttons mode-buttons">
+      <button class="button set-tool-mode is-primary" data-action="Zoom">
+        Zoom
+      </button>
+      <button class="button set-tool-mode" data-action="Pan">
+        Pan
+      </button>
+      <button class="button set-tool-mode" data-action="Wwwc">
+        Wwwc
+      </button>
+    </div>
+    <button id="segmentation" onclick="toggleSeg()">Segmentation</button>
+    <div class="row">
+      <div id="segOptions" class="Hidden">
+        <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
+        <button id="sampleData" onclick="createSeg()">Create Seg</button>
+        <label for="switchSegment">Active Segment: </label><select id="switchSegment" onchange="changeSegment()">
+        </select>
+        <label for="switchActiveLabelmap">Active Labelmap: </label><select id="switchActiveLabelmap"
+          onchange="changeLabelmap()">
+          <option value="0">1</option>
+          <option value="1">2</option>
+        </select>
+        <!--TODO: add brush and erase buttons-->
       </div>
-      <div class="buttons mode-buttons">
-        <button class="button set-tool-mode is-primary" data-action="Zoom">
-          Zoom
-        </button>
-        <button class="button set-tool-mode" data-action="Pan">
-          Pan
-        </button>
-        <button class="button set-tool-mode" data-action="Wwwc">
-          Wwwc
-        </button>
-      </div>
-      <button id="segmentation" onclick="toggleSeg()">Segmentation</button>
-      <div class="row">
-        <div id="segOptions" class="Hidden">
-          <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
-          <button id="sampleData" onclick="createSeg()">Create Seg</button>
-          <label for="switchSegment">Active Segment: </label
-          ><select id="switchSegment" onchange="changeSegment()"> </select>
-          <label for="switchActiveLabelmap">Active Labelmap: </label
-          ><select id="switchActiveLabelmap" onchange="changeLabelmap()">
-            <option value="0">1</option>
-            <option value="1">2</option>
-          </select>
-          <!--TODO: add brush and erase buttons-->
-        </div>
-        <p id="statusLine"></p>
-        <div class="col-xs-9">
-          <div
-            style="width:512px;height:512px;position:relative;display:inline-block;"
-            oncontextmenu="return false"
-            class="cornerstone-enabled-image"
-            unselectable="on"
-            onselectstart="return false;"
-            onmousedown="return false;"
-          >
-            <div
-              id="cornerstoneViewport"
-              style="width:512px;height:512px;top:0px;left:0px; position:absolute;"
-            ></div>
-          </div>
-          <p>
-            <!--Sample data is from the dicom4qi connectathon event to be held at
-            RSNA 2017. This is
-            <a
-              href="https://qiicr.gitbooks.io/dicom4qi/content/instructions/seg.html#test-dataset-2"
-              >test dataset #2</a
-            >-->
-          </p>
+      <p id="statusLine"></p>
+      <div class="col-xs-9">
+        <div style="width:512px;height:512px;position:relative;display:inline-block;" oncontextmenu="return false"
+          class="cornerstone-enabled-image" unselectable="on" onselectstart="return false;" onmousedown="return false;">
+          <div id="cornerstoneViewport
+    " style="width:512px;height:512px;top:0px;left:0px; position:absolute;"></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      function initModeButtons() {
-        const nameSpace = `.mode-buttons`;
-        const buttons = document.querySelectorAll(
-          `${nameSpace} .set-tool-mode`
-        );
+  <script>
+    function initModeButtons() {
+      const nameSpace = `.mode-buttons`;
+      const buttons = document.querySelectorAll(
+        `${nameSpace} .set-tool-mode`
+      );
 
-        const handleClick = function(evt) {
-          const action = this.dataset.action;
-          // console.log(action);
-          const options = {
-            mouseButtonMask: 1
-          };
-
-          cornerstoneTools[`setToolActive`](`${action}`, options);
-
-          // Remove active style from all buttons
-          buttons.forEach(btn => {
-            btn.classList.remove("is-primary");
-          });
-
-          // Add active style to this button
-          this.classList.add("is-primary");
-
-          evt.preventDefault();
-          evt.stopPropagation();
-          evt.stopImmediatePropagation();
-          return false;
+      const handleClick = function (evt) {
+        const action = this.dataset.action;
+        const options = {
+          mouseButtonMask: 1
         };
 
+        cornerstoneTools[`setToolActive`](`${action}`, options);
+
+        // Remove active style from all buttons
         buttons.forEach(btn => {
-          btn.addEventListener("contextmenu", handleClick);
-          btn.addEventListener("auxclick", handleClick);
-          btn.addEventListener("click", handleClick);
+          btn.classList.remove("is-primary");
         });
-      }
-      const convertMouseEventWhichToButtons = which => {
-        switch (which) {
-          // no button
-          case 0:
-            return 0;
-          // left
-          case 1:
-            return 1;
-          // middle
-          case 2:
-            return 4;
-          // right
-          case 3:
-            return 2;
-        }
-        return 0;
-      };
-    </script>
-    <!-- include the hammer.js library for touch gestures-->
-    <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
 
-    <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+        // Add active style to this button
+        this.classList.add("is-primary");
 
-    <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
-
-    <!-- include the cornerstone library -->
-    <script src="https://unpkg.com/cornerstone-core"></script>
-    <script src="https://unpkg.com/cornerstone-math"></script>
-    <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
-
-    <!-- Why we're all here ;) -->
-    <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
-
-    <!--Check if this has redundancies with js/initCornerstone.js-->
-    <script>
-      initModeButtons();
-      cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-      cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-
-      try {
-        window.cornerstoneWADOImageLoader.webWorkerManager.initialize({
-          maxWebWorkers: 4,
-          startWebWorkersOnDemand: true,
-          webWorkerTaskPaths: [],
-          taskConfiguration: {
-            decodeTask: {
-              initializeCodecsOnStartup: false,
-              usePDFJS: false,
-              strict: true
-            }
-          }
-        });
-      } catch (error) {
-        throw new Error("cornerstoneWADOImageLoader is not loaded");
-      }
-    </script>
-    <script>
-      cornerstoneTools.external.cornerstone = cornerstone;
-      cornerstoneTools.external.Hammer = Hammer;
-      cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-      // Init cornerstone tools
-      cornerstoneTools.init({
-        showSVGCursors: true
-      });
-    </script>
-
-    <!-- script.js may have redundancies-->
-    <!--TODO: fix file location issue-->
-    <script>
-      // const imageId = 'example://1';
-      // const element = document.getElementById('dicomImage');
-      // cornerstone.enable(element);
-      // cornerstone.loadImage(imageId).then(function(image) {
-      //     cornerstone.displayImage(element, image);
-      // });
-      // webapp/BLDViewer/public/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277
-      var imageIds = [];
-      //FIXME: This looks like it has conflictswith getImageIds() in script.js-- for now, doesn't appear to be any conflicts
-      for (var i = 1; i < 72; i++) {
-        imageIds.push(
-          "dicomweb://" +
-            window.location.host +
-            "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" +
-            i +
-            ".dcm"
-        );
-      }
-      const element = document.getElementById("cornerstoneViewport");
-      cornerstone.enable(element);
-      // cornerstone.loadImage(imageIds[0]).then(function (image) {
-      //     cornerstone.displayImage(element, image);
-      // });
-      <!--TODO: figure out if all tools are already added or if we need to manually add them as here:-->
-      const StackScrollMouseWheelTool =
-        cornerstoneTools.StackScrollMouseWheelTool;
-
-      //define the stack
-      const stack = {
-        currentImageIdIndex: 0,
-        imageIds
+        evt.preventDefault();
+        evt.stopPropagation();
+        evt.stopImmediatePropagation();
+        return false;
       };
 
-      // load images and set the stack
-      cornerstone.loadImage(imageIds[0]).then(image => {
-        cornerstone.displayImage(element, image);
-        cornerstoneTools.addStackStateManager(element, ["stack"]);
-        cornerstoneTools.addToolState(element, "stack", stack);
+      buttons.forEach(btn => {
+        btn.addEventListener("contextmenu", handleClick);
+        btn.addEventListener("auxclick", handleClick);
+        btn.addEventListener("click", handleClick);
       });
+    }
+    const convertMouseEventWhichToButtons = which => {
+      switch (which) {
+        // no button
+        case 0:
+          return 0;
+        // left
+        case 1:
+          return 1;
+        // middle
+        case 2:
+          return 4;
+        // right
+        case 3:
+          return 2;
+      }
+      return 0;
+    };
+  </script>
+  <!-- include the hammer.js library for touch gestures-->
+  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
 
-      cornerstoneTools.addTool(StackScrollMouseWheelTool);
-      cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
+  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
 
-      // Add our tool, and set it's mode
-      const PanTool = cornerstoneTools.PanTool;
+  <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
 
-      cornerstoneTools.addTool(PanTool);
-      cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 1 });
+  <!-- include the cornerstone library -->
+  <script src="https://unpkg.com/cornerstone-core"></script>
+  <script src="https://unpkg.com/cornerstone-math"></script>
+  <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
 
-      const ZoomTool = cornerstoneTools.ZoomTool;
+  <!-- Why we're all here ;) -->
+  <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
 
-      cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
-        // Optional configuration
-        configuration: {
-          invert: false,
-          preventZoomOutsideImage: false,
-          minScale: 0.1,
-          maxScale: 20.0
-        }
-      });
+  <!--Check if this has redundancies with js/initCornerstone.js-->
+  <script>
+    initModeButtons();
+    cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+    cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
 
-      const WwwcTool = cornerstoneTools.WwwcTool;
+    // try {
+    //   window.cornerstoneWADOImageLoader.webWorkerManager.initialize({
+    //     maxWebWorkers: 4,
+    //     startWebWorkersOnDemand: true,
+    //     webWorkerTaskPaths: [],
+    //     taskConfiguration: {
+    //       decodeTask: {
+    //         initializeCodecsOnStartup: false,
+    //         usePDFJS: false,
+    //         strict: true
+    //       }
+    //     }
+    //   });
+    // } catch (error) {
+    //   throw new Error("cornerstoneWADOImageLoader is not loaded");
+    // }
+  </script>
+  <script>
+    cornerstoneTools.external.cornerstone = cornerstone;
+    cornerstoneTools.external.Hammer = Hammer;
+    cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
+    // Init cornerstone tools
+    cornerstoneTools.init({
+      showSVGCursors: true
+    });
+  </script>
 
-      cornerstoneTools.addTool(WwwcTool);
-    </script>
-    <script src="https://unpkg.com/cornerstone-core@2.2.6/dist/cornerstone.js"></script>
-    <script src="https://unpkg.com/cornerstone-math@0.1.6/dist/cornerstoneMath.js"></script>
-    <script src="https://unpkg.com/cornerstone-tools@4.3.0/dist/cornerstoneTools.js"></script>
+  <script>
+    var imageIds = [];
+    //FIXME: This looks like it has conflictswith getImageIds() in script.js-- for now, doesn't appear to be any conflicts
+    for (var i = 1; i < 72; i++) {
+      imageIds.push(
+        "dicomweb://" +
+        window.location.host +
+        "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
+      );
+    }
+    const element = document.getElementById("cornerstoneViewport");
+    cornerstone.enable(element);
+    const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 
-    <script src="https://unpkg.com/dicom-parser/dist/dicomParser.js"></script>
-    <script src="https://unpkg.com/cornerstone-wado-image-loader@3.0.2/dist/cornerstoneWADOImageLoader.min.js"></script>
-    <script src="https://unpkg.com/hammerjs/hammer.min.js"></script>
+    //define the stack
+    const stack = {
+      currentImageIdIndex: 0,
+      imageIds
+    };
 
-    <script src="./js/initCornerstone.js"></script>
-    <script srve="https://unpkg.com/dcmjs@0.18.3/build/dcmjs.js"></script>
+    // load images and set the stack
+    cornerstone.loadImage(imageIds[0]).then(image => {
+      cornerstone.displayImage(element, image);
+      cornerstoneTools.addStackStateManager(element, ["stack"]);
+      cornerstoneTools.addToolState(element, "stack", stack);
+    });
 
-    <script
-      src="https://unpkg.com/react@16/umd/react.development.js"
-      crossorigin
-    ></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    cornerstoneTools.addTool(StackScrollMouseWheelTool);
+    cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
 
-    <script>
-      "use strict";
+    // Add our tool, and set it's mode
+    const PanTool = cornerstoneTools.PanTool;
 
-      var process = {
-        env: {
-          NODE_ENV: "production"
-        }
-      };
+    cornerstoneTools.addTool(PanTool);
 
-      window.process = process;
-    </script>
+    const ZoomTool = cornerstoneTools.ZoomTool;
 
-    <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script>
-    <script src="./script.js"></script>
-  </body>
+    cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
+      // Optional configuration
+      configuration: {
+        invert: false,
+        preventZoomOutsideImage: false,
+        minScale: 0.1,
+        maxScale: 20.0
+      }
+    });
+
+    const WwwcTool = cornerstoneTools.WwwcTool;
+    cornerstoneTools.addTool(WwwcTool);
+
+    const BrushTool = cornerstoneTools.BrushTool;
+    cornerstoneTools.addTool(BrushTool);
+
+    cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 1 });
+
+
+  </script>
+
+  <script src="./js/initCornerstone.js"></script>
+  <script srve="https://unpkg.com/dcmjs@0.18.3/build/dcmjs.js"></script>
+
+  <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+  <script>
+    "use strict";
+
+    var process = {
+      env: {
+        NODE_ENV: "production"
+      }
+    };
+
+    window.process = process;
+  </script>
+
+  <script src="https://unpkg.com/react-cornerstoneViewpor@0.1.23/dist/index.umd.js"></script>
+  <script src="./script.js"></script>
+</body>
+
 </html>

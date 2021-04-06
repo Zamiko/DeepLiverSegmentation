@@ -18,7 +18,6 @@ function getBlobUrl(url) {
     return baseUrl.createObjectURL(blob);
 }
 
-<!--TODO: figure out what this is doing, so we can tell if it conflicts with the webWOrker initializer linked in index.html-->
 const config = {
     maxWebWorkers: navigator.hardwareConcurrency || 1,
     startWebWorkersOnDemand: true,

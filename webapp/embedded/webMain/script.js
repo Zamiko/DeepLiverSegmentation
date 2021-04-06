@@ -17,7 +17,7 @@ document.getElementById("switchActiveLabelmap")[0].selected = true;
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
   const element = document.getElementsByClassName("viewport-element")[0];
-
+  console.log(segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
 
   setters.activeSegmentIndex(element, segmentIndex);
@@ -32,8 +32,10 @@ function changeLabelmap() {
 
   setters.activeLabelmapIndex(element, labelmapIndex);
   setters.activeSegmentIndex(element, segmentIndex);
+  console.log(segmentIndex);
 
   cornerstone.updateImage(element);
+
 }
 
 function toggleSeg() {
