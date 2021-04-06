@@ -3,9 +3,14 @@
 Current Content:
 - index.html
 - 404.html
-- client.js
+- script.js
+- style.css
+- js/initCornerstone.js
 
 To do in future:
-- Might copy linked js script here for editing
-- Might include files for styling and ui/ux
+- Finish setting up segmentation capabilities
+-- loading and saving segmentation masks, adding more tools for ease of user
+- Hooking up to data storage (whatever we decide to use)
+- UI/UX
 - login page
+- Integration with ML team
