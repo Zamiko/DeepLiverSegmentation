@@ -1,0 +1,7 @@
+/* this file is loaded by index.html and styles the page */
+.Hidden {
+  opacity: 0;
+}
+.Shown {
+  opacity: 1;
+}
