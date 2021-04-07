@@ -6,6 +6,8 @@ Current Content:
 - style.css
 - js/segmentation.js
 - js/initCornerstone.js
+- js/viewport.js
+- js/dcmjs.js
 
 To do in future:
 -- loading and saving segmentation masks, adding more tools for ease of user
