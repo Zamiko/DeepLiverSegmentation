@@ -32,6 +32,7 @@ docker/dcm4che/dcm4che-arc
 videos/
 screenshots/
 DICOM_Data
+*.dcm
 
 # Locize settings
 .locize

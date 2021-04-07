@@ -1,14 +1,14 @@
 "use strict";
 //TODO: this is where we'd change the image data, I believe
 console.log("using reacing viewport");
-var imageIds = [];
-for (var i = 1; i < 72; i++) {
-  imageIds.push(
-    "dicomweb://" +
-    window.location.host +
-    "/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
-  );
-}
+// var imageIds = [];
+// for (var i = 1; i < 72; i++) {
+//   imageIds.push(
+//     "dicomweb://" +
+//     window.location.host +
+//         "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
+//   );
+// }
 
 var exampleData = {
   stack: {
