@@ -47,8 +47,7 @@
       <div class="col-xs-9">
         <div style="width:512px;height:512px;position:relative;display:inline-block;" oncontextmenu="return false"
           class="cornerstone-enabled-image" unselectable="on" onselectstart="return false;" onmousedown="return false;">
-          <div id="cornerstoneViewport
-    " style="width:512px;height:512px;top:0px;left:0px; position:absolute;"></div>
+          <div id="cornerstoneViewport" style="width:512px;height:512px;top:0px;left:0px; position:absolute;"></div>
         </div>
       </div>
     </div>
@@ -158,29 +157,29 @@
   <script>
     var imageIds = [];
     //FIXME: This looks like it has conflictswith getImageIds() in script.js-- for now, doesn't appear to be any conflicts
-    for (var i = 1; i < 72; i++) {
-      imageIds.push(
-        "dicomweb://" +
-        window.location.host +
-        "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
-      );
-    }
+    // for (var i = 1; i < 72; i++) {
+    //   imageIds.push(
+    //     "dicomweb://" +
+    //     window.location.host +
+    //     "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
+    //   );
+    // }
     const element = document.getElementById("cornerstoneViewport");
     cornerstone.enable(element);
     const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 
     //define the stack
-    const stack = {
-      currentImageIdIndex: 0,
-      imageIds
-    };
+    // const stack = {
+    //   currentImageIdIndex: 0,
+    //   imageIds
+    // };
 
-    // load images and set the stack
-    cornerstone.loadImage(imageIds[0]).then(image => {
-      cornerstone.displayImage(element, image);
-      cornerstoneTools.addStackStateManager(element, ["stack"]);
-      cornerstoneTools.addToolState(element, "stack", stack);
-    });
+    // // load images and set the stack
+    // cornerstone.loadImage(imageIds[0]).then(image => {
+    //   cornerstone.displayImage(element, image);
+    //   cornerstoneTools.addStackStateManager(element, ["stack"]);
+    //   cornerstoneTools.addToolState(element, "stack", stack);
+    // });
 
     cornerstoneTools.addTool(StackScrollMouseWheelTool);
     cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
@@ -217,8 +216,8 @@
 
   <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-    <script src="./js/initCornerstone.js"></script>
-    <script src="./js/dcmjs.js"></script>
+  <script src="js/initCornerstone.js"></script>
+  <script src="js/dcmjs.js"></script>
 
   <script>
     "use strict";
@@ -232,8 +231,9 @@
     window.process = process;
   </script>
 
-  <script src="https://unpkg.com/react-cornerstoneViewpor@0.1.23/dist/index.umd.js"></script>
+  <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script>
   <script src="./script.js"></script>
+  <script src="./viewport.js"></script>
 </body>
 
 </html>

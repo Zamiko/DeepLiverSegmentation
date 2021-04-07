@@ -8,7 +8,6 @@ Current Content:
 - js/initCornerstone.js
 
 To do in future:
-- Finish setting up segmentation capabilities
 -- loading and saving segmentation masks, adding more tools for ease of user
 - Hooking up to data storage (whatever we decide to use)
 - UI/UX
