@@ -109,24 +109,21 @@
   <!-- include the hammer.js library for touch gestures-->
   <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
 
-  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
-
   <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
 
   <!-- include the cornerstone library -->
   <script src="https://unpkg.com/cornerstone-core"></script>
   <script src="https://unpkg.com/cornerstone-math"></script>
   <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
-
-  <!-- Why we're all here ;) -->
   <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
 
-  <!--Check if this has redundancies with js/initCornerstone.js-->
+
+  <!-- Check if this has redundancies with js/initCornerstone.js -->
   <script>
     initModeButtons();
     cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
     cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-
+    // TODO decide between webwork configs
     // try {
     //   window.cornerstoneWADOImageLoader.webWorkerManager.initialize({
     //     maxWebWorkers: 4,
@@ -148,7 +145,6 @@
     cornerstoneTools.external.cornerstone = cornerstone;
     cornerstoneTools.external.Hammer = Hammer;
     cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-    // Init cornerstone tools
     cornerstoneTools.init({
       showSVGCursors: true
     });
@@ -156,7 +152,6 @@
 
   <script>
     var imageIds = [];
-    //FIXME: This looks like it has conflictswith getImageIds() in script.js-- for now, doesn't appear to be any conflicts
     for (var i = 1; i < 72; i++) {
       imageIds.push(
         "dicomweb://" +
@@ -164,7 +159,8 @@
         "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
       );
     }
-    const element = document.getElementById("cornerstoneViewport");
+    // TODO research react integration 
+    // const element = document.getElementById("cornerstoneViewport");
     // cornerstone.enable(element);
     const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 
@@ -184,13 +180,10 @@
     cornerstoneTools.addTool(StackScrollMouseWheelTool);
     cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
 
-    // Add our tool, and set it's mode
     const PanTool = cornerstoneTools.PanTool;
-
     cornerstoneTools.addTool(PanTool);
 
     const ZoomTool = cornerstoneTools.ZoomTool;
-
     cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
       // Optional configuration
       configuration: {
@@ -232,8 +225,8 @@
   </script>
 
   <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script>
-  <script src="./script.js"></script>
-  <script src="./viewport.js"></script>
+  <script src="js/segmentation.js"></script>
+  <script src="js/viewport.js"></script>
 </body>
 
 </html>

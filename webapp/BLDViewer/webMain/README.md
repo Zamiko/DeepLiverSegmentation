@@ -3,8 +3,8 @@
 Current Content:
 - index.html
 - 404.html
-- script.js
 - style.css
+- js/segmentation.js
 - js/initCornerstone.js
 
 To do in future:
