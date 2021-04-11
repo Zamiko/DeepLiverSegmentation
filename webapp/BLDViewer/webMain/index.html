@@ -41,7 +41,11 @@
           <option value="0">1</option>
           <option value="1">2</option>
         </select>
-        <!--TODO: add brush and erase buttons-->
+        <!-- TODO: add erase buttons -->
+        <!-- TODO add size adjustment to the brush and erase size -->
+        <button class="button set-tool-mode" data-action="CorrectionScissors">
+          CorrectionScissors
+        </button>
       </div>
       <p id="statusLine"></p>
       <div class="col-xs-9">
@@ -57,7 +61,7 @@
     function initModeButtons() {
       const nameSpace = `.mode-buttons`;
       const buttons = document.querySelectorAll(
-        `${nameSpace} .set-tool-mode`
+        `.set-tool-mode`
       );
 
       const handleClick = function (evt) {
@@ -65,14 +69,11 @@
         const options = {
           mouseButtonMask: 1
         };
-
         cornerstoneTools[`setToolActive`](`${action}`, options);
-
         // Remove active style from all buttons
         buttons.forEach(btn => {
           btn.classList.remove("is-primary");
         });
-
         // Add active style to this button
         this.classList.add("is-primary");
 
@@ -117,39 +118,6 @@
   <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
   <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
 
-
-  <!-- Check if this has redundancies with js/initCornerstone.js -->
-  <script>
-    initModeButtons();
-    cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-    cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-    // TODO decide between webwork configs
-    // try {
-    //   window.cornerstoneWADOImageLoader.webWorkerManager.initialize({
-    //     maxWebWorkers: 4,
-    //     startWebWorkersOnDemand: true,
-    //     webWorkerTaskPaths: [],
-    //     taskConfiguration: {
-    //       decodeTask: {
-    //         initializeCodecsOnStartup: false,
-    //         usePDFJS: false,
-    //         strict: true
-    //       }
-    //     }
-    //   });
-    // } catch (error) {
-    //   throw new Error("cornerstoneWADOImageLoader is not loaded");
-    // }
-  </script>
-  <script>
-    cornerstoneTools.external.cornerstone = cornerstone;
-    cornerstoneTools.external.Hammer = Hammer;
-    cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
-    cornerstoneTools.init({
-      showSVGCursors: true
-    });
-  </script>
-
   <script>
     var imageIds = [];
     for (var i = 1; i < 72; i++) {
@@ -159,50 +127,6 @@
         "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/1-" + i + ".dcm"
       );
     }
-    // TODO research react integration 
-    // const element = document.getElementById("cornerstoneViewport");
-    // cornerstone.enable(element);
-    const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
-
-    //define the stack
-    // const stack = {
-    //   currentImageIdIndex: 0,
-    //   imageIds
-    // };
-
-    // // load images and set the stack
-    // cornerstone.loadImage(imageIds[0]).then(image => {
-    //   cornerstone.displayImage(element, image);
-    //   cornerstoneTools.addStackStateManager(element, ["stack"]);
-    //   cornerstoneTools.addToolState(element, "stack", stack);
-    // });
-
-    cornerstoneTools.addTool(StackScrollMouseWheelTool);
-    cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
-
-    const PanTool = cornerstoneTools.PanTool;
-    cornerstoneTools.addTool(PanTool);
-
-    const ZoomTool = cornerstoneTools.ZoomTool;
-    cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
-      // Optional configuration
-      configuration: {
-        invert: false,
-        preventZoomOutsideImage: false,
-        minScale: 0.1,
-        maxScale: 20.0
-      }
-    });
-
-    const WwwcTool = cornerstoneTools.WwwcTool;
-    cornerstoneTools.addTool(WwwcTool);
-
-    const BrushTool = cornerstoneTools.BrushTool;
-    cornerstoneTools.addTool(BrushTool);
-
-    cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 1 });
-
-
   </script>
 
   <!-- <script srve="https://unpkg.com/dcmjs@0.18.3/build/dcmjs.js"></script> -->
@@ -219,11 +143,11 @@
         NODE_ENV: "production"
       }
     };
-
     window.process = process;
   </script>
 
-  <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script>
+  <!-- <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script> -->
+  <script src="js/reactCornerstoneViewport.js"></script>
   <script src="js/segmentation.js"></script>
   <script src="js/viewport.js"></script>
 </body>
