@@ -1,9 +1,13 @@
-let metaData = {};
+// let metaData = {};
 
 function getAndLoadSeg() {
-    var segURL =
-        "https://s3.amazonaws.com/IsomicsPublic/SampleData/QIN-H%2BN-0139/1-105-SEG.dcm";
 
+    // This will change as we select the correct study and series
+    var segURL =
+    "http://" + 
+    window.location.host +
+    "/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277/SEG.dcm";
+    console.log(segURL);
     const xhr = new XMLHttpRequest();
 
     xhr.addEventListener("load", () => {
