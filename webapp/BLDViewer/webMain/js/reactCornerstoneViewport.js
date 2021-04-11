@@ -7033,7 +7033,7 @@
     }(React.Component);
   
     _defineProperty(CornerstoneViewport, "defaultProps", {
-      activeTool: 'Wwwc',
+      activeTool: 'Pan',
       viewportData: {
         stack: {
           imageIds: [],
@@ -7077,6 +7077,9 @@
         name: 'Brush',
         mouseButtonMasks: [1]
       }, {
+        name: 'CorrectionScissors',
+        mouseButtonMasks: [1]
+      },{
         name: 'PanMultiTouch'
       }, {
         name: 'ZoomTouchPinch'
