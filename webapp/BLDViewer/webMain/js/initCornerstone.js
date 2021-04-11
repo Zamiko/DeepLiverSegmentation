@@ -48,8 +48,6 @@ cornerstoneTools.addTool(BrushTool);
 
 const CorrectionScissors = cornerstoneTools.CorrectionScissorsTool;
 cornerstoneTools.addTool(CorrectionScissors);
-console.log("added correction scissors tool");
-
 
 cornerstoneTools.addTool(cornerstoneTools.BidirectionalTool);
 cornerstoneTools.addTool(cornerstoneTools.ArrowAnnotateTool);

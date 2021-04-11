@@ -9,13 +9,14 @@
     dicomParser = dicomParser && dicomParser.hasOwnProperty('default') ? dicomParser['default'] : dicomParser;
     var React__default = 'default' in React ? React['default'] : React;
     ReactResizeDetector = ReactResizeDetector && ReactResizeDetector.hasOwnProperty('default') ? ReactResizeDetector['default'] : ReactResizeDetector;
-    cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
-  
+    // cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
+    // This forces CornerstoneViewport to use the cornerstoneTools instance we pass in
+    cornerstoneTools = cornerstoneTools;
     var _cornerstoneWADOImage = cornerstoneWADOImageLoader.wadors.metaData,
-        getNumberString = _cornerstoneWADOImage.getNumberString,
-        getNumberValue = _cornerstoneWADOImage.getNumberValue,
-        getNumberValues = _cornerstoneWADOImage.getNumberValues,
-        getValue = _cornerstoneWADOImage.getValue;
+      getNumberString = _cornerstoneWADOImage.getNumberString,
+      getNumberValue = _cornerstoneWADOImage.getNumberValue,
+      getNumberValues = _cornerstoneWADOImage.getNumberValues,
+      getValue = _cornerstoneWADOImage.getValue;
   
     function wadoRsMetaDataProvider(type, imageId) {
       var metaData = cornerstoneWADOImageLoader.wadors.metaDataManager.get(imageId);

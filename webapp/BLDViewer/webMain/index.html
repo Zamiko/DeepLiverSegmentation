@@ -28,9 +28,6 @@
       <button class="button set-tool-mode" data-action="Wwwc">
         Wwwc
       </button>
-      <button class="button set-tool-mode" data-action="CorrectionScissors">
-        CorrectionScissors
-      </button>
     </div>
     <button id="segmentation" onclick="toggleSeg()">Segmentation</button>
     <div class="row">
@@ -44,8 +41,11 @@
           <option value="0">1</option>
           <option value="1">2</option>
         </select>
-        <!--TODO: add brush and erase buttons-->
-        
+        <!-- TODO: add erase buttons -->
+        <!-- TODO add size adjustment to the brush and erase size -->
+        <button class="button set-tool-mode" data-action="CorrectionScissors">
+          CorrectionScissors
+        </button>
       </div>
       <p id="statusLine"></p>
       <div class="col-xs-9">
@@ -61,7 +61,7 @@
     function initModeButtons() {
       const nameSpace = `.mode-buttons`;
       const buttons = document.querySelectorAll(
-        `${nameSpace} .set-tool-mode`
+        `.set-tool-mode`
       );
 
       const handleClick = function (evt) {
@@ -69,14 +69,11 @@
         const options = {
           mouseButtonMask: 1
         };
-
         cornerstoneTools[`setToolActive`](`${action}`, options);
-        console.log(action);
         // Remove active style from all buttons
         buttons.forEach(btn => {
           btn.classList.remove("is-primary");
         });
-
         // Add active style to this button
         this.classList.add("is-primary");
 
