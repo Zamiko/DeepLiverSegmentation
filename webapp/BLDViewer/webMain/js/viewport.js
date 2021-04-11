@@ -12,7 +12,8 @@ var CornerstoneViewport = window["react-cornerstone-viewport"];
 var props = {
   viewportData: exampleData,
   cornerstone,
-  cornerstoneTools
+  cornerstoneTools,
+  activeTool: "Pan"
 };
 var app = React.createElement(CornerstoneViewport, props, null);
 

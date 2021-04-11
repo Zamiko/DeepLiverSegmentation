@@ -46,6 +46,11 @@
         <button class="button set-tool-mode" data-action="CorrectionScissors">
           CorrectionScissors
         </button>
+        <br>
+
+        <button class="button load-segmentation-mask">
+          CorrectionScissors
+        </button>
       </div>
       <p id="statusLine"></p>
       <div class="col-xs-9">
@@ -106,6 +111,8 @@
       }
       return 0;
     };
+    initModeButtons();
+
   </script>
   <!-- include the hammer.js library for touch gestures-->
   <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
@@ -148,7 +155,7 @@
 
   <!-- <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script> -->
   <script src="js/reactCornerstoneViewport.js"></script>
-  <script src="js/segmentation.js"></script>
+  <script src="js/createSegmentationMask.js"></script>
   <script src="js/viewport.js"></script>
 </body>
 

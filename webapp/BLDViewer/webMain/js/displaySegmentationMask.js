@@ -1,0 +1,76 @@
+let metaData = {};
+
+function getAndLoadSeg() {
+    var segURL =
+        "https://s3.amazonaws.com/IsomicsPublic/SampleData/QIN-H%2BN-0139/1-105-SEG.dcm";
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.addEventListener("load", () => {
+        parseSeg(xhr.response);
+    });
+
+    xhr.addEventListener("error", () => {
+        console.log(`Request returned, status: ${xhr.status}`);
+        console.log(xhr.message);
+    });
+
+    xhr.open("GET", segURL);
+    xhr.responseType = "arraybuffer"; //Type of file
+
+    xhr.send();
+}
+
+function parseSeg(arrayBuffer) {
+    const element = document.getElementsByClassName(
+        "viewport-element"
+    )[0];
+
+    const stackToolState = cornerstoneTools.getToolState(
+        element,
+        "stack"
+    );
+    const imageIds = stackToolState.data[0].imageIds;
+
+    const t0 = performance.now();
+
+    const {
+        labelmapBufferArray,
+        segMetadata,
+        segmentsOnFrame
+    } = dcmjs.adapters.Cornerstone.Segmentation.generateToolState(
+        imageIds,
+        arrayBuffer,
+        cornerstone.metaData,
+    );
+
+    const t1 = performance.now();
+
+    const { setters, state } = cornerstoneTools.getModule(
+        "segmentation"
+    );
+
+    setters.labelmap3DByFirstImageId(
+        imageIds[0],
+        labelmapBufferArray[0],
+        0,
+        segMetadata,
+        imageIds.length,
+        segmentsOnFrame
+    );
+}
+
+function metaDataProvider(type, imageId) {
+    if (!metaData[imageId]) {
+        return;
+    }
+
+    return metaData[imageId][type];
+}
+
+cornerstone.metaData.addProvider(metaDataProvider);
+
+function addMetaData(type, imageId, data) {
+    metaData[imageId] = metaData[imageId] || {};
+    metaData[imageId][type] = data;
+}
