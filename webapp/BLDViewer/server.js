@@ -23,13 +23,12 @@ const healthcare = google.healthcare("v1");
 const sleep = require('util').promisify(setTimeout);
 
 //Variables needed
-//Should we also move auth here?
 const cloudRegion = "us-west2";
 const projectId = "liversegmentationwebapp";
 const datasetId = "DICOM_data";
 //TODO(?): I was planning we have two stores, one for the data Roger's given us, and then when we submit the project it should be a new/clean datastore? or we can just not bother lol
 const dicomStoreId = "testing_data";
-//FIXME: uhh idk if we should give this a directory
+//FIXME: this is wrong?
 const gcsUri = "liver_segmentation";
 const name = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
 
@@ -85,14 +84,12 @@ const importDicomInstance = async () => {
   }
 };
 
-//I believe after calling this command there will no longer be any files stored in the cloud storage directory we're using
 app.get("/unloadDataStore", (request, response) => {
   importDicomInstance();
-  console.log("unloaded Data Store");
+  console.log("unloading Data Store");
 });
 
 const exportDicomInstance = async () => {
-  //FIXME: need to change this so that it doesn't request permission? maybe get it to use a service account
   const auth = await google.auth.getClient({
     scopes: ["https://www.googleapis.com/auth/cloud-platform"]
   });
@@ -115,7 +112,7 @@ const exportDicomInstance = async () => {
 //TODO: there is (in beta) a filter file suggestion that allows us to only import a few files (ie a study) rather than everything in the Datastore this might be good to look at
 app.get("/loadDataStore", (request, response) => {
   exportDicomInstance();
-  console.log("loaded Data Store");
+  console.log("loading Data Store");
 });
 //End of data store manipulation
 
