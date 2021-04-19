@@ -1,4 +1,42 @@
 /* this file is loaded by index.html and styles the page */
+html, body{
+  margin:0;
+  height: 100%;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+  font-family: Helvetica, sans-serif;
+  height: 100%;
+}
+.page-header{
+  height: 10%;
+}
+.main-button-bar, #segoptions{
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+}
+.row{
+  height: 75%;
+}
+.col-xs-9{
+  height: 88%;
+}
+.cornerstone-enabled-image ,#cornerstoneViewport{
+  height: 100%;
+}
+.button{
+  background-color: #31c505;
+  border-radius: 10px;
+  color: #000000;
+  padding: 10px 10px;
+  text-align: center;
+  margin-right: 15px;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 .Hidden {
   opacity: 0;
 }
