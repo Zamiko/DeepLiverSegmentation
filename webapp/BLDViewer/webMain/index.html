@@ -12,28 +12,34 @@
 <body>
   <div class="container">
     <div class="page-header">
-      <h1>Create DICOM Segmentation</h1>
-      <p>
-        This example demonstrates creation of a DICOM Segmentation object on
-        multiframe source data.
-      </p>
+      <h2>Liver Segmenter</h2>
+      <!--the hidden attribute is temporary, and only for aesthetic purpose-->
+      <div class="uploadStuff Hidden">
+        <button class="button" id = "uploadDICOM">DO NOT USE YET</button>
+        <button class="button" id = "loadDICOM">Load DICOM</button>
+        <button class="button" id = "unloadDICOM">Save all files to the Server</button>
+      </div>
     </div>
-    <div class="buttons mode-buttons">
-      <button class="button set-tool-mode is-primary" data-action="Zoom">
-        Zoom
-      </button>
-      <button class="button set-tool-mode" data-action="Pan">
-        Pan
-      </button>
-      <button class="button set-tool-mode" data-action="Wwwc">
-        Wwwc
+    <div class = "main-button-bar">
+      <div class="buttons mode-buttons">
+        <button class="button set-tool-mode is-primary" data-action="Zoom">
+          Zoom
+        </button>
+        <button class="button set-tool-mode" data-action="Pan">
+          Pan
+        </button>
+        <button class="button set-tool-mode" data-action="Wwwc">
+          Wwwc
+        </button>
+      </div>
+      <button class = "button" id="segmentation" onclick="toggleSeg()">
+        Segmentation
       </button>
     </div>
-    <button id="segmentation" onclick="toggleSeg()">Segmentation</button>
     <div class="row">
-      <div id="segOptions" class="Hidden">
+      <div class="Hidden" id="segOptions">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
-        <button id="sampleData" onclick="createSeg()">Create Seg</button>
+        <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
         <label for="switchSegment">Active Segment: </label><select id="switchSegment" onchange="changeSegment()">
         </select>
         <label for="switchActiveLabelmap">Active Labelmap: </label><select id="switchActiveLabelmap"
@@ -54,9 +60,9 @@
       </div>
       <p id="statusLine"></p>
       <div class="col-xs-9">
-        <div style="width:512px;height:512px;position:relative;display:inline-block;" oncontextmenu="return false"
+        <div oncontextmenu="return false"
           class="cornerstone-enabled-image" unselectable="on" onselectstart="return false;" onmousedown="return false;">
-          <div id="cornerstoneViewport" style="width:512px;height:512px;top:0px;left:0px; position:absolute;"></div>
+          <div id="cornerstoneViewport" ></div>
         </div>
       </div>
     </div>
@@ -149,10 +155,15 @@
 
   <!-- Replaced by reactCornerstoneViewport.js to edit what tools we can use -->
   <!-- <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script> -->
-  <script src="js/reactCornerstoneViewport.js"></script>
-  <script src="js/displaySegmentationMask.js"></script>
-  <script src="js/createSegmentationMask.js"></script>
-  <script src="js/viewport.js"></script>
+  <script src="./js/reactCornerstoneViewport.js"></script>
+  <script src="./js/displaySegmentationMask.js"></script>
+  <script src="./js/createSegmentationMask.js"></script>
+  <script src="./js/viewport.js"></script>
+  <script src="./js/handleDICOM.js"></script>
 </body>
-
+<!--Might attach a footer here in the future with credits-->
+<footer>
+    <p>This is a Banana Leaf Development Project, created for Dr.Roger Goldman in UC Davis' ECS193 class</p>
+    <p>We've used <a href = "https://github.com/cornerstonejs">cornerstonejs</a> and <a href = "https://github.com/dcmjs-org/dcmjs">dcmjs</a> libraries for assistance with this</p>
+</footer>
 </html>
