@@ -50,9 +50,7 @@ function parseSeg(arrayBuffer) {
 
     const t1 = performance.now();
 
-    const { setters, state } = cornerstoneTools.getModule(
-        "segmentation"
-    );
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
 
     setters.labelmap3DByFirstImageId(
         imageIds[0],
@@ -62,6 +60,9 @@ function parseSeg(arrayBuffer) {
         imageIds.length,
         segmentsOnFrame
     );
+    // for (let labelmapIndex = 1; labelmapIndex < imageIds.length; labelmapIndex++) {
+    //     setters.labelmap3DForElement(element, imageIds[labelmapIndex], labelmapIndex, segMetadata, segmentsOnFrame)
+    // }
 }
 
 function metaDataProvider(type, imageId) {

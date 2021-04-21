@@ -11934,7 +11934,6 @@ b"+i+"*=d\
 	    var labelmaps2D = labelmap3D.labelmaps2D,
 	        metadata = labelmap3D.metadata;
 	    var referencedFramesPerSegment = [];
-
 	    for (var i = 1; i < metadata.length; i++) {
 	      if (metadata[i]) {
 	        referencedFramesPerSegment[i] = [];
@@ -11947,10 +11946,11 @@ b"+i+"*=d\
 	      if (labelmaps2D[_i]) {
 	        var segmentsOnLabelmap = labelmap2D.segmentsOnLabelmap;
 	        segmentsOnLabelmap.forEach(function (segmentIndex) {
-	          if (segmentIndex !== 0) {
-	            referencedFramesPerSegment[segmentIndex].push(_i);
-	            numberOfFrames++;
-	          }
+    		if (segmentIndex !== 0) {
+				console.log(referencedFramesPerSegment[segmentIndex]);
+				referencedFramesPerSegment[segmentIndex].push(_i);
+				numberOfFrames++;
+			}
 	        });
 	      }
 	    };
