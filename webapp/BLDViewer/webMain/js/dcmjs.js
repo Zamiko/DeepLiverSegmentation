@@ -11925,11 +11925,11 @@ b"+i+"*=d\
 	  var userOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 	  var options = Object.assign({}, generateSegmentationDefaultOptions, userOptions); // Use another variable so we don't redefine labelmaps3D.
 
-	  var labelmaps3D = Array.isArray(inputLabelmaps3D) ? inputLabelmaps3D : [inputLabelmaps3D];
-	  var numberOfFrames = 0;
-	  var referencedFramesPerLabelmap = [];
+	    var labelmaps3D = Array.isArray(inputLabelmaps3D) ? inputLabelmaps3D : [inputLabelmaps3D];
+	    var numberOfFrames = 0;
+	    var referencedFramesPerLabelmap = [];
 
-	  var _loop = function _loop(labelmapIndex) {
+		var _loop = function _loop(labelmapIndex) {
 	    var labelmap3D = labelmaps3D[labelmapIndex];
 	    var labelmaps2D = labelmap3D.labelmaps2D,
 	        metadata = labelmap3D.metadata;
@@ -11947,7 +11947,6 @@ b"+i+"*=d\
 	        var segmentsOnLabelmap = labelmap2D.segmentsOnLabelmap;
 	        segmentsOnLabelmap.forEach(function (segmentIndex) {
     		if (segmentIndex !== 0) {
-				console.log(referencedFramesPerSegment[segmentIndex]);
 				referencedFramesPerSegment[segmentIndex].push(_i);
 				numberOfFrames++;
 			}

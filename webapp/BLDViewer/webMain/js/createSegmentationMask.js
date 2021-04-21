@@ -54,7 +54,6 @@ function toggleSeg() {
 //if not: there is an undo and redo button we can implement instead/additionally
 
 function createSeg() {
-  console.log("creating seg");
   const element = document.getElementsByClassName("viewport-element")[0];
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;
@@ -74,10 +73,8 @@ function createSeg() {
   const { labelmaps3D } = getters.labelmaps3D(element);
 
   if (!labelmaps3D) {
-    console.log("no labelmaps3D");
     return;
   }
-  console.log("labelmaps3d leength is " + labelmaps3D.length);
   for (
     let labelmapIndex = 0;
     labelmapIndex < labelmaps3D.length;
@@ -85,7 +82,6 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log("labelmaps2d leength is " + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -93,7 +89,6 @@ function createSeg() {
       }
 
       const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-      console.log("segments on labelmap2D " + i + " is " + segmentsOnLabelmap);
       segmentsOnLabelmap.forEach(segmentIndex => {
         if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
           labelmap3D.metadata[segmentIndex] =
