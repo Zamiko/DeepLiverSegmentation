@@ -17,7 +17,7 @@ document.getElementById("switchActiveLabelmap")[0].selected = true;
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
   const element = document.getElementsByClassName("viewport-element")[0];
-  console.log(segmentIndex);
+  console.log("Active Seegment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
 
   setters.activeSegmentIndex(element, segmentIndex);
@@ -32,7 +32,8 @@ function changeLabelmap() {
 
   setters.activeLabelmapIndex(element, labelmapIndex);
   setters.activeSegmentIndex(element, segmentIndex);
-  console.log(segmentIndex);
+  console.log("active labelmapIndex is " + labelmapIndex);
+  console.log("Active Seegment index is " + segmentIndex);
 
   cornerstone.updateImage(element);
 
@@ -54,7 +55,9 @@ function toggleSeg() {
 //if not: there is an undo and redo button we can implement instead/additionally
 
 function createSeg() {
-  const element = document.getElementsByClassName("viewport-element")[0];
+  // const element = document.getElementsByClassName("viewport-element")[0];
+  // const element = document.getElementById("cornerstoneViewport");
+  console.log(element);
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;
   const toolState = globalToolStateManager.saveToolState();
@@ -73,8 +76,12 @@ function createSeg() {
   const { labelmaps3D } = getters.labelmaps3D(element);
 
   if (!labelmaps3D) {
+    console.log("no labelmaps 3D");
     return;
   }
+
+  console.log(labelmaps3D);
+
   for (
     let labelmapIndex = 0;
     labelmapIndex < labelmaps3D.length;
@@ -82,6 +89,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
+    console.log(labelmaps2D);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
