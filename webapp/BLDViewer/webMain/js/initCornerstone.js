@@ -6,8 +6,8 @@ cornerstoneTools.init({
 });
 
 // TODO research react integration 
-// const element = document.getElementById("cornerstoneViewport");
-// cornerstone.enable(element);
+const element = document.getElementById("cornerstoneViewport");
+cornerstone.enable(element);
 const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 //define the stack
 // const stack = {
@@ -47,6 +47,11 @@ cornerstoneTools.addTool(BrushTool);
 
 const CorrectionScissors = cornerstoneTools.CorrectionScissorsTool;
 cornerstoneTools.addTool(CorrectionScissors);
+
+const FreehandScissors = cornerstoneTools.FreehandScissorsTool;
+FreehandScissors.defaultStrategy = "ERASE_INSIDE";
+FreehandScissors.activeStrategy = "ERASE_INSIDE";
+cornerstoneTools.addTool(FreehandScissors);
 
 cornerstoneTools.addTool(cornerstoneTools.BidirectionalTool);
 cornerstoneTools.addTool(cornerstoneTools.ArrowAnnotateTool);

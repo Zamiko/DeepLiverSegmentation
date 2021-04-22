@@ -50,15 +50,13 @@ function parseSeg(arrayBuffer) {
 
     const t1 = performance.now();
 
-    const { setters, state } = cornerstoneTools.getModule(
-        "segmentation"
-    );
+    const { setters, state } = cornerstoneTools.getModule("segmentation");
 
     setters.labelmap3DByFirstImageId(
         imageIds[0],
         labelmapBufferArray[0],
         0,
-        segMetadata,
+        segMetadata.data,
         imageIds.length,
         segmentsOnFrame
     );

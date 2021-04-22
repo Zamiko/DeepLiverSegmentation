@@ -75,7 +75,6 @@ function createSeg() {
   if (!labelmaps3D) {
     return;
   }
-
   for (
     let labelmapIndex = 0;
     labelmapIndex < labelmaps3D.length;
@@ -90,12 +89,10 @@ function createSeg() {
       }
 
       const segmentsOnLabelmap = labelmaps2D[i].segmentsOnLabelmap;
-
       segmentsOnLabelmap.forEach(segmentIndex => {
         if (segmentIndex !== 0 && !labelmap3D.metadata[segmentIndex]) {
-          labelmap3D.metadata[segmentIndex] = generateMockMetadata(
-            segmentIndex
-          );
+          labelmap3D.metadata[segmentIndex] =
+            generateMockMetadata(segmentIndex);
         }
       });
     }
@@ -104,6 +101,7 @@ function createSeg() {
   Promise.all(imagePromises)
     .then(images => {
       //this will convert the segmentation mask to a binary file
+      
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         labelmaps3D

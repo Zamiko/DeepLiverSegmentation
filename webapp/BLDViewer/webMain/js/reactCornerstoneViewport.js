@@ -3,13 +3,14 @@
     typeof define === 'function' && define.amd ? define(['cornerstone-core', 'cornerstone-wado-image-loader', 'dicom-parser', 'react', 'react-resize-detector', 'cornerstone-tools'], factory) :
     (global = global || self, global['react-cornerstone-viewport'] = factory(global.cornerstone, global.cornerstoneWADOImageLoader, global.dicomParser, global.React, global.ReactResizeDetector, global.cornerstoneTools));
   }(this, function (cornerstone, cornerstoneWADOImageLoader, dicomParser, React, ReactResizeDetector, cornerstoneTools) { 'use strict';
-  
     cornerstone = cornerstone && cornerstone.hasOwnProperty('default') ? cornerstone['default'] : cornerstone;
     cornerstoneWADOImageLoader = cornerstoneWADOImageLoader && cornerstoneWADOImageLoader.hasOwnProperty('default') ? cornerstoneWADOImageLoader['default'] : cornerstoneWADOImageLoader;
     dicomParser = dicomParser && dicomParser.hasOwnProperty('default') ? dicomParser['default'] : dicomParser;
     var React__default = 'default' in React ? React['default'] : React;
     ReactResizeDetector = ReactResizeDetector && ReactResizeDetector.hasOwnProperty('default') ? ReactResizeDetector['default'] : ReactResizeDetector;
-    cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
+    console.log("using default cornerstoneTools : "  + (cornerstoneTools && cornerstoneTools.hasOwnProperty('default')).toString());
+    // cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
+    cornerstoneTools = cornerstoneTools;
     var _cornerstoneWADOImage = cornerstoneWADOImageLoader.wadors.metaData,
       getNumberString = _cornerstoneWADOImage.getNumberString,
       getNumberValue = _cornerstoneWADOImage.getNumberValue,
@@ -6437,7 +6438,7 @@
           }).map(function (tool) {
             return tool.name;
           });
-  
+          console.log(element);
           var leftMouseToolsWithAnotherButtonMask = _this.props.availableTools.filter(function (tool) {
             if (!tool.mouseButtonMasks) {
               return;
@@ -6448,6 +6449,7 @@
   
           try {
             setToolsPassive(cornerstoneTools, leftMouseToolNames);
+
           } catch (error) {
             // TODO: Looks like the Brush tool is calling updateImage, which is
             // failing because the image is not available yet in the enabledElement?
@@ -7078,7 +7080,13 @@
       }, {
         name: 'CorrectionScissors',
         mouseButtonMasks: [1]
-      },{
+      }, {
+        name: 'FreehandScissors',
+        configuration: {
+          activeStrategy: "ERASE_INSIDE"
+        },
+        mouseButtonMasks: [1],
+      }, {
         name: 'PanMultiTouch'
       }, {
         name: 'ZoomTouchPinch'

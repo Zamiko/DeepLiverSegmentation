@@ -49,8 +49,8 @@
         </select>
         <!-- TODO add erase buttons -->
         <!-- add size adjustment to the brush and erase size -->
-        <button class="button set-tool-mode" data-action="CorrectionScissors">
-          CorrectionScissors
+        <button class="button set-tool-mode" data-action="FreehandScissors">
+          FreehandScissors
         </button>
         <br>
 
@@ -81,6 +81,9 @@
           mouseButtonMask: 1
         };
         cornerstoneTools[`setToolActive`](`${action}`, options);
+        if (action == "FreehandScissors") {
+
+        }
         // Remove active style from all buttons
         buttons.forEach(btn => {
           btn.classList.remove("is-primary");
@@ -130,7 +133,6 @@
   <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
   <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
   <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
- 
   <script src="js/initCornerstone.js"></script>
   <script src="js/dcmjs.js"></script>
 
