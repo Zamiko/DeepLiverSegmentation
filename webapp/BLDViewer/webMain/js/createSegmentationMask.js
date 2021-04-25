@@ -4,10 +4,8 @@ const switchSegment = document.getElementById("switchSegment");
 
 for (let i = 1; i <= 255; i++) {
   const option = document.createElement("option");
-
   option.text = i;
   option.value = i;
-
   switchSegment.add(option);
 }
 
@@ -19,8 +17,7 @@ function changeSegment() {
   // const element = document.getElementsByClassName("viewport-element")[0];
   console.log("Active Segment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
-
-  setters.activeSegmentIndex(element, segmentIndex);
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
 }
 
 function changeLabelmap() {
@@ -29,18 +26,12 @@ function changeLabelmap() {
   // const element = document.getElementsByClassName("viewport-element")[0];
 
   const { setters } = cornerstoneTools.getModule("segmentation");
-
-  setters.activeLabelmapIndex(element, labelmapIndex);
-  setters.activeSegmentIndex(element, segmentIndex);
-  console.log("active labelmapIndex is " + labelmapIndex);
-  console.log("Active Seegment index is " + segmentIndex);
-
+  setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
   cornerstone.updateImage(element);
-
 }
 
 function toggleSeg() {
-  //console.log(cornerstoneTools.getToolActive());
   segOptions = document.getElementById("segOptions");
   if (segOptions.className == "Hidden") {
     segOptions.className = "Shown";

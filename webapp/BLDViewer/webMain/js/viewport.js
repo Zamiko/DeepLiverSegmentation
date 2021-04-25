@@ -10,12 +10,12 @@
 //   );
 // }
 
-var exampleData = {
-  stack: {
-    currentImageIdIndex: 0,
-    imageIds
-  }
-};
+// var exampleData = {
+//   stack: {
+//     currentImageIdIndex: 0,
+//     imageIds
+//   }
+// };
 
 // var CornerstoneViewport = window["react-cornerstone-viewport"];
 // var props = {

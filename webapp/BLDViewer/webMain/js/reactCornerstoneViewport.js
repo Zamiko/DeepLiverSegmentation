@@ -7082,9 +7082,6 @@
         mouseButtonMasks: [1]
       }, {
         name: 'FreehandScissors',
-        configuration: {
-          activeStrategy: "ERASE_INSIDE"
-        },
         mouseButtonMasks: [1],
       }, {
         name: 'PanMultiTouch'
