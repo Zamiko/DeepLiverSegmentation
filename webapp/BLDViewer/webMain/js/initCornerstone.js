@@ -51,20 +51,20 @@ for (var i = 1; i < 72; i++) {
     );
 }
 
-const element = document.getElementById("cornerstoneViewport");
-cornerstone.enable(element);
-// define the stack
-const stack = {
-    currentImageIdIndex: 0,
-    imageIds: imageIds
-};
+// const element = document.getElementById("cornerstoneViewport");
+// cornerstone.enable(element);
+// // define the stack
+// const stack = {
+//     currentImageIdIndex: 0,
+//     imageIds: imageIds
+// };
 
-// load images and set the stack
-cornerstone.loadImage(imageIds[0]).then(image => {
-    cornerstoneTools.addStackStateManager(element, ["stack"]);
-    cornerstoneTools.addToolState(element, "stack", stack);
-    cornerstone.displayImage(element, image);
-});
+// // load images and set the stack
+// cornerstone.loadImage(imageIds[0]).then(image => {
+//     cornerstoneTools.addStackStateManager(element, ["stack"]);
+//     cornerstoneTools.addToolState(element, "stack", stack);
+//     cornerstone.displayImage(element, image);
+// });
 
 
 const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;

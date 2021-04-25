@@ -6438,7 +6438,6 @@
           }).map(function (tool) {
             return tool.name;
           });
-          console.log(element);
           var leftMouseToolsWithAnotherButtonMask = _this.props.availableTools.filter(function (tool) {
             if (!tool.mouseButtonMasks) {
               return;

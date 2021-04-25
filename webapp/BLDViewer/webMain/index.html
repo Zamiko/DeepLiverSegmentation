@@ -85,6 +85,8 @@
         cornerstoneTools[`setToolActive`](`${action}`, options);
         if (action == "FreehandScissors") {
           // cornerstoneTools[`setToolActive`]("FreehandScissors", options);
+          // this declaration of element needed for react cornerstone viewport version
+          const element = document.getElementsByClassName("viewport-element")[0];
           const activeScissors = cornerstoneTools.getToolForElement(element, "FreehandScissors");
           activeScissors.activeStrategy = "ERASE_INSIDE";
         }
@@ -165,9 +167,9 @@
 
   <!-- Replaced by reactCornerstoneViewport.js to edit what tools we can use -->
   <!-- <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script> -->
-  <!-- <script src="./js/reactCornerstoneViewport.js"></script> -->
+  <script src="./js/reactCornerstoneViewport.js"></script>
 
-  <!-- <script src="./js/viewport.js"></script> -->
+  <script src="./js/viewport.js"></script>
   <!-- <script src="./js/handleDICOM.js"></script> -->
 </body>
 <!--Might attach a footer here in the future with credits-->

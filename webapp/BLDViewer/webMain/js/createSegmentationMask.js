@@ -14,7 +14,7 @@ document.getElementById("switchActiveLabelmap")[0].selected = true;
 
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
-  // const element = document.getElementsByClassName("viewport-element")[0];
+  const element = document.getElementsByClassName("viewport-element")[0];
   console.log("Active Segment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
   setters.activeSegmentIndex(element, parseInt(segmentIndex));
@@ -23,7 +23,7 @@ function changeSegment() {
 function changeLabelmap() {
   const labelmapIndex = document.getElementById("switchActiveLabelmap").value;
   const segmentIndex = document.getElementById("switchSegment").value;
-  // const element = document.getElementsByClassName("viewport-element")[0];
+  const element = document.getElementsByClassName("viewport-element")[0];
 
   const { setters } = cornerstoneTools.getModule("segmentation");
   setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
@@ -46,7 +46,7 @@ function toggleSeg() {
 //if not: there is an undo and redo button we can implement instead/additionally
 
 function createSeg() {
-  // const element = document.getElementsByClassName("viewport-element")[0];
+  const element = document.getElementsByClassName("viewport-element")[0];
   // const element = document.getElementById("cornerstoneViewport");
   console.log(element);
   const globalToolStateManager =
