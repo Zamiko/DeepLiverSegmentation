@@ -53,15 +53,6 @@ const stack = {
   currentImageIdIndex: 0,
   imageIds
 };
-
-// load images and set the stack
-cornerstone.loadImage(imageIds[0]).then(image => {
-    
-  cornerstone.displayImage(element, image);
-  cornerstoneTools.addStackStateManager(element, ["stack"]);
-  cornerstoneTools.addToolState(element, "stack", stack);
-});
-
 cornerstoneTools.addTool(StackScrollMouseWheelTool);
 cornerstoneTools.setToolActive("StackScrollMouseWheel", {});
 
@@ -96,4 +87,13 @@ cornerstoneTools.addTool(FreehandScissors);
 cornerstoneTools.addTool(cornerstoneTools.BidirectionalTool);
 cornerstoneTools.addTool(cornerstoneTools.ArrowAnnotateTool);
 cornerstoneTools.addTool(cornerstoneTools.EllipticalRoiTool);
+// load images and set the stack
+cornerstone.loadImage(imageIds[0]).then(image => {
+    
+  cornerstone.displayImage(element, image);
+  cornerstoneTools.addStackStateManager(element, ["stack"]);
+  cornerstoneTools.addToolState(element, "stack", stack);
+});
+
+
 

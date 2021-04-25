@@ -87,7 +87,10 @@
         };
         cornerstoneTools[`setToolActive`](`${action}`, options);
         if (action == "FreehandScissors") {
-
+          console.log("changing strat every time");
+          const activeScissors = cornerstoneTools.getToolForElement(element, "FreehandScissors");
+          activeScissors.activeStrategy = "ERASE_INSIDE";
+          console.log(activeScissors.activeStrategy);
         }
         // Remove active style from all buttons
         buttons.forEach(btn => {

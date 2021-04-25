@@ -16,8 +16,8 @@ document.getElementById("switchActiveLabelmap")[0].selected = true;
 
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
-  const element = document.getElementsByClassName("viewport-element")[0];
-  console.log("Active Seegment index is " + segmentIndex);
+  // const element = document.getElementsByClassName("viewport-element")[0];
+  console.log("Active Segment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
 
   setters.activeSegmentIndex(element, segmentIndex);
@@ -26,7 +26,7 @@ function changeSegment() {
 function changeLabelmap() {
   const labelmapIndex = document.getElementById("switchActiveLabelmap").value;
   const segmentIndex = document.getElementById("switchSegment").value;
-  const element = document.getElementsByClassName("viewport-element")[0];
+  // const element = document.getElementsByClassName("viewport-element")[0];
 
   const { setters } = cornerstoneTools.getModule("segmentation");
 
@@ -80,7 +80,7 @@ function createSeg() {
     return;
   }
 
-  console.log(labelmaps3D);
+  console.log("label maps 3D length " + labelmaps3D.length);
 
   for (
     let labelmapIndex = 0;
@@ -89,7 +89,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log(labelmaps2D);
+    console.log( "labeel maps 2D length is" + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -109,7 +109,7 @@ function createSeg() {
   Promise.all(imagePromises)
     .then(images => {
       //this will convert the segmentation mask to a binary file
-      
+      console.log(images.length);
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         labelmaps3D
@@ -117,7 +117,10 @@ function createSeg() {
 
       //TODO: we'll want to override this so that it instead saves to the location of the DICOM image it's segmenting?
       //Create a URL for the binary.
+      console.log("created image");
       var objectUrl = URL.createObjectURL(segBlob);
+      console.log(objectUrl);
+      console.log(window);
       window.open(objectUrl);
     })
     .catch(err => console.log(err));

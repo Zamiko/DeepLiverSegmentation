@@ -26,9 +26,9 @@ function getAndLoadSeg() {
 }
 
 function parseSeg(arrayBuffer) {
-    const element = document.getElementsByClassName(
-        "viewport-element"
-    )[0];
+    // const element = document.getElementsByClassName(
+    //     "viewport-element"
+    // )[0];
 
     const stackToolState = cornerstoneTools.getToolState(
         element,
