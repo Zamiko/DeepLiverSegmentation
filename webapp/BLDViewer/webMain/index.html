@@ -52,8 +52,20 @@
         <button class="button set-tool-mode" data-action="Brush">
           Brush
         </button>
+        <button class="button set-brush-size" data-action="decrement">
+          -
+        </button>
+        <button class="button set-brush-size" data-action="increment">
+          +
+        </button>
         <button class="button set-tool-mode" data-action="FreehandScissors">
           FreehandScissors
+        </button>
+        <button class="button control-history" data-action="undo">
+          Undo
+        </button>
+        <button class="button control-history" data-action="redo">
+          Redo
         </button>
         <br>
         <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
@@ -70,65 +82,6 @@
     </div>
   </div>
 
-  <script>
-    function initModeButtons() {
-      const nameSpace = `.mode-buttons`;
-      const buttons = document.querySelectorAll(
-        `.set-tool-mode`
-      );
-
-      const handleClick = function (evt) {
-        const action = this.dataset.action;
-        const options = {
-          mouseButtonMask: 1
-        };
-        cornerstoneTools[`setToolActive`](`${action}`, options);
-        if (action == "FreehandScissors") {
-          // cornerstoneTools[`setToolActive`]("FreehandScissors", options);
-          // this declaration of element needed for react cornerstone viewport version
-          const element = document.getElementsByClassName("viewport-element")[0];
-          const activeScissors = cornerstoneTools.getToolForElement(element, "FreehandScissors");
-          activeScissors.activeStrategy = "ERASE_INSIDE";
-        }
-        // Remove active style from all buttons
-        buttons.forEach(btn => {
-          btn.classList.remove("is-primary");
-        });
-        // Add active style to this button
-        this.classList.add("is-primary");
-
-        evt.preventDefault();
-        evt.stopPropagation();
-        evt.stopImmediatePropagation();
-        return false;
-      };
-
-      buttons.forEach(btn => {
-        btn.addEventListener("contextmenu", handleClick);
-        btn.addEventListener("auxclick", handleClick);
-        btn.addEventListener("click", handleClick);
-      });
-    }
-    const convertMouseEventWhichToButtons = which => {
-      switch (which) {
-        // no button
-        case 0:
-          return 0;
-        // left
-        case 1:
-          return 1;
-        // middle
-        case 2:
-          return 4;
-        // right
-        case 3:
-          return 2;
-      }
-      return 0;
-    };
-    initModeButtons();
-
-  </script>
   <!-- include the hammer.js library for touch gestures-->
 
 
@@ -144,7 +97,7 @@
 
   <!-- Why we're all here ;) -->
   <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
-
+  <script src="./js/initInterface.js"></script>
   <script src="./js/initCornerstone.js"></script>
   <script src="./js/dcmjs.js"></script>
  
