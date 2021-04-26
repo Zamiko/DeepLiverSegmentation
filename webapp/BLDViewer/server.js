@@ -1,120 +1,159 @@
+// server.js
+// where your node app starts
+
 // init project
 const express = require("express");
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
+const fs = require("fs");
+//app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
 
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static(`${__dirname}/webMain`));
+app.use(express.static("webMain"));
+
+//was trying to implement all this via a python script--however have to figure out authentication for that
+const {google} = require('googleapis');
+const healthcare = google.healthcare('v1');
+const fs = require('fs');
+const util = require('util');
+const writeFile = util.promisify(fs.writeFile);
+// When specifying the output file, use an extension like ".multipart."
+// Then, parse the downloaded multipart file to get each individual
+// DICOM file.
+const fileName = 'study_file.multipart';
+
+const cloudRegion = 'us-west2';
+const projectId = 'liversegmentationwebapp';
+const datasetId = 'DICOM_data';
+const dicomStoreId = 'testing_data';
+
+const dicomWebStoreInstance = async () => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {
+      'Content-Type': 'application/dicom',
+      Accept: 'application/dicom+json',
+    },
+  });
+  //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location
+  //const dcmFile = 
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = 'studies';
+  // Use a stream because other types of reads overwrite the client's HTTP
+  // headers and cause storeInstances to fail.
+  const binaryData = fs.createReadStream(dcmFile);
+  const request = {
+    parent,
+    dicomWebPath,
+    requestBody: binaryData,
+  };
+
+  const instance = await healthcare.projects.locations.datasets.dicomStores.storeInstances(
+    request
+  );
+  console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+};
+
+
+const dicomWebSearchForInstances = async () => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {Accept: 'application/dicom+json,multipart/related'},
+  });
+
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = 'instances';
+  const request = {parent, dicomWebPath};
+
+  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForInstances(
+    request
+  );
+  //FIXME: will have to send this data back to the frontend for display
+  console.log(`Found ${instances.data.length} instances:`);
+  console.log(JSON.stringify(instances.data));
+};
+
+
+
+const dicomWebRetrieveStudy = async (studyUid) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {
+      Accept: 'multipart/related; type=application/dicom; transfer-syntax=*',
+    },
+    responseType: 'arraybuffer',
+  });
+
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyUid}`;
+  const request = {parent, dicomWebPath};
+
+  const study = await healthcare.projects.locations.datasets.dicomStores.studies.retrieveStudy(
+    request
+  );
+
+  const fileBytes = Buffer.from(study.data);
+
+  await writeFile(fileName, fileBytes);
+  console.log(
+    `Retrieved study and saved to ${fileName} in current directory`
+  );
+};
+
+
+const dicomWebDeleteStudy = async (studyUid) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({auth});
+
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyUid}`;
+  const request = {parent, dicomWebPath};
+
+  await healthcare.projects.locations.datasets.dicomStores.studies.delete(
+    request
+  );
+  console.log('Deleted DICOM study');
+};
+
+//dicomWebDeleteStudy();
+
+
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
 
-//This code is all for:
-//importing DICOM instances from the cloud storage to the DICOM store, which we are using for more permanent storage
-//exporting DICOM instances from the DICOM store to the cloud storage, this will allow us to access DICOM studies sent from a PACS
-const { google } = require("googleapis");
-const healthcare = google.healthcare("v1");
-//const sleep = require("../sleep");--this dependency was causing issues
-const sleep = require('util').promisify(setTimeout);
 
-//Variables needed
-const cloudRegion = "us-west2";
-const projectId = "liversegmentationwebapp";
-const datasetId = "DICOM_data";
-//TODO(?): I was planning we have two stores, one for the data Roger's given us, and then when we submit the project it should be a new/clean datastore? or we can just not bother lol
-const dicomStoreId = "testing_data";
-//FIXME: this is wrong?
-const gcsUri = "liver_segmentation";
-const name = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-
-const importDicomInstance = async () => {
-  const auth = await google.auth.getClient({
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"]
-  });
-  google.options({ auth });
-
-  const request = {
-    name,
-    resource: {
-      // The location of the DICOM instances in Cloud Storage
-      gcsSource: {
-        uri: `gs://${gcsUri}`
-      }
-    }
-  };
-
-  const operation = await healthcare.projects.locations.datasets.dicomStores.import(
-    request
-  );
-  const operationName = operation.data.name;
-
-  const operationRequest = { name: operationName };
-
-  // Wait fifteen seconds for the LRO to finish.
-  await sleep(15000);
-
-  // Check the LRO's status
-  const operationStatus = await healthcare.projects.locations.datasets.operations.get(
-    operationRequest
-  );
-
-  const { data } = operationStatus;
-
-  if (data.error === undefined) {
-    console.log("Successfully imported DICOM instances");
-  } else {
-    console.log("Encountered errors. Sample error:");
-    console.log(
-      "Resource on which error occured:",
-      data.error.details[0]["sampleErrors"][0]["resource"]
-    );
-    console.log(
-      "Error code:",
-      data.error.details[0]["sampleErrors"][0]["error"]["code"]
-    );
-    console.log(
-      "Error message:",
-      data.error.details[0]["sampleErrors"][0]["error"]["message"]
-    );
-  }
-};
-
-app.get("/unloadDataStore", (request, response) => {
-  importDicomInstance();
-  console.log("unloading Data Store");
+//FIXME: for all three of these functions I may need to directly write the async fucntion here instead of writing it elsewhere and calling it here
+app.get("/store", (request, response) => {
+  dicomWebStoreInstance();
 });
 
-const exportDicomInstance = async () => {
-  const auth = await google.auth.getClient({
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"]
-  });
-  google.options({ auth });
-  const request = {
-    name,
-    resource: {
-      gcsDestination: {
-        // The destination location of the DICOM instances in Cloud Storage
-        uriPrefix: `gs://${gcsUri}`,
-        // The format to use for the output files, per the MIME types supported in the DICOM spec
-        mimeType: "application/dicom"
-      }
-    }
-  };
-
-  await healthcare.projects.locations.datasets.dicomStores.export(request);
-  console.log(`Exported DICOM instances to ${gcsUri}`);
-};
-//TODO: there is (in beta) a filter file suggestion that allows us to only import a few files (ie a study) rather than everything in the Datastore this might be good to look at
-app.get("/loadDataStore", (request, response) => {
-  exportDicomInstance();
-  console.log("loading Data Store");
+app.get("/retrieve", (request, response) => {
+  //FIXME: we can store the information of the study we want to retrieve in request and pass it to the function
+  dicomWebRetrieveStudy();
 });
-//End of data store manipulation
+
+app.get("/search", (request, response) => {
+  //FIXME: we'l need to pass the JSON information back through response
+  dicomWebSearchForInstances();
+});
+
+
+
 
 //check for invalid function calls
 app.all("*", function(request, response) {
