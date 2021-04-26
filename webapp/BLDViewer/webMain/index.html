@@ -15,12 +15,12 @@
       <h2>Liver Segmenter</h2>
       <!--the hidden attribute is temporary, and only for aesthetic purpose-->
       <div class="uploadStuff Hidden">
-        <button class="button" id = "uploadDICOM">DO NOT USE YET</button>
-        <button class="button" id = "loadDICOM">Load DICOM</button>
-        <button class="button" id = "unloadDICOM">Save all files to the Server</button>
+        <button class="button" id="uploadDICOM">DO NOT USE YET</button>
+        <button class="button" id="loadDICOM">Load DICOM</button>
+        <button class="button" id="unloadDICOM">Save all files to the Server</button>
       </div>
     </div>
-    <div class = "main-button-bar">
+    <div class="main-button-bar">
       <div class="buttons mode-buttons">
         <button class="button set-tool-mode is-primary" data-action="Zoom">
           Zoom
@@ -32,7 +32,7 @@
           Wwwc
         </button>
       </div>
-      <button class = "button" id="segmentation" onclick="toggleSeg()">
+      <button class="button" id="segmentation" onclick="toggleSeg()">
         Segmentation
       </button>
     </div>
@@ -49,97 +49,60 @@
         </select>
         <!-- TODO add erase buttons -->
         <!-- add size adjustment to the brush and erase size -->
+        <button class="button set-tool-mode" data-action="Brush">
+          Brush
+        </button>
+        <button class="button set-brush-size" data-action="decrement">
+          -
+        </button>
+        <button class="button set-brush-size" data-action="increment">
+          +
+        </button>
         <button class="button set-tool-mode" data-action="FreehandScissors">
           FreehandScissors
         </button>
+        <button class="button control-history" data-action="undo">
+          Undo
+        </button>
+        <button class="button control-history" data-action="redo">
+          Redo
+        </button>
         <br>
-
         <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
           Load Segmentation
         </button>
       </div>
       <p id="statusLine"></p>
       <div class="col-xs-9">
-        <div oncontextmenu="return false"
-          class="cornerstone-enabled-image" unselectable="on" onselectstart="return false;" onmousedown="return false;">
-          <div id="cornerstoneViewport" ></div>
+        <div oncontextmenu="return false" class="cornerstone-enabled-image" unselectable="on"
+          onselectstart="return false;" onmousedown="return false;">
+          <div id="cornerstoneViewport"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    function initModeButtons() {
-      const nameSpace = `.mode-buttons`;
-      const buttons = document.querySelectorAll(
-        `.set-tool-mode`
-      );
-
-      const handleClick = function (evt) {
-        const action = this.dataset.action;
-        const options = {
-          mouseButtonMask: 1
-        };
-        cornerstoneTools[`setToolActive`](`${action}`, options);
-        if (action == "FreehandScissors") {
-
-        }
-        // Remove active style from all buttons
-        buttons.forEach(btn => {
-          btn.classList.remove("is-primary");
-        });
-        // Add active style to this button
-        this.classList.add("is-primary");
-
-        evt.preventDefault();
-        evt.stopPropagation();
-        evt.stopImmediatePropagation();
-        return false;
-      };
-
-      buttons.forEach(btn => {
-        btn.addEventListener("contextmenu", handleClick);
-        btn.addEventListener("auxclick", handleClick);
-        btn.addEventListener("click", handleClick);
-      });
-    }
-    const convertMouseEventWhichToButtons = which => {
-      switch (which) {
-        // no button
-        case 0:
-          return 0;
-        // left
-        case 1:
-          return 1;
-        // middle
-        case 2:
-          return 4;
-        // right
-        case 3:
-          return 2;
-      }
-      return 0;
-    };
-    initModeButtons();
-
-  </script>
   <!-- include the hammer.js library for touch gestures-->
 
 
   <!-- include the cornerstone library -->
+  <!-- include the hammer.js library for touch gestures-->
+  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+  <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
+
+  <!-- include the cornerstone library -->
   <script src="https://unpkg.com/cornerstone-core"></script>
   <script src="https://unpkg.com/cornerstone-math"></script>
-  <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
-  <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
   <script src="https://unpkg.com/cornerstone-wado-image-loader"></script>
-  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
-  <script src="js/initCornerstone.js"></script>
-  <script src="js/dcmjs.js"></script>
 
-  <script>
-   
-  </script>
-
+  <!-- Why we're all here ;) -->
+  <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
+  <script src="./js/initInterface.js"></script>
+  <script src="./js/initCornerstone.js"></script>
+  <script src="./js/dcmjs.js"></script>
+ 
+  <script src="./js/displaySegmentationMask.js"></script>
+  <script src="./js/createSegmentationMask.js"></script>
   <!-- <script srve="https://unpkg.com/dcmjs@0.18.3/build/dcmjs.js"></script> -->
 
   <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
@@ -158,14 +121,15 @@
   <!-- Replaced by reactCornerstoneViewport.js to edit what tools we can use -->
   <!-- <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script> -->
   <script src="./js/reactCornerstoneViewport.js"></script>
-  <script src="./js/displaySegmentationMask.js"></script>
-  <script src="./js/createSegmentationMask.js"></script>
+
   <script src="./js/viewport.js"></script>
-  <script src="./js/handleDICOM.js"></script>
+  <!-- <script src="./js/handleDICOM.js"></script> -->
 </body>
 <!--Might attach a footer here in the future with credits-->
 <footer>
-    <p>This is a Banana Leaf Development Project, created for Dr.Roger Goldman in UC Davis' ECS193 class</p>
-    <p>We've used <a href = "https://github.com/cornerstonejs">cornerstonejs</a> and <a href = "https://github.com/dcmjs-org/dcmjs">dcmjs</a> libraries for assistance with this</p>
+  <p>This is a Banana Leaf Development Project, created for Dr.Roger Goldman in UC Davis' ECS193 class</p>
+  <p>We've used <a href="https://github.com/cornerstonejs">cornerstonejs</a> and <a
+      href="https://github.com/dcmjs-org/dcmjs">dcmjs</a> libraries for assistance with this</p>
 </footer>
+
 </html>

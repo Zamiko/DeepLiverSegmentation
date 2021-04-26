@@ -9,8 +9,8 @@
     var React__default = 'default' in React ? React['default'] : React;
     ReactResizeDetector = ReactResizeDetector && ReactResizeDetector.hasOwnProperty('default') ? ReactResizeDetector['default'] : ReactResizeDetector;
     console.log("using default cornerstoneTools : "  + (cornerstoneTools && cornerstoneTools.hasOwnProperty('default')).toString());
-    // cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
-    cornerstoneTools = cornerstoneTools;
+    cornerstoneTools = cornerstoneTools && cornerstoneTools.hasOwnProperty('default') ? cornerstoneTools['default'] : cornerstoneTools;
+    // cornerstoneTools = cornerstoneTools;
     var _cornerstoneWADOImage = cornerstoneWADOImageLoader.wadors.metaData,
       getNumberString = _cornerstoneWADOImage.getNumberString,
       getNumberValue = _cornerstoneWADOImage.getNumberValue,
@@ -6438,7 +6438,6 @@
           }).map(function (tool) {
             return tool.name;
           });
-          console.log(element);
           var leftMouseToolsWithAnotherButtonMask = _this.props.availableTools.filter(function (tool) {
             if (!tool.mouseButtonMasks) {
               return;
@@ -7082,9 +7081,6 @@
         mouseButtonMasks: [1]
       }, {
         name: 'FreehandScissors',
-        configuration: {
-          activeStrategy: "ERASE_INSIDE"
-        },
         mouseButtonMasks: [1],
       }, {
         name: 'PanMultiTouch'

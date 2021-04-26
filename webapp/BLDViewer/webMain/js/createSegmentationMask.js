@@ -4,10 +4,8 @@ const switchSegment = document.getElementById("switchSegment");
 
 for (let i = 1; i <= 255; i++) {
   const option = document.createElement("option");
-
   option.text = i;
   option.value = i;
-
   switchSegment.add(option);
 }
 
@@ -17,10 +15,9 @@ document.getElementById("switchActiveLabelmap")[0].selected = true;
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
   const element = document.getElementsByClassName("viewport-element")[0];
-  console.log(segmentIndex);
+  console.log("Active Segment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
-
-  setters.activeSegmentIndex(element, segmentIndex);
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
 }
 
 function changeLabelmap() {
@@ -29,17 +26,12 @@ function changeLabelmap() {
   const element = document.getElementsByClassName("viewport-element")[0];
 
   const { setters } = cornerstoneTools.getModule("segmentation");
-
-  setters.activeLabelmapIndex(element, labelmapIndex);
-  setters.activeSegmentIndex(element, segmentIndex);
-  console.log(segmentIndex);
-
+  setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
   cornerstone.updateImage(element);
-
 }
 
 function toggleSeg() {
-  //console.log(cornerstoneTools.getToolActive());
   segOptions = document.getElementById("segOptions");
   if (segOptions.className == "Hidden") {
     segOptions.className = "Shown";
@@ -55,6 +47,8 @@ function toggleSeg() {
 
 function createSeg() {
   const element = document.getElementsByClassName("viewport-element")[0];
+  // const element = document.getElementById("cornerstoneViewport");
+  console.log(element);
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;
   const toolState = globalToolStateManager.saveToolState();
@@ -73,8 +67,12 @@ function createSeg() {
   const { labelmaps3D } = getters.labelmaps3D(element);
 
   if (!labelmaps3D) {
+    console.log("no labelmaps 3D");
     return;
   }
+
+  console.log("label maps 3D length " + labelmaps3D.length);
+
   for (
     let labelmapIndex = 0;
     labelmapIndex < labelmaps3D.length;
@@ -82,6 +80,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
+    console.log( "labeel maps 2D length is" + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -101,7 +100,7 @@ function createSeg() {
   Promise.all(imagePromises)
     .then(images => {
       //this will convert the segmentation mask to a binary file
-      
+      console.log(images.length);
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         labelmaps3D
@@ -109,7 +108,10 @@ function createSeg() {
 
       //TODO: we'll want to override this so that it instead saves to the location of the DICOM image it's segmenting?
       //Create a URL for the binary.
+      console.log("created image");
       var objectUrl = URL.createObjectURL(segBlob);
+      console.log(objectUrl);
+      console.log(window);
       window.open(objectUrl);
     })
     .catch(err => console.log(err));
