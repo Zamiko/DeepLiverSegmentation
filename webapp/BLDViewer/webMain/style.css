@@ -1,4 +1,53 @@
 /* this file is loaded by index.html and styles the page */
+html, body{
+  margin:0;
+  height: 100%;
+  font-family: Helvetica, sans-serif;
+  background-color: #161616;
+  color: #cecaca;
+}
+footer{
+  margin:0;
+  background-color: #497c3a;
+  color: #cecece;
+  padding: 10px;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.page-header{
+  display: flex;
+  flex-direction: row;
+  height: 10%;
+}
+.main-button-bar, #segoptions{
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  padding-bottom: 5px;
+}
+.row{
+  height: 75%;
+}
+.col-xs-9{
+  height: 100%;
+}
+.cornerstone-enabled-image ,#cornerstoneViewport{
+  height: 100%;
+}
+.button{
+  background-color: #497c3a;
+  border-radius: 10px;
+  color: #000000;
+  padding: 5px 5px;
+  text-align: center;
+  margin-right: 15px;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 .Hidden {
   opacity: 0;
 }
