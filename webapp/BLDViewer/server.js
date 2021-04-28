@@ -3,105 +3,148 @@
 
 // init project
 const express = require("express");
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 const app = express();
 const fs = require("fs");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// we've started you off with Express,
-// but feel free to use whatever libs or frameworks you'd like through `package.json`.
+//app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
 
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static("public"));
+app.use(express.static("webMain"));
 
-// init sqlite db
-const dbFile = "./.data/sqlite.db";
-const exists = fs.existsSync(dbFile);
-const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database(dbFile);
+//was trying to implement all this via a python script--however have to figure out authentication for that
+const {google} = require('googleapis');
+const healthcare = google.healthcare('v1');
+const util = require('util');
+const writeFile = util.promisify(fs.writeFile);
+// When specifying the output file, use an extension like ".multipart."
+// Then, parse the downloaded multipart file to get each individual
+// DICOM file.
+const fileName = 'study_file.multipart';
 
-//COPIED THE EXAMPLE FOR FUTURE USE WITH THE LOGIN DATABASE, we'll need to include cookies if we're creating our own database though
-// if ./.data/sqlite.db does not exist, create it, otherwise print records to console
-/*db.serialize(() => {
-  if (!exists) {
-    db.run(
-      "CREATE TABLE Dreams (id INTEGER PRIMARY KEY AUTOINCREMENT, dream TEXT)"
-    );
-    console.log("New table Dreams created!");
-
-    // insert default dreams
-    db.serialize(() => {
-      db.run(
-        'INSERT INTO Dreams (dream) VALUES ("Find and count some sheep"), ("Climb a really tall mountain"), ("Wash the dishes")'
-      );
-    });
-  } else {
-    console.log('Database "Dreams" ready to go!');
-    db.each("SELECT * from Dreams", (err, row) => {
-      if (row) {
-        console.log(`record: ${row.dream}`);
-      }
-    });
-  }
-});*/
+const cloudRegion = 'us-west2';
+const projectId = 'liversegmentationwebapp';
+const datasetId = 'DICOM_data';
+const dicomStoreId = 'testing_data';
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
 
-/*
-// endpoint to get all the dreams in the database
-app.get("/getDreams", (request, response) => {
-  db.all("SELECT * from Dreams", (err, rows) => {
-    response.send(JSON.stringify(rows));
-  });
-});
 
-// endpoint to add a dream to the database
-app.post("/addDream", (request, response) => {
-  console.log(`add to dreams ${request.body.dream}`);
-
-  // DISALLOW_WRITE is an ENV variable that gets reset for new projects
-  // so they can write to the database
-  if (!process.env.DISALLOW_WRITE) {
-    const cleansedDream = cleanseString(request.body.dream);
-    db.run(`INSERT INTO Dreams (dream) VALUES (?)`, cleansedDream, error => {
-      if (error) {
-        response.send({ message: "error!" });
-      } else {
-        response.send({ message: "success" });
+//FIXME: for all three of these functions I may need to directly write the async fucntion here instead of writing it elsewhere and calling it here
+app.get("/store", async (req, res) => {
+    const auth = await google.auth.getClient({
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+    google.options({
+      auth,
+      headers: {
+        'Content-Type': 'application/dicom',
+        Accept: 'application/dicom+json',
+      },
+    });
+    //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
+    fileFolder = "webMain/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277"
+    fs.readdir(fileFolder, async (err, files) => {
+      if (err) {
+        console.error("Could not list the directory.", err);
+        process.exit(1);
       }
+    
+      files.forEach(async(file, index) => {
+        const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+        const dicomWebPath = 'studies';
+        // Use a stream because other types of reads overwrite the client's HTTP
+        // headers and cause storeInstances to fail.
+        filePath = fileFolder + "/" + file
+        const binaryData = fs.createReadStream(filePath);
+        const request = {
+          parent,
+          dicomWebPath,
+          requestBody: binaryData,
+        };
+  
+        const instance = await healthcare.projects.locations.datasets.dicomStores.storeInstances(
+        request
+        );
+        console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+      });
     });
   }
+);
+//FIXME: we can store the information of the study we want to retrieve in request and pass it to the function
+app.post("/retrieve", async (req, res) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {
+      Accept: 'multipart/related; type=application/dicom; transfer-syntax=*',
+    },
+    responseType: 'arraybuffer',
+  });
+
+  //studyUid will be stores in req
+  //possible FIXME: may have to convert body to string
+  studyUid = req.body;
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyUid}`;
+  const request = {parent, dicomWebPath};
+
+  const study = await healthcare.projects.locations.datasets.dicomStores.studies.retrieveStudy(
+    request
+  );
+
+  const fileBytes = Buffer.from(study.data);
+
+  await writeFile(fileName, fileBytes);
+  console.log(
+    `Retrieved study and saved to ${fileName} in current directory`
+  );
 });
 
-// endpoint to clear dreams from the database
-app.get("/clearDreams", (request, response) => {
-  // DISALLOW_WRITE is an ENV variable that gets reset for new projects so you can write to the database
-  if (!process.env.DISALLOW_WRITE) {
-    db.each(
-      "SELECT * from Dreams",
-      (err, row) => {
-        console.log("row", row);
-        db.run(`DELETE FROM Dreams WHERE ID=?`, row.id, error => {
-          if (row) {
-            console.log(`deleted row ${row.id}`);
-          }
-        });
-      },
-      err => {
-        if (err) {
-          response.send({ message: "error!" });
-        } else {
-          response.send({ message: "success" });
-        }
-      }
-    );
-  }
+app.get("/search", async (req, res) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {Accept: 'application/dicom+json,multipart/related'},
+  });
+
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = 'instances';
+  const request = {parent, dicomWebPath};
+
+  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForInstances(
+    request
+  );
+  //FIXME: will have to send this data back to the frontend for display
+  //can do this through the response--I've done it before I believe, I jsut need to find the code
+  console.log(`Found ${instances.data.length} instances:`);
+  console.log(JSON.stringify(instances.data));
 });
-*/
+
+//need to get uID through the request
+app.get("/delete", async (req, res) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({auth});
+
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyUid}`;
+  const request = {parent, dicomWebPath};
+
+  await healthcare.projects.locations.datasets.dicomStores.studies.delete(
+    request
+  );
+  console.log('Deleted DICOM study');
+});
+
 
 //check for invalid function calls
 app.all("*", function(request, response) {
