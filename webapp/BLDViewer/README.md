@@ -22,7 +22,6 @@ How I believe these should work are as follows:
         - perhaps this could simply be a "back" button and will return user to the study selection screen
 
 The order in which we should implement and test the dicomweb commands is:  
-store-Done
-retrieve  
-search  
+search
+retrieve 
 I provided the code for the deletion of a study in the dataset, but I don't know that it would be necessary

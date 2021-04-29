@@ -87,7 +87,7 @@ app.post("/retrieve", async (req, res) => {
     responseType: 'arraybuffer',
   });
 
-  //studyUid will be stores in req
+  //studyUid will be stored in req
   //possible FIXME: may have to convert body to string
   studyUid = req.body;
   const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
@@ -123,9 +123,11 @@ app.get("/search", async (req, res) => {
     request
   );
   //FIXME: will have to send this data back to the frontend for display
-  //can do this through the response--I've done it before I believe, I jsut need to find the code
+  //can do this through the response--I've done it before I believe, I just need to find the code
   console.log(`Found ${instances.data.length} instances:`);
   console.log(JSON.stringify(instances.data));
+  response.json(JSON.stringify(instances.data));
+  response.status(200);
 });
 
 //need to get uID through the request
