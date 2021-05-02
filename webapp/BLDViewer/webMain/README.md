@@ -8,9 +8,10 @@ Current Content:
 - js/initCornerstone.js
 - js/viewport.js
 - js/dcmjs.js
+- js/handleDICOM.js
+
 
 To do in future:
--- loading and saving segmentation masks, adding more tools for ease of user
 - Hooking up to data storage (whatever we decide to use)
 - UI/UX
 - login page

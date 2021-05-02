@@ -4,30 +4,47 @@ const studyUrl = "49591";
 
 function store() {
     //we're going to want to store the url of the study to store in the request we send
-
-    // build a browser-style HTTP request data structure
+    console.log("Storing current instances")
     const xHTTPreq = new XMLHttpRequest();
     xHTTPreq.open("GET", "/store", true);
-    // callback function executed when the HTTP response comes back
     xHTTPreq.onloadend = function(e) {
-      // Get the server's response body
-      console.log(xHTTPreq.responseText);
+      if (xHTTPreq.status != 200) {
+        console.log(xHTTPreq.responseText);
+      }
+      else{
+        console.log("Store successful")
+      }
     };
-  
-    // actually send the request
     xHTTPreq.send();
   }
 function retrieve(){
     //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
+    console.log("Retrieving selected instances")
     const xHTTPreq = new XMLHttpRequest();
     xHTTPreq.open("POST", "/retrieve");
     xHTTPreq.addEventListener("load", function() {
         if (xHTTPreq.status != 200) {
           console.log(xHTTPreq.responseText);
         }
+        else{
+          console.log("Retrieve successful")
+        }
       });
       xHTTPreq.send(studyUrl);
 }
-// Add event listener to the file input element
-document.getElementById("saveDICOM").addEventListener("click", store());
-document.getElementById("loadDICOM").addEventListener("click", retrieve);
+function studySearch(){
+  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
+  console.log("Searching for available studies")
+  const xHTTPreq = new XMLHttpRequest();
+  xHTTPreq.open("GET", "/search");
+  xHTTPreq.addEventListener("load", function() {
+      if (xHTTPreq.status != 200) {
+        console.log(xHTTPreq.responseText);
+      }
+      else{
+        let StudyDataAr = JSON.parse(xhr.responseText);
+        let StudyData = postcardDataAr[0];
+        console.log("We received " + xhr.responseText + " from the server");
+      }
+    });
+}
