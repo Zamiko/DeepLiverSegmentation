@@ -1,13 +1,15 @@
 // server.js
-// where your node app starts
 
-// init project
+//setting google auth permission
+//require('dotenv').config()
 const express = require("express");
-//const bodyParser = require("body-parser");
 const app = express();
 const fs = require("fs");
-//app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(bodyParser.json());
+
+/*const db = require('db')
+db.connect({
+  GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS
+})*/
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
@@ -20,6 +22,7 @@ const writeFile = util.promisify(fs.writeFile);
 // When specifying the output file, use an extension like ".multipart."
 // Then, parse the downloaded multipart file to get each individual
 // DICOM file.
+//FIXME: RETRIEVE: change this to reflect our local situation
 const fileName = 'study_file.multipart';
 
 const cloudRegion = 'us-west2';
@@ -33,7 +36,6 @@ app.get("/", (request, response) => {
 });
 
 
-//FIXME: for all three of these functions I may need to directly write the async fucntion here instead of writing it elsewhere and calling it here
 app.get("/store", async (req, res) => {
     const auth = await google.auth.getClient({
       scopes: ['https://www.googleapis.com/auth/cloud-platform'],
