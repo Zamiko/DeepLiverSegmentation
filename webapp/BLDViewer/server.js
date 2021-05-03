@@ -48,7 +48,7 @@ app.get("/store", async (req, res) => {
       },
     });
     //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
-    fileFolder = "webMain/DICOM_Data/C3N-00198/08-31-2009-CT ABDOMEN W IV CONTRAST-36291/6.000000-AbdPANC 2.0 B31f-92277"
+    fileFolder = "webMain/DICOM_Data/C4KC-KiTS/KiTS-00000/06-29-2003-threephaseabdomen-41748/5.000000-noncontrast-64798"
     fs.readdir(fileFolder, async (err, files) => {
       if (err) {
         console.error("Could not list the directory.", err);
@@ -109,27 +109,29 @@ app.post("/retrieve", async (req, res) => {
 });
 
 app.get("/search", async (req, res) => {
+  console.log("Beginning study search");
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
+  console.log()
   google.options({
     auth,
     headers: {Accept: 'application/dicom+json,multipart/related'},
   });
 
   const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = 'instances';
+  const dicomWebPath = 'studies';
   const request = {parent, dicomWebPath};
 
-  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForInstances(
+  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForStudies(
     request
   );
   //FIXME: will have to send this data back to the frontend for display
   //can do this through the response--I've done it before I believe, I just need to find the code
   console.log(`Found ${instances.data.length} instances:`);
   console.log(JSON.stringify(instances.data));
-  response.json(JSON.stringify(instances.data));
-  response.status(200);
+  res.json(instances.data);
+  res.status(200);
 });
 
 //need to get uID through the request
