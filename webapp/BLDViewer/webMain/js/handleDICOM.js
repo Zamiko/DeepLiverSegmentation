@@ -93,12 +93,7 @@ function studySearch(){
 
 
         let StudyDataString = xHTTPreq.responseText;
-        let StudyDataAr = StudyDataString.split("}")
-        //need to run through string until reaching "0010010"
-          //begin reading from 37 characters in to the next quotation mark
-            //discard if equal to Patient^Anonymous, otherwise, store in JSON as patient name
-          //studuid
-        // once we hit "}}" need to increase index so we're getting the next study
+        let StudyDataAr = StudyDataString.split("}");
         console.log("We received " + StudyDataAr + " from the server");
         //Ignore first 11
         patientName = '';
@@ -119,7 +114,8 @@ function studySearch(){
             allStudies.push(new Study(patientName, studyID));
           }
         }
-        console.log("Found studies " + JSON.stringify(allStudies))
+        console.log("Found studies " + JSON.stringify(allStudies));
+        displayStudies(allStudies);
       }
     });
   xHTTPreq.send();
@@ -128,43 +124,30 @@ function studySearch(){
 
 
 //Search bar implementation
+const studiesList = document.getElementById('studiesList')
 const searchBar = document.getElementById('searchBar');
-let studies = [];
 
 searchBar.addEventListener('keyup', (e) => {
   const searchString = e.target.value.toLowerCase();
+  console.log("searching for study " + searchString);
 
-  const filteredSeries = studies.filter((series) => {
+  const filteredSeries = allStudies.filter((series) => {
       return (
-          series.name.toLowerCase().includes(searchString) ||
-          series.house.toLowerCase().includes(searchString)
+          series.patientName.toLowerCase().includes(searchString) ||
+          series.studyID.toLowerCase().includes(searchString)
       );
   });
-  displayCharacters(filteredSeries);
+  displayStudies(filteredSeries);
 });
-
-//change this to be what search studies does
-const loadSeries = async () => {
-  try {
-      studies = await res.json();
-      displayCharacters(hpCharacters);
-  } catch (err) {
-      console.error(err);
-  }
-};
 
 //will need to edit this to reflect the studyJSON
 const displayStudies = (series) => {
   const htmlString = series
       .map((series) => {
           return `
-          <li class="character">
-              <h2>${character.name}</h2>
-              <p>House: ${character.house}</p>
-              <img src="${character.image}"></img>
-          </li>
+            <button /*onclick = retrieve(series.studyID)*/> <div>${series.patientName}</div> <div> Study ID: ${series.studyID}</div></button>
       `;
       })
       .join('');
-  charactersList.innerHTML = htmlString;
+  studiesList.innerHTML = htmlString;
 };
