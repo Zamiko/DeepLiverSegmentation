@@ -1,15 +1,8 @@
 // server.js
 
-//setting google auth permission
-//require('dotenv').config()
 const express = require("express");
 const app = express();
 const fs = require("fs");
-
-/*const db = require('db')
-db.connect({
-  GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS
-})*/
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
