@@ -17,14 +17,13 @@
       <div class="uploadStuff">
         <button class="button" id="saveDICOM" onclick=store()>test save</button>
         <button class="button" id="loadDICOM" onclick=retrieve()>test retrieve</button>
-        <button class="button" id="searchDICOM" onclick=studySearch()>test study search</button>
       </div>
     </div>
     <div class = "Overlay Shown" id = "StudySearch">
       <div id = "searchWrapper">
-        <input type="text" name="searchBar" id="searchBar" placeholder = "search for a series"/>
+        <input type="text" name="searchBar" id="searchBar" placeholder = "search for a study by ID or patient ID"/>
       </div>
-      <ul id = "studiesList"></ul>
+      <div id = "studiesList"></div>
     </div>
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
@@ -79,7 +78,8 @@
         </button>
       </div>
       <p id="statusLine"></p>
-      <div class="col-xs-9">
+      <!--FIXME: I think marking this as Hidden to begin with will have to be permanent, and we'll set it to shown later-->
+      <div class="col-xs-9 Hidden" id="divViewport">
         <div oncontextmenu="return false" class="cornerstone-enabled-image" unselectable="on"
           onselectstart="return false;" onmousedown="return false;">
           <div id="cornerstoneViewport"></div>
