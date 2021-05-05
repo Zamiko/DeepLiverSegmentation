@@ -13,10 +13,17 @@
   <div class="container">
     <div class="page-header">
       <h2>Liver Segmenter</h2>
+      <!--the hidden attribute is temporary, and only for aesthetic purpose-->
       <div class="uploadStuff">
-        <button class="button" id="saveDICOM">test save</button>
-        <button class="button" id="loadDICOM">test retrieve</button>
+        <button class="button" id="saveDICOM" onclick=store()>test save</button>
+        <button class="button" id="loadDICOM" onclick=retrieve()>test retrieve</button>
       </div>
+    </div>
+    <div class = "Overlay Shown" id = "StudySearch">
+      <div id = "searchWrapper">
+        <input type="text" name="searchBar" id="searchBar" placeholder = "search for a study by ID or patient ID"/>
+      </div>
+      <div id = "studiesList"></div>
     </div>
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
@@ -71,7 +78,8 @@
         </button>
       </div>
       <p id="statusLine"></p>
-      <div class="col-xs-9">
+      <!--FIXME: I think marking this as Hidden to begin with will have to be permanent, and we'll set it to shown later-->
+      <div class="col-xs-9 Hidden" id="divViewport">
         <div oncontextmenu="return false" class="cornerstone-enabled-image" unselectable="on"
           onselectstart="return false;" onmousedown="return false;">
           <div id="cornerstoneViewport"></div>
