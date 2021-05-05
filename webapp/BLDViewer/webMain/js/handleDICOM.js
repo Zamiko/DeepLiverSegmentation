@@ -77,6 +77,7 @@ function studySearch(){
         }
         console.log("Found studies " + JSON.stringify(allStudies));
         displayStudies(allStudies);
+        document.getElementById("StudySearch").style.display = "block";
       }
     });
   xHTTPreq.send();
@@ -85,6 +86,7 @@ function retrieveStudyHandler(studyID){
   studyUrl = studyID;
   //close studySearch display
   var studyOverlay = document.getElementById('StudySearch');
+  document.getElementById("StudySearch").style.display = "none";
   studyOverlay.classList.remove("Shown");
   studyOverlay.classList.add("Hidden");
   //this is maybe a bit weird, we'll have to remove this later

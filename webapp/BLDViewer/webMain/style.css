@@ -49,23 +49,24 @@ footer{
   cursor: pointer;
 }
 .Hidden {
+  display: none;
   opacity: 0;
 }
 .Shown {
+  display: block;
   opacity: 1;
 }
 .Overlay {
   position: fixed;
-  display: flex;
-  flex-direction: column;
+  display: none;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.7);
-  cursor: pointer;
+  background-color: rgba(0,0,0,1.0);
+  z-index: 2;
 }
 #searchBar{
   width: 90%;
