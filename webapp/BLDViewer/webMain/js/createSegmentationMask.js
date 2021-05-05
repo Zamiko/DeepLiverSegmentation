@@ -113,6 +113,21 @@ function createSeg() {
       console.log(objectUrl);
       console.log(window);
       window.open(objectUrl);
+      //need an http request again
+      /*const xHTTPreq = new XMLHttpRequest();
+      xHTTPreq.open("POST", "/saveSeg");
+      xHTTPreq.addEventListener("load", function() {
+        if (xHTTPreq.status != 200) {
+          console.log(xHTTPreq.responseText);
+        }
+        else{
+          console.log("Save successful")
+        }
+      });
+      var objJSON = {
+        "objectUrl": objectUrl
+      }
+      xHTTPreq.send(JSON.stringify(objJSON));*/
     })
     .catch(err => console.log(err));
 }
