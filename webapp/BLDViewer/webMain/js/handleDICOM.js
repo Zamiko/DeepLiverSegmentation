@@ -1,17 +1,21 @@
 //we'll have to change this later
-studyUrl = "49591";
+studyUrl = '';
+seriesUrl = '';
 let allStudies =[];
-
+let allSeries = [];
 //need to call studySearch on load
 studySearch();
-
-
 //this will create a json object representing the study
 function Study(patientName, studyID) {
   this.patientName = patientName;
   this.studyID = studyID;
 }
-
+//this will create a json object representing the series
+function Series(Type, Notes, seriesId) {
+  this.Type = Type;
+  this.Notes = Notes;
+  this.seriesId = seriesId;
+}
 
 function store() {
     //we're going to want to store the url of the study to store in the request we send
@@ -55,7 +59,7 @@ function studySearch(){
       else{
         let StudyDataString = xHTTPreq.responseText;
         let StudyDataAr = StudyDataString.split("}");
-        console.log("We received " + StudyDataAr + " from the server");
+        //console.log("We received " + StudyDataAr + " from the server");
         //Ignore first 11
         var patientName = '';
         var studyID =''; 
@@ -82,21 +86,87 @@ function studySearch(){
     });
   xHTTPreq.send();
 }
-function retrieveStudyHandler(studyID){
-  studyUrl = studyID;
-  //close studySearch display
-  var studyOverlay = document.getElementById('StudySearch');
-  document.getElementById("StudySearch").style.display = "none";
-  studyOverlay.classList.remove("Shown");
-  studyOverlay.classList.add("Hidden");
+function seriesSearch(studyID){
+  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
+  console.log("Searching for available series in study " + studyID);
+  const xHTTPreq = new XMLHttpRequest();
+  xHTTPreq.open("POST", "/searchSeries");
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  xHTTPreq.addEventListener("load", function() {
+      if (xHTTPreq.status != 200) {
+        console.log(xHTTPreq.responseText);
+      }
+      else{
+        let SeriesDataString = xHTTPreq.responseText;
+        let SeriesDataAr = SeriesDataString.split("}");
+        var Type = '';
+        var Notes ='';//sorry didn't know what else to call this
+        var seriesId = ''; 
+        for(i = 0; i < SeriesDataAr.length; i++){
+          TypeIndex = SeriesDataAr[i].indexOf('00080060');
+          NotesIndex = SeriesDataAr[i].indexOf('0008103E');
+          seriesIdIndex = SeriesDataAr[i].indexOf('0020000E');
+          if(TypeIndex!=-1){
+            substr = SeriesDataAr[i].split("\"");
+            Type = substr[9];
+          }
+          if(NotesIndex!=-1){
+            substr = SeriesDataAr[i].split("\"");
+            Notes = substr[9];
+          }
+          if(seriesIdIndex!=-1){
+            substr = SeriesDataAr[i].split("\"");
+            seriesId = substr[9];
+          }
+          if(SeriesDataAr[i] === null || SeriesDataAr[i] === ''){
+            //push a new JSON object to the array, with the patientName and studID
+            allSeries.push(new Series(Type, Notes, seriesId));
+          }
+        }
+        console.log("Found series " + JSON.stringify(allSeries));
+        displaySeries(allSeries);
+        document.getElementById("SeriesSearch").style.display = "block";
+      }
+    });
+    var studyIDJSON = {
+      "StudyUID": studyID
+    }
+    xHTTPreq.send(JSON.stringify(studyIDJSON));
+}
+//handler for the series searchbar
+function retrieveSeriesHandler(seriesID){
+  seriesUrl = seriesID;
+  //close seriesSearch display
+  var seriesOverlay = document.getElementById('SeriesSearch');
+  console.log("Class list is " + seriesOverlay.classList);
+  seriesOverlay.style.display = "none";
+  seriesOverlay.classList.remove("Shown");
+  seriesOverlay.classList.add("Hidden");
   //this is maybe a bit weird, we'll have to remove this later
   var vpDiv = document.getElementById('divViewport');
   vpDiv.classList.remove("Hidden");
   vpDiv.classList.add("Shown");
-  //call retrieve
-  console.log("Retrieving study " + studyUrl);
+  //retrieve instances in the series
+  console.log("Retrieving instances in series " + seriesUrl);
 }
-//Search bar implementation
+
+//handler for the study searchbar
+function retrieveStudyHandler(studyID){
+  studyUrl = studyID;
+  //close studySearch display
+  var studyOverlay = document.getElementById('StudySearch');
+  studyOverlay.style.display = "none";
+  studyOverlay.classList.remove("Shown");
+  studyOverlay.classList.add("Hidden");
+  //this is maybe a bit weird, we'll have to remove this later
+  var seriesOverlay = document.getElementById('SeriesSearch');
+  seriesOverlay.classList.remove("Hidden");
+  seriesOverlay.classList.add("Shown");
+  //get the series
+  console.log("Retrieving series in study " + studyUrl);
+  seriesSearch(studyID);
+
+}
 const studiesList = document.getElementById('studiesList')
 const searchBar = document.getElementById('searchBar');
 
@@ -123,5 +193,36 @@ const displayStudies = (series) => {
         retrieveStudyHandler(element.studyID)
       });
       studiesList.append(buttonElement);
+  });  
+};
+
+//Search bar implementation
+const seriesList = document.getElementById('seriesList')
+const searchBarSeries = document.getElementById('searchBarSeries');
+
+searchBarSeries.addEventListener('keyup', (e) => {
+  const searchStringSeries = e.target.value.toLowerCase();
+  console.log("searching for series " + searchStringSeries);
+
+  const filteredInstances = allSeries.filter((instances) => {
+      return (
+          instances.Type.toLowerCase().includes(searchStringSeries) ||
+          instances.Notes.toLowerCase().includes(searchStringSeries) ||
+          instances.seriesId.toLowerCase().includes(searchStringSeries)
+      );
+  });
+  displaySeries(filteredInstances);
+});
+
+const displaySeries = (instances) => {
+  seriesList.innerHTML = "";
+  instances.forEach(el => {
+    var buttonEl = document.createElement('button');
+    buttonEl.classList = "button";
+    buttonEl.innerHTML = `<div class="type">Type: ${el.Type}</div><div class="seriesID">Series ID: ${el.seriesId}</div><div class="notes">${el.Notes}</div>`;
+    buttonEl.addEventListener('click', function(){
+        retrieveSeriesHandler(el.seriesId)
+      });
+      seriesList.append(buttonEl);
   });  
 };
