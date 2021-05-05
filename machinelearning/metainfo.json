@@ -1,0 +1,184 @@
+{
+  "ContentCreatorName": "LeoMartinez",
+  "ClinicalTrialSeriesID": "Session1",
+  "ClinicalTrialTimePointID": "1",
+  "SeriesDescription": "Segmentation",
+  "SeriesNumber": "300",
+  "InstanceNumber": "1",
+  "BodyPartExamined": "Liver",
+  "segmentAttributes": [
+    [
+      {
+        "labelID": 1,
+        "SegmentDescription": "Liver Couinaud Region 1",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          221,
+          130,
+          101
+        ]
+      },
+      {
+        "labelID": 2,
+        "SegmentDescription": "Liver Couinaud Region 2",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          223,
+          102,
+          102
+        ]
+      },
+      {
+        "labelID": 3,
+        "SegmentDescription": "Liver Couinaud Region 3",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          209,
+          222,
+          101
+        ]
+      },
+      {
+        "labelID": 4,
+        "SegmentDescription": "Liver Couinaud Region 4",
+        "SegmentAlgorithmType": "SEMIAUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          128,
+          222,
+          101
+        ]
+      },
+      {
+        "labelID": 5,
+        "SegmentDescription": "Liver Couinaud Region 5",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          101,
+          222,
+          199
+        ]
+      },
+      {
+        "labelID": 6,
+        "SegmentDescription": "Liver Couinaud Region 6",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          101,
+          133,
+          222
+        ]
+      },
+      {
+        "labelID": 7,
+        "SegmentDescription": "Liver Couinaud Region 7",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          144,
+          101,
+          222
+        ]
+      },
+      {
+        "labelID": 8,
+        "SegmentDescription": "Liver Couinaud Region 8",
+        "SegmentAlgorithmType": "AUTOMATIC",
+        "SegmentAlgorithmName": "BananaLeafDevelopment",
+        "SegmentedPropertyCategoryCodeSequence": {
+          "CodeValue": "123037004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Anatomical Structure"
+        },
+        "SegmentedPropertyTypeCodeSequence": {
+          "CodeValue": "10200004",
+          "CodingSchemeDesignator": "SCT",
+          "CodeMeaning": "Liver"
+        },
+        "recommendedDisplayRGBValue": [
+          222,
+          101,
+          200
+        ]
+      }
+    ]
+  ],
+  "ContentLabel": "SEGMENTATION",
+  "ContentDescription": "Image segmentation",
+  "ClinicalTrialCoordinatingCenterName": "dcmqi"
+}
