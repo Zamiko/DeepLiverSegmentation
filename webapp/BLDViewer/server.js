@@ -19,6 +19,37 @@ const projectId = 'liversegmentationwebapp';
 const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
 
+
+function setRetrieveOptions(auth) {
+  google.options({
+    auth,
+    headers:  {
+      Accept: 'application/dicom; transfer-syntax=*',
+    },
+    responseType: 'arraybuffer',
+  });
+}
+
+// Right now retrieve is too slow to show the newest loaded series because we have to write every time
+// TODO Delay until finished writing and then display 
+function deletePreviousDICOMs() {
+  fileFolder = "webMain/dicoms/";
+  fs.readdir(fileFolder, async (err, files) => {
+    if (err) {
+      console.error("Could not list the directory.", err);
+      process.exit(1);
+    }
+    files.forEach(async (file, index) => {
+      filePath = fileFolder + "/" + file;
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  });
+}
+
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
@@ -74,8 +105,8 @@ app.post("/retrieve", async (req, res) => {
   // Search options setting
   google.options({
     auth,
-    // 00200032 ID for Image Postion Patient
-    // 0020000E ID for Series Instance UID in Referenced Series Sequence
+    // 00200032 ID for Image Postion Patient in CT DICOM
+    // 0020000E ID for Series Instance UID in Referenced Series Sequence in SEG DICOM
     params:{includefield: '00200032, 0020000E'},
     headers: {
       Accept: 'application/dicom+json, multipart/related'
@@ -97,16 +128,19 @@ app.post("/retrieve", async (req, res) => {
 
   console.log(`Found ${seriesInstances.data.length} instances:`);
 
-  var SOPInstanceUIDs = [];
+  var SOPInstances = [];
   seriesInstances.data.forEach((instance, index) => {
-    if (index < 10)
-      console.log(instance);
-    SOPInstanceUIDs.push(instance[`00080018`].Value[0]);
+    SOPInstances.push(instance);
+  });
+
+  SOPInstances.sort((a, b) => {
+    if (a[`00200032`].Value[2] < b[`00200032`].Value[2]) return 1;
+    if (a[`00200032`].Value[2] == b[`00200032`].Value[2]) return 0;
+    return -1;
   });
   setRetrieveOptions(auth);
-
-  SOPInstanceUIDs.forEach(async (SOPInstanceUID, index) => {
-    const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstanceUID}`;
+  SOPInstances.forEach(async (SOPInstance, index) => {
+    const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
     const instanceReq = { parent, dicomWebPath };
 
     const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
@@ -125,7 +159,7 @@ app.get("/search", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  console.log()
+  // console.log()
   google.options({
     auth,
     headers: {Accept: 'application/dicom+json,multipart/related'},
@@ -149,7 +183,6 @@ app.post("/searchSeries", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  console.log()
   google.options({
     auth,
     headers: {Accept: 'application/dicom+json,multipart/related'},
@@ -217,12 +250,3 @@ var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
 
-function setRetrieveOptions(auth) {
-  google.options({
-    auth,
-    headers:  {
-      Accept: 'application/dicom; transfer-syntax=*',
-    },
-    responseType: 'arraybuffer',
-  });
-}
