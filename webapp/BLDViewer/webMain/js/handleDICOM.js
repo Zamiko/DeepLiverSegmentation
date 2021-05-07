@@ -40,10 +40,12 @@ function store() {
     xHTTPreq.open("POST", "/retrieve");
     xHTTPreq.addEventListener("load", function () {
       if (xHTTPreq.status != 200) {
+        console.log("Retrieve faileed");
         console.log(xHTTPreq.responseText);
       } else {
         console.log("Retrieve successful");
-        console.log(parseInt(xHTTPreq.responseText));
+        console.log(xHTTPreq.responseText);
+        console.log(parseInt(xHTTPreq.responseText.substring(1, xHTTPreq.responseText.length-1)));
       }
     });
     
