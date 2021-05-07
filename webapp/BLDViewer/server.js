@@ -74,6 +74,9 @@ app.post("/retrieve", async (req, res) => {
   // Search options setting
   google.options({
     auth,
+    // 00200032 ID for Image Postion Patient
+    // 0020000E ID for Series Instance UID in Referenced Series Sequence
+    params:{includefield: '00200032, 0020000E'},
     headers: {
       Accept: 'application/dicom+json, multipart/related'
     },
@@ -95,8 +98,9 @@ app.post("/retrieve", async (req, res) => {
   console.log(`Found ${seriesInstances.data.length} instances:`);
 
   var SOPInstanceUIDs = [];
-  seriesInstances.data.forEach(instance => {
-    console.log(instance);
+  seriesInstances.data.forEach((instance, index) => {
+    if (index < 10)
+      console.log(instance);
     SOPInstanceUIDs.push(instance[`00080018`].Value[0]);
   });
   setRetrieveOptions(auth);
@@ -111,7 +115,7 @@ app.post("/retrieve", async (req, res) => {
     const fileBytes = Buffer.from(instance.data);
     const fileName = "webMain/dicoms/"+ (index + 1) + ".dcm";
     await writeFile(fileName, fileBytes);
-  })
+  });
   res.status(200);
   res.json(JSON.stringify(seriesInstances.data.length));
 });
