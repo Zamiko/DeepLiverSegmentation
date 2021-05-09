@@ -68,13 +68,25 @@ footer{
   background-color: rgba(0,0,0,1.0);
   z-index: 2;
 }
-#searchBar{
+#searchBar, #searchBarSeries{
   width: 90%;
   padding: 10px;
   margin: 15 px;
 }
-.patientName, .studyID{
+.patientName, .studyID, .type, .notes, .studyID{
   width: 90%;
   padding: 5px;
   margin: 5px;
+}
+#StudySearch{
+  position: fixed;
+  z-index: 9;
+}
+#SeriesSearch{
+  position: fixed;
+  z-index: 8;
+}
+#seriesList, #studiesList{
+  overflow-x: hidden;
+  overflow-y: auto;
 }

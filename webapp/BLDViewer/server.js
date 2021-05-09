@@ -1,27 +1,54 @@
 // server.js
-
 const express = require("express");
 const app = express();
 const fs = require("fs");
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
+app.use(express.json());
 
 //was trying to implement all this via a python script--however have to figure out authentication for that
 const {google} = require('googleapis');
 const healthcare = google.healthcare('v1');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);
-// When specifying the output file, use an extension like ".multipart."
-// Then, parse the downloaded multipart file to get each individual
-// DICOM file.
-//FIXME: RETRIEVE: change this to reflect our local situation
-const fileName = 'study_file.multipart';
+
 
 const cloudRegion = 'us-west2';
 const projectId = 'liversegmentationwebapp';
 const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
+
+
+function setRetrieveOptions(auth) {
+  google.options({
+    auth,
+    headers:  {
+      Accept: 'application/dicom; transfer-syntax=*',
+    },
+    responseType: 'arraybuffer',
+  });
+}
+
+// Right now retrieve is too slow to show the newest loaded series because we have to write every time
+// TODO Delay until finished writing and then display 
+function deletePreviousDICOMs() {
+  fileFolder = "webMain/dicoms/";
+  fs.readdir(fileFolder, async (err, files) => {
+    if (err) {
+      console.error("Could not list the directory.", err);
+      process.exit(1);
+    }
+    files.forEach(async (file, index) => {
+      filePath = fileFolder + "/" + file;
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  });
+}
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
@@ -41,7 +68,7 @@ app.get("/store", async (req, res) => {
       },
     });
     //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
-    fileFolder = "webMain/DICOM_Data/C4KC-KiTS/KiTS-00000/06-29-2003-threephaseabdomen-41748/5.000000-noncontrast-64798"
+    fileFolder = "webMain/dicoms/"
     fs.readdir(fileFolder, async (err, files) => {
       if (err) {
         console.error("Could not list the directory.", err);
@@ -69,36 +96,62 @@ app.get("/store", async (req, res) => {
     });
   }
 );
-//FIXME: we can store the information of the study we want to retrieve in request and pass it to the function
+
 app.post("/retrieve", async (req, res) => {
+  console.log("Beginning retrieve");
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
+  // Search options setting
   google.options({
     auth,
+    // 00200032 ID for Image Postion Patient in CT DICOM
+    // 0020000E ID for Series Instance UID in Referenced Series Sequence in SEG DICOM
+    params:{includefield: '00200032, 0020000E'},
     headers: {
-      Accept: 'multipart/related; type=application/dicom; transfer-syntax=*',
+      Accept: 'application/dicom+json, multipart/related'
     },
-    responseType: 'arraybuffer',
   });
 
-  //studyUid will be stored in req
-  //possible FIXME: may have to convert body to string
-  studyUid = req.body;
+  const { StudyInstanceUID, SeriesInstanceUID } = req.body;
+  console.log(req.body);
   const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${studyUid}`;
-  const request = {parent, dicomWebPath};
+  const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances`;
+  const request = { parent, dicomWebPath };
 
-  const study = await healthcare.projects.locations.datasets.dicomStores.studies.retrieveStudy(
+  const seriesInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
     request
-  );
+  ).catch(error => {
+    console.log(error);
+    res.status(404);
+  });
 
-  const fileBytes = Buffer.from(study.data);
+  console.log(`Found ${seriesInstances.data.length} instances:`);
 
-  await writeFile(fileName, fileBytes);
-  console.log(
-    `Retrieved study and saved to ${fileName} in current directory`
-  );
+  var SOPInstances = [];
+  seriesInstances.data.forEach((instance, index) => {
+    SOPInstances.push(instance);
+  });
+
+  SOPInstances.sort((a, b) => {
+    if (a[`00200032`].Value[2] < b[`00200032`].Value[2]) return 1;
+    if (a[`00200032`].Value[2] == b[`00200032`].Value[2]) return 0;
+    return -1;
+  });
+  setRetrieveOptions(auth);
+  SOPInstances.forEach(async (SOPInstance, index) => {
+    const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
+    const instanceReq = { parent, dicomWebPath };
+
+    const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
+      instanceReq
+    );
+    const fileBytes = Buffer.from(instance.data);
+    const fileName = "webMain/dicoms/"+ (index + 1) + ".dcm";
+    await writeFile(fileName, fileBytes);
+  });
+  res.status(200);
+  res.json(JSON.stringify(seriesInstances.data.length));
 });
 
 app.get("/search", async (req, res) => {
@@ -106,7 +159,7 @@ app.get("/search", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  console.log()
+  // console.log()
   google.options({
     auth,
     headers: {Accept: 'application/dicom+json,multipart/related'},
@@ -119,8 +172,30 @@ app.get("/search", async (req, res) => {
   const instances = await healthcare.projects.locations.datasets.dicomStores.searchForStudies(
     request
   );
-  //FIXME: will have to send this data back to the frontend for display
-  //can do this through the response--I've done it before I believe, I just need to find the code
+  console.log(`Found ${instances.data.length} instances:`);
+  console.log(JSON.stringify(instances.data));
+  res.json(instances.data);
+  res.status(200);
+});
+
+app.post("/searchSeries", async (req, res) => {
+  console.log("Beginning study search");
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    headers: {Accept: 'application/dicom+json,multipart/related'},
+  });
+  const {StudyUID} = req.body;
+  console.log("retrieving from " + StudyUID);
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${StudyUID}/series`;
+  const request = {parent, dicomWebPath};
+
+  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForSeries(
+    request
+  );
   console.log(`Found ${instances.data.length} instances:`);
   console.log(JSON.stringify(instances.data));
   res.json(instances.data);
@@ -143,7 +218,21 @@ app.get("/delete", async (req, res) => {
   );
   console.log('Deleted DICOM study');
 });
-
+//this will be used to save segmentation files locally
+app.post("/saveSeg", (req, res)=>{
+  console.log(req.body);
+  const {objectUrl} = req.body;
+  console.log("Saving " + objectUrl);
+  filePlace = "/dicoms/";
+  filePlace + `${objectUrl}`
+  console.log(" to " + filePlace);
+  fs.writeFile(filePlace, objectUrl, function(err) {
+    if (err) {
+       return console.error(err);
+    }
+    console.log("Data written successfully");
+ });
+});
 
 //check for invalid function calls
 app.all("*", function(request, response) {
@@ -160,3 +249,4 @@ const cleanseString = function(string) {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
+

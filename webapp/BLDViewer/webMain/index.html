@@ -16,7 +16,6 @@
       <!--the hidden attribute is temporary, and only for aesthetic purpose-->
       <div class="uploadStuff">
         <button class="button" id="saveDICOM" onclick=store()>test save</button>
-        <button class="button" id="loadDICOM" onclick=retrieve()>test retrieve</button>
       </div>
     </div>
     <div class = "Overlay Shown" id = "StudySearch">
@@ -24,6 +23,12 @@
         <input type="text" name="searchBar" id="searchBar" placeholder = "search for a study by ID or patient ID"/>
       </div>
       <div id = "studiesList"></div>
+    </div>
+    <div class = "Overlay Shown" id = "SeriesSearch">
+      <div id = "SeriesSearchWrapper">
+        <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder = "search for a series"/>
+      </div>
+      <div id = "seriesList"></div>
     </div>
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
