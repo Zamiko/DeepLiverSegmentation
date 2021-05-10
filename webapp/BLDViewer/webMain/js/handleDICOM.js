@@ -84,6 +84,7 @@ function studySearch() {
   });
   xHTTPreq.send();
 }
+
 function seriesSearch(studyID) {
   //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
   console.log("Searching for available series in study " + studyID);
@@ -131,6 +132,7 @@ function seriesSearch(studyID) {
   }
   xHTTPreq.send(JSON.stringify(studyIDJSON));
 }
+
 //handler for the series searchbar
 function retrieveSeriesHandler(seriesID) {
   seriesUrl = seriesID;
