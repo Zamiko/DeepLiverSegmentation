@@ -68,28 +68,15 @@ function studySearch() {
       console.log(xHTTPreq.responseText);
     }
     else {
-      let StudyDataString = xHTTPreq.responseText;
-      let StudyDataAr = StudyDataString.split("}");
-      //console.log("We received " + StudyDataAr + " from the server");
-      //Ignore first 11
+      // console.log(JSON.parse(xHTTPreq.responseText));
+      let studiesReceived = JSON.parse(xHTTPreq.responseText);
       var patientName = '';
       var studyID = '';
-      for (i = 12; i < StudyDataAr.length; i++) {
-        pnIndex = StudyDataAr[i].indexOf('Alphabetic');
-        IDIndex = StudyDataAr[i].indexOf('UI\",\"Value');
-        if (pnIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          patientName = substr[11];
-        }
-        if (IDIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          studyID = substr[9];
-        }
-        if (StudyDataAr[i] === null || StudyDataAr[i] === '') {
-          //push a new JSON object to the array, with the patientName and studID
+      studiesReceived.forEach(function (study) {
+          patientName = study[`00100010`].Value[0][`Alphabetic`];
+          studyID = study[`0020000D`].Value[0];
           allStudies.push(new Study(patientName, studyID));
-        }
-      }
+        });
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
       document.getElementById("StudySearch").style.display = "block";
