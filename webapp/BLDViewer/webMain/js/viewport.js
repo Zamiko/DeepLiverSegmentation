@@ -25,7 +25,6 @@ var props = {
   activeTool: "Pan"
 };
 var app = React.createElement(CornerstoneViewport, props, null);
-// ReactDOM.render(app, document.getElementById("cornerstoneViewport"));
 
 function changeSeries(numInstances) {
   var newImageIds = [];

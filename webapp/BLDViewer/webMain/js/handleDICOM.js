@@ -76,7 +76,6 @@ function studySearch() {
       let StudyDataAr = StudyDataString.split("}");
       //console.log("We received " + StudyDataAr + " from the server");
       //Ignore first 11
-      //FIXME: we want Patient Name(00100010), MRN(00100020), Accession Number (00080050), Scan Date (00080020)
       var patientName = '';
       var studyID = '';
       var accessionNumber = '';
@@ -90,13 +89,16 @@ function studySearch() {
         IDIndex = StudyDataAr[i].indexOf('0020000D');
         if (anIndex != -1) {
           substr = StudyDataAr[i].split("\"");
-          //FIXME: add check here to see if index exists
-          accessionNumber = substr[9];
+          if(substr.length < 10){
+            accessionNumber = "N/A";
+          }else{
+            accessionNumber = substr[9];
+          }
         }
         if (sdIndex != -1) {
           substr = StudyDataAr[i].split("\"");
-          scanDate = substr[9];
-          //FIXME: add some code to format this like a date?
+          var tempString = substr[9];
+          scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
         }
         if (pnIndex != -1) {
           substr = StudyDataAr[i].split("\"");
@@ -177,11 +179,6 @@ function retrieveSeriesHandler(seriesID) {
   seriesOverlay.style.display = "none";
   seriesOverlay.classList.remove("Shown");
   seriesOverlay.classList.add("Hidden");
-  //FIXME: check for viewport bug, if still around, need to remove this and change viewport z-index instead
-  var vpDiv = document.getElementById('divViewport');
-  vpDiv.classList.remove("Hidden");
-  vpDiv.classList.add("Shown");
-  //retrieve instances in the series
   console.log("Retrieving instances in series " + seriesUrl);
   retrieve();
 }
