@@ -20,15 +20,15 @@
         <button class="button" id="seriesSelect" onclick="SeriesSelect()">Select Series</button>
       </div>
     </div>
-    <div class = "Overlay Shown" id = "StudySearch">
-      <div id = "searchWrapper">
-        <input type="text" name="searchBar" id="searchBar" placeholder = "search for a study by ID or patient ID"/>
+    <div class="Overlay Shown" id="StudySearch">
+      <div id="searchWrapper">
+        <input type="text" name="searchBar" id="searchBar" placeholder="search for a study by ID or patient ID" />
       </div>
       <table id="studiesList"></table>
     </div>
-    <div class = "Overlay Shown" id = "SeriesSearch">
-      <div id = "SeriesSearchWrapper">
-        <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder = "search for a series"/>
+    <div class="Overlay Shown" id="SeriesSearch">
+      <div id="SeriesSearchWrapper">
+        <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder="search for a series" />
       </div>
       <table id="seriesList"></table>
     </div>
@@ -52,6 +52,9 @@
       <div class="Hidden" id="segOptions">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
         <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
+        <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
+          Load Segmentation
+        </button>
         <label for="switchSegment">Active Segment: </label><select id="switchSegment" onchange="changeSegment()">
         </select>
         <label for="switchActiveLabelmap">Active Labelmap: </label><select id="switchActiveLabelmap"
@@ -64,24 +67,15 @@
         <button class="button set-tool-mode" data-action="Brush">
           Brush
         </button>
-        <button class="button set-brush-size" data-action="decrement">
-          -
-        </button>
-        <button class="button set-brush-size" data-action="increment">
-          +
-        </button>
-        <button class="button set-tool-mode" data-action="FreehandScissors">
+        <input type="range" class="brush-slider" min="1" max="50" value="10">
+        <!-- <button class="button set-tool-mode" data-action="FreehandScissors">
           FreehandScissors
-        </button>
+        </button> -->
         <button class="button control-history" data-action="undo">
           Undo
         </button>
         <button class="button control-history" data-action="redo">
           Redo
-        </button>
-        <br>
-        <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
-          Load Segmentation
         </button>
       </div>
       <p id="statusLine"></p>
@@ -112,7 +106,7 @@
   <script src="./js/initInterface.js"></script>
   <script src="./js/initCornerstone.js"></script>
   <script src="./js/dcmjs.js"></script>
- 
+
   <script src="./js/displaySegmentationMask.js"></script>
   <script src="./js/createSegmentationMask.js"></script>
   <!-- <script srve="https://unpkg.com/dcmjs@0.18.3/build/dcmjs.js"></script> -->

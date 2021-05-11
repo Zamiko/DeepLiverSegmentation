@@ -1,8 +1,10 @@
+
 //we'll have to change this later
 studyUrl = '';
 seriesUrl = '';
 let allStudies = [];
 let allSeries = [];
+let jsontest = '';
 //need to call studySearch on load
 studySearch();
 //this will create a json object representing the study
@@ -46,8 +48,8 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var numInstances = parseInt(xHTTPreq.responseText.substring(1, xHTTPreq.responseText.length - 1));
-      changeSeries(numInstances);
+      var numInstancesJSON = JSON.parse(xHTTPreq.responseText);
+      changeSeries(numInstancesJSON.numInstances);
     }
   });
 
@@ -72,50 +74,31 @@ function studySearch() {
     }
     else {
       allStudies = [];
+      let studiesReceived = JSON.parse(xHTTPreq.responseText);
       let StudyDataString = xHTTPreq.responseText;
       let StudyDataAr = StudyDataString.split("}");
       //console.log("We received " + StudyDataAr + " from the server");
       //Ignore first 11
       var patientName = '';
       var studyID = '';
+
       var accessionNumber = '';
       var scanDate = '';
       var MRN = '';
-      for (i = 12; i < StudyDataAr.length; i++) {
-        anIndex = StudyDataAr[i].indexOf('00080050');
-        sdIndex = StudyDataAr[i].indexOf('00080020');
-        pnIndex = StudyDataAr[i].indexOf('00100010');
-        mrnIndex = StudyDataAr[i].indexOf('00100020');
-        IDIndex = StudyDataAr[i].indexOf('0020000D');
-        if (anIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          if(substr.length < 10){
-            accessionNumber = "N/A";
-          }else{
-            accessionNumber = substr[9];
+      studiesReceived.forEach(function (study) {
+        console.log(study);
+        patientName = study[`00100010`].Value[0][`Alphabetic`];
+        studyID = study[`0020000D`].Value[0];
+        if (study[`00080050`].Value) {
+          accessionNumber = study[`00080050`].Value[0];
+          } else {
+            accessionNumber = '';
           }
-        }
-        if (sdIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          var tempString = substr[9];
-          scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
-        }
-        if (pnIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          patientName = substr[11];
-        }
-        if (mrnIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          MRN = substr[9];
-        }
-        if (IDIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          studyID = substr[9];
-        }
-        if (StudyDataAr[i] === null || StudyDataAr[i] === '') {
-          allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
-        }
-      }
+
+        scanDate = study[`00080020`].Value[0];
+        MRN = study[`00100020`].Value[0];
+        allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
+      });
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
       document.getElementById("StudySearch").style.display = "block";
@@ -133,33 +116,42 @@ function seriesSearch(studyID) {
       console.log(xHTTPreq.responseText);
     }
     else {
+      let studySeries = JSON.parse(xHTTPreq.responseText);
+
       let SeriesDataString = xHTTPreq.responseText;
-      let SeriesDataAr = SeriesDataString.split("}");
-      var Modality = '';
-      var Notes = '';
-      var seriesId = '';
-      allSeries = [];
-      for (i = 0; i < SeriesDataAr.length; i++) {
-        ModIndex = SeriesDataAr[i].indexOf('00080060');
-        NotesIndex = SeriesDataAr[i].indexOf('0008103E');
-        seriesIdIndex = SeriesDataAr[i].indexOf('0020000E');
-        if (ModIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          Modality = substr[9];
-        }
-        if (NotesIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          Notes = substr[9];
-        }
-        if (seriesIdIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          seriesId = substr[9];
-        }
-        if (SeriesDataAr[i] === null || SeriesDataAr[i] === '') {
-          //push a new JSON object to the array, with the patientName and studID
-          allSeries.push(new Series(Modality, Notes, seriesId));
-        }
-      }
+      // let SeriesDataAr = SeriesDataString.split("}");
+      var seriesModality = '';
+      var seriesDescription = '';//sorry didn't know what else to call this
+      var seriesInstanceUID = '';
+
+      studySeries.forEach((series) => {
+        seriesModality = series[`00080060`].Value[0];
+        seriesDescription = series[`0008103E`].Value[0];
+        seriesInstanceUID = series[`0020000E`].Value[0];
+        allSeries.push(new Series(seriesModality, seriesDescription, seriesInstanceUID));
+      });
+
+      // for (i = 0; i < SeriesDataAr.length; i++) {
+      //   TypeIndex = SeriesDataAr[i].indexOf('00080060');
+      //   NotesIndex = SeriesDataAr[i].indexOf('0008103E');
+      //   seriesIdIndex = SeriesDataAr[i].indexOf('0020000E');
+      //   if (TypeIndex != -1) {
+      //     substr = SeriesDataAr[i].split("\"");
+      //     seriesType = substr[9];
+      //   }
+      //   if (NotesIndex != -1) {
+      //     substr = SeriesDataAr[i].split("\"");
+      //     seriesDescription = substr[9];
+      //   }
+      //   if (seriesIdIndex != -1) {
+      //     substr = SeriesDataAr[i].split("\"");
+      //     seriesInstanceUID = substr[9];
+      //   }
+      //   if (SeriesDataAr[i] === null || SeriesDataAr[i] === '') {
+      //     //push a new JSON object to the array, with the patientName and studID
+      //     allSeries.push(new Series(seriesType, seriesDescription, seriesInstanceUID));
+      //   }
+      // }
       console.log("Found series " + JSON.stringify(allSeries));
       displaySeries(allSeries);
       document.getElementById("SeriesSearch").style.display = "block";
@@ -210,9 +202,9 @@ searchBar.addEventListener('keyup', (e) => {
   const filteredSeries = allStudies.filter((series) => {
     return (
       series.patientName.toLowerCase().includes(searchString) ||
-      series.studyID.toLowerCase().includes(searchString)||
-      series.MRN.toLowerCase().includes(searchString)||
-      series.accessionNumber.toLowerCase().includes(searchString)||
+      series.studyID.toLowerCase().includes(searchString) ||
+      series.MRN.toLowerCase().includes(searchString) ||
+      series.accessionNumber.toLowerCase().includes(searchString) ||
       series.scanDate.toLowerCase().includes(searchString)
     );
   });
@@ -250,7 +242,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesList.innerHTML =  '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
+  seriesList.innerHTML = '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
   instances.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
@@ -261,7 +253,7 @@ const displaySeries = (instances) => {
   });
 };
 
-function StudySelect(){
+function StudySelect() {
   console.log("re-displaying study search");
   var studyOverlay = document.getElementById('StudySearch');
   studyOverlay.classList.remove("Hidden");
@@ -269,7 +261,7 @@ function StudySelect(){
   studySearch();
 }
 
-function SeriesSelect(){
+function SeriesSelect() {
   console.log("re-displaying series search");
   var seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
