@@ -68,16 +68,6 @@ footer{
   background-color: rgba(0,0,0,1.0);
   z-index: 2;
 }
-#searchBar, #searchBarSeries{
-  width: 90%;
-  padding: 10px;
-  margin: 15 px;
-}
-.patientName, .studyID, .type, .notes, .studyID{
-  width: 90%;
-  padding: 5px;
-  margin: 5px;
-}
 #StudySearch{
   position: fixed;
   z-index: 9;
@@ -89,4 +79,32 @@ footer{
 #seriesList, #studiesList{
   overflow-x: hidden;
   overflow-y: auto;
+}
+#searchBar, #searchBarSeries {
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#studiesList, #seriesList {
+  border-collapse: collapse;
+  width: 100%; 
+  border: 1px solid #ddd;
+  font-size: 18px;
+}
+
+#studiesList th, #studiesList td, #seriesList th, #seriesList td{
+  text-align: left;
+  padding: 12px;
+}
+
+#studiesList tr, #seriesList tr {
+  border-bottom: 1px solid #ddd;
+}
+
+#studiesList tr.header, #studiesList tr:hover, #seriesList tr.header, #seriesList tr:hover {
+  background-color: #f1f1f1;
+  color: #000000;
 }

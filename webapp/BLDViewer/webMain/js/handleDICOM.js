@@ -6,8 +6,11 @@ let allSeries = [];
 //need to call studySearch on load
 studySearch();
 //this will create a json object representing the study
-function Study(patientName, studyID) {
+function Study(accessionNumber, scanDate, patientName, MRN, studyID) {
+  this.accessionNumber = accessionNumber;
+  this.scanDate = scanDate;
   this.patientName = patientName;
+  this.MRN = MRN;
   this.studyID = studyID;
 }
 //this will create a json object representing the series
@@ -68,15 +71,48 @@ function studySearch() {
       console.log(xHTTPreq.responseText);
     }
     else {
-      // console.log(JSON.parse(xHTTPreq.responseText));
-      let studiesReceived = JSON.parse(xHTTPreq.responseText);
+      let StudyDataString = xHTTPreq.responseText;
+      let StudyDataAr = StudyDataString.split("}");
+      //console.log("We received " + StudyDataAr + " from the server");
+      //Ignore first 11
+      //FIXME: we want Patient Name(00100010), MRN(00100020), Accession Number (00080050), Scan Date (00080020)
       var patientName = '';
       var studyID = '';
-      studiesReceived.forEach(function (study) {
-          patientName = study[`00100010`].Value[0][`Alphabetic`];
-          studyID = study[`0020000D`].Value[0];
-          allStudies.push(new Study(patientName, studyID));
-        });
+      var accessionNumber = '';
+      var scanDate = '';
+      var MRN = '';
+      for (i = 12; i < StudyDataAr.length; i++) {
+        anIndex = StudyDataAr[i].indexOf('00080050');
+        sdIndex = StudyDataAr[i].indexOf('00080020');
+        pnIndex = StudyDataAr[i].indexOf('00100010');
+        mrnIndex = StudyDataAr[i].indexOf('00100020');
+        IDIndex = StudyDataAr[i].indexOf('0020000D');
+        if (anIndex != -1) {
+          substr = StudyDataAr[i].split("\"");
+          //FIXME: add check here to see if index exists
+          accessionNumber = substr[9];
+        }
+        if (sdIndex != -1) {
+          substr = StudyDataAr[i].split("\"");
+          scanDate = substr[9];
+          //FIXME: add some code to format this like a date?
+        }
+        if (pnIndex != -1) {
+          substr = StudyDataAr[i].split("\"");
+          patientName = substr[11];
+        }
+        if (mrnIndex != -1) {
+          substr = StudyDataAr[i].split("\"");
+          MRN = substr[9];
+        }
+        if (IDIndex != -1) {
+          substr = StudyDataAr[i].split("\"");
+          studyID = substr[9];
+        }
+        if (StudyDataAr[i] === null || StudyDataAr[i] === '') {
+          allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
+        }
+      }
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
       document.getElementById("StudySearch").style.display = "block";
@@ -84,9 +120,7 @@ function studySearch() {
   });
   xHTTPreq.send();
 }
-
 function seriesSearch(studyID) {
-  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
   console.log("Searching for available series in study " + studyID);
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/searchSeries");
@@ -132,7 +166,6 @@ function seriesSearch(studyID) {
   }
   xHTTPreq.send(JSON.stringify(studyIDJSON));
 }
-
 //handler for the series searchbar
 function retrieveSeriesHandler(seriesID) {
   seriesUrl = seriesID;
@@ -142,7 +175,7 @@ function retrieveSeriesHandler(seriesID) {
   seriesOverlay.style.display = "none";
   seriesOverlay.classList.remove("Shown");
   seriesOverlay.classList.add("Hidden");
-  //this is maybe a bit weird, we'll have to remove this later
+  //FIXME: check for viewport bug, if still around, need to remove this and change viewport z-index instead
   var vpDiv = document.getElementById('divViewport');
   vpDiv.classList.remove("Hidden");
   vpDiv.classList.add("Shown");
@@ -178,22 +211,24 @@ searchBar.addEventListener('keyup', (e) => {
   const filteredSeries = allStudies.filter((series) => {
     return (
       series.patientName.toLowerCase().includes(searchString) ||
-      series.studyID.toLowerCase().includes(searchString)
+      series.studyID.toLowerCase().includes(searchString)||
+      series.MRN.toLowerCase().includes(searchString)||
+      series.accessionNumber.toLowerCase().includes(searchString)||
+      series.scanDate.toLowerCase().includes(searchString)
     );
   });
   displayStudies(filteredSeries);
 });
 
 const displayStudies = (series) => {
-  studiesList.innerHTML = "";
+  studiesList.innerHTML = '<tr class="header"><th style="width:25%;">Patient Name/MRN</th><th style="width:50%;">Study UID</th><th style="width:25%;">Accession Number/Scan Date</th></tr>';
   series.forEach(element => {
-    var buttonElement = document.createElement('button');
-    buttonElement.classList = "button";
-    buttonElement.innerHTML = `<div class="patientName">Patient Name: ${element.patientName}</div><divclass="studyID">Study ID: ${element.studyID}</div>`;
-    buttonElement.addEventListener('click', function () {
+    var tableEl = document.createElement('tr');
+    tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
+    tableEl.addEventListener('click', function () {
       retrieveStudyHandler(element.studyID)
     });
-    studiesList.append(buttonElement);
+    studiesList.append(tableEl);
   });
 };
 
@@ -216,14 +251,13 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesList.innerHTML = "";
-  instances.forEach(el => {
-    var buttonEl = document.createElement('button');
-    buttonEl.classList = "button";
-    buttonEl.innerHTML = `<div class="type">Type: ${el.Type}</div><div class="seriesID">Series ID: ${el.seriesId}</div><div class="notes">${el.Notes}</div>`;
-    buttonEl.addEventListener('click', function () {
-      retrieveSeriesHandler(el.seriesId)
+  seriesList.innerHTML =  '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
+  instances.forEach(element => {
+    var tableEl = document.createElement('tr');
+    tableEl.innerHTML = `<td>${element.Type}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
+    tableEl.addEventListener('click', function () {
+      retrieveSeriesHandler(element.seriesId)
     });
-    seriesList.append(buttonEl);
+    seriesList.append(tableEl);
   });
 };

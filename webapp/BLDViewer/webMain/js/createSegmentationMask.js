@@ -111,10 +111,10 @@ function createSeg() {
       console.log("created image");
       var objectUrl = URL.createObjectURL(segBlob);
       console.log(objectUrl);
-      console.log(window);
-      window.open(objectUrl);
+      //console.log(window);
+      //window.open(objectUrl);
       //need an http request again
-      /*const xHTTPreq = new XMLHttpRequest();
+      const xHTTPreq = new XMLHttpRequest();
       xHTTPreq.open("POST", "/saveSeg");
       xHTTPreq.addEventListener("load", function() {
         if (xHTTPreq.status != 200) {
@@ -124,10 +124,8 @@ function createSeg() {
           console.log("Save successful")
         }
       });
-      var objJSON = {
-        "objectUrl": objectUrl
-      }
-      xHTTPreq.send(JSON.stringify(objJSON));*/
+      //FIXME: I believe I can simply send a Blob to the backend--if not, might have to do a bit of work so it's properly recognized as a file
+      xHTTPreq.send(segBlob);
     })
     .catch(err => console.log(err));
 }
