@@ -14,8 +14,8 @@ function Study(accessionNumber, scanDate, patientName, MRN, studyID) {
   this.studyID = studyID;
 }
 //this will create a json object representing the series
-function Series(Type, Notes, seriesId) {
-  this.Type = Type;
+function Series(Modality, Notes, seriesId) {
+  this.Modality = Modality;
   this.Notes = Notes;
   this.seriesId = seriesId;
 }
@@ -71,6 +71,7 @@ function studySearch() {
       console.log(xHTTPreq.responseText);
     }
     else {
+      allStudies = [];
       let StudyDataString = xHTTPreq.responseText;
       let StudyDataAr = StudyDataString.split("}");
       //console.log("We received " + StudyDataAr + " from the server");
@@ -132,16 +133,17 @@ function seriesSearch(studyID) {
     else {
       let SeriesDataString = xHTTPreq.responseText;
       let SeriesDataAr = SeriesDataString.split("}");
-      var Type = '';
-      var Notes = '';//sorry didn't know what else to call this
+      var Modality = '';
+      var Notes = '';
       var seriesId = '';
+      allSeries = [];
       for (i = 0; i < SeriesDataAr.length; i++) {
-        TypeIndex = SeriesDataAr[i].indexOf('00080060');
+        ModIndex = SeriesDataAr[i].indexOf('00080060');
         NotesIndex = SeriesDataAr[i].indexOf('0008103E');
         seriesIdIndex = SeriesDataAr[i].indexOf('0020000E');
-        if (TypeIndex != -1) {
+        if (ModIndex != -1) {
           substr = SeriesDataAr[i].split("\"");
-          Type = substr[9];
+          Modality = substr[9];
         }
         if (NotesIndex != -1) {
           substr = SeriesDataAr[i].split("\"");
@@ -153,7 +155,7 @@ function seriesSearch(studyID) {
         }
         if (SeriesDataAr[i] === null || SeriesDataAr[i] === '') {
           //push a new JSON object to the array, with the patientName and studID
-          allSeries.push(new Series(Type, Notes, seriesId));
+          allSeries.push(new Series(Modality, Notes, seriesId));
         }
       }
       console.log("Found series " + JSON.stringify(allSeries));
@@ -242,7 +244,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 
   const filteredInstances = allSeries.filter((instances) => {
     return (
-      instances.Type.toLowerCase().includes(searchStringSeries) ||
+      instances.Modality.toLowerCase().includes(searchStringSeries) ||
       instances.Notes.toLowerCase().includes(searchStringSeries) ||
       instances.seriesId.toLowerCase().includes(searchStringSeries)
     );
@@ -254,10 +256,26 @@ const displaySeries = (instances) => {
   seriesList.innerHTML =  '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
   instances.forEach(element => {
     var tableEl = document.createElement('tr');
-    tableEl.innerHTML = `<td>${element.Type}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
+    tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveSeriesHandler(element.seriesId)
     });
     seriesList.append(tableEl);
   });
 };
+
+function StudySelect(){
+  console.log("re-displaying study search");
+  var studyOverlay = document.getElementById('StudySearch');
+  studyOverlay.classList.remove("Hidden");
+  studyOverlay.classList.add("Shown");
+  studySearch();
+}
+
+function SeriesSelect(){
+  console.log("re-displaying series search");
+  var seriesOverlay = document.getElementById('SeriesSearch');
+  seriesOverlay.classList.remove("Hidden");
+  seriesOverlay.classList.add("Shown");
+  seriesSearch(studyUrl)
+}
