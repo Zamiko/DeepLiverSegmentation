@@ -37,7 +37,6 @@ function store() {
 }
 
 function retrieve() {
-  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
   console.log("Retrieving selected instances");
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/retrieve");
@@ -72,50 +71,28 @@ function studySearch() {
     }
     else {
       allStudies = [];
-      let StudyDataString = xHTTPreq.responseText;
-      let StudyDataAr = StudyDataString.split("}");
-      //console.log("We received " + StudyDataAr + " from the server");
-      //Ignore first 11
+      let studiesReceived = JSON.parse(xHTTPreq.responseText);
       var patientName = '';
       var studyID = '';
       var accessionNumber = '';
       var scanDate = '';
       var MRN = '';
-      for (i = 12; i < StudyDataAr.length; i++) {
-        anIndex = StudyDataAr[i].indexOf('00080050');
-        sdIndex = StudyDataAr[i].indexOf('00080020');
-        pnIndex = StudyDataAr[i].indexOf('00100010');
-        mrnIndex = StudyDataAr[i].indexOf('00100020');
-        IDIndex = StudyDataAr[i].indexOf('0020000D');
-        if (anIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          if(substr.length < 10){
-            accessionNumber = "N/A";
-          }else{
-            accessionNumber = substr[9];
-          }
+      studiesReceived.forEach(function (study) {
+        if(!study[`00080050`] || !study[`00080050`].Value){
+          accessionNumber = "N/A"
         }
-        if (sdIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          var tempString = substr[9];
-          scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
+        else{
+          accessionNumber = study[`00080050`].Value[0];
         }
-        if (pnIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          patientName = substr[11];
-        }
-        if (mrnIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          MRN = substr[9];
-        }
-        if (IDIndex != -1) {
-          substr = StudyDataAr[i].split("\"");
-          studyID = substr[9];
-        }
-        if (StudyDataAr[i] === null || StudyDataAr[i] === '') {
+        var tempString = study[`00080020`].Value[0];
+        scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
+        patientName = study[`00100010`].Value[0][`Alphabetic`];
+        MRN = study[`00100020`].Value[0];
+        studyID = study[`0020000D`].Value[0];
+        if(patientName != "Patient^Anonymous"){
           allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
         }
-      }
+      });
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
       document.getElementById("StudySearch").style.display = "block";
@@ -133,33 +110,17 @@ function seriesSearch(studyID) {
       console.log(xHTTPreq.responseText);
     }
     else {
-      let SeriesDataString = xHTTPreq.responseText;
-      let SeriesDataAr = SeriesDataString.split("}");
+      let seriesReceived = JSON.parse(xHTTPreq.responseText);
       var Modality = '';
       var Notes = '';
       var seriesId = '';
       allSeries = [];
-      for (i = 0; i < SeriesDataAr.length; i++) {
-        ModIndex = SeriesDataAr[i].indexOf('00080060');
-        NotesIndex = SeriesDataAr[i].indexOf('0008103E');
-        seriesIdIndex = SeriesDataAr[i].indexOf('0020000E');
-        if (ModIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          Modality = substr[9];
-        }
-        if (NotesIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          Notes = substr[9];
-        }
-        if (seriesIdIndex != -1) {
-          substr = SeriesDataAr[i].split("\"");
-          seriesId = substr[9];
-        }
-        if (SeriesDataAr[i] === null || SeriesDataAr[i] === '') {
-          //push a new JSON object to the array, with the patientName and studID
-          allSeries.push(new Series(Modality, Notes, seriesId));
-        }
-      }
+      seriesReceived.forEach(function (study) {
+        Modality = study[`00080060`].Value[0];
+        Notes = study[`0008103E`].Value[0];
+        seriesId = study[`0020000E`].Value[0];
+        allSeries.push(new Series(Modality, Notes, seriesId));
+      });
       console.log("Found series " + JSON.stringify(allSeries));
       displaySeries(allSeries);
       document.getElementById("SeriesSearch").style.display = "block";
@@ -191,7 +152,6 @@ function retrieveStudyHandler(studyID) {
   studyOverlay.style.display = "none";
   studyOverlay.classList.remove("Shown");
   studyOverlay.classList.add("Hidden");
-  //this is maybe a bit weird, we'll have to remove this later
   var seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
   seriesOverlay.classList.add("Shown");
