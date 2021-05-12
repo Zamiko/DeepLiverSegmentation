@@ -75,6 +75,10 @@ function studySearch() {
     else {
       allStudies = [];
       let studiesReceived = JSON.parse(xHTTPreq.responseText);
+      let StudyDataString = xHTTPreq.responseText;
+      let StudyDataAr = StudyDataString.split("}");
+      //console.log("We received " + StudyDataAr + " from the server");
+      //Ignore first 11
       var patientName = '';
       var studyID = '';
       var accessionNumber = '';
