@@ -144,5 +144,24 @@ dcm.SharedFunctionalGroupsSequence[0].PlaneOrientationSequence[0].ImageOrientati
 dcm.SharedFunctionalGroupsSequence[0].PixelMeasuresSequence[0].SliceThickness = source_images[0].SliceThickness
 dcm.SharedFunctionalGroupsSequence[0].PixelMeasuresSequence[0].PixelSpacing = source_images[0].PixelSpacing
 
+# Include the referenced series sequence attributes manually
+dcm.ReferencedSeriesSequence = Sequence([Dataset()])
+temp = [Dataset() for x in range(len(source_images))] # Create list of datasets with length equal to amount of slices
+dcm.ReferencedSeriesSequence[0].ReferencedInstanceSequence = Sequence(temp)
+dcm.ReferencedSeriesSequence[0].SeriesInstanceUID = pydicom.uid.UID(source_images[0].SeriesInstanceUID)
+for i in range(len(source_images)):
+  classUID = source_images[i].SOPClassUID
+  instanceUID = source_images[i].SOPInstanceUID
+  dcm.ReferencedSeriesSequence[0].ReferencedInstanceSequence[i].ReferencedSOPClassUID = pydicom.uid.UID(classUID)
+  dcm.ReferencedSeriesSequence[0].ReferencedInstanceSequence[i].ReferencedSOPInstanceUID = pydicom.uid.UID(instanceUID)
+ 
+# ClinicalTrialTImePoint Variables not always accessible in original DICOM series
+try:
+  dcm.ClinicalTrialTimePointDescription = source_images[0].ClinicalTrialTimePointDescription
+  dcm.ClinicalTrialTimePointID = source_images[0].ClinicalTrialTimePointID
+  dcm.ClinicalTrialSeriesID = source_images[0].ClinicalTrialSeriesID # TODO: Connect this to "PatientName"
+except:
+  print("TODO: Log error")
+
 # Save the DICOM Segmentation to local directory
 dcm.save_as(DICOM_seg_path)
