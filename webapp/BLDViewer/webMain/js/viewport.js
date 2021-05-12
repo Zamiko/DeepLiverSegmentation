@@ -27,6 +27,7 @@ var props = {
 var app = React.createElement(CornerstoneViewport, props, null);
 
 function changeSeries(numInstances) {
+  console.log(numInstances);
   var newImageIds = [];
   for (var i = 1; i <= numInstances; i++) {
     newImageIds.push(

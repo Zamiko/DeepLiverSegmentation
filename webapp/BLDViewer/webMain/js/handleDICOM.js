@@ -1,10 +1,13 @@
+
 //we'll have to change this later
 studyUrl = '';
 seriesUrl = '';
 let allStudies = [];
 let allSeries = [];
+let jsontest = '';
 //need to call studySearch on load
 studySearch();
+
 //this will create a json object representing the study
 function Study(accessionNumber, scanDate, patientName, MRN, studyID) {
   this.accessionNumber = accessionNumber;
@@ -45,8 +48,8 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var numInstances = parseInt(xHTTPreq.responseText.substring(1, xHTTPreq.responseText.length - 1));
-      changeSeries(numInstances);
+      var numInstancesJSON = JSON.parse(xHTTPreq.responseText);
+      changeSeries(numInstancesJSON.numInstances);
     }
   });
 
@@ -78,18 +81,23 @@ function studySearch() {
       var scanDate = '';
       var MRN = '';
       studiesReceived.forEach(function (study) {
-        if(!study[`00080050`] || !study[`00080050`].Value){
+        if (!study[`00080050`] || !study[`00080050`].Value) {
           accessionNumber = "N/A"
         }
-        else{
+        else {
           accessionNumber = study[`00080050`].Value[0];
         }
-        var tempString = study[`00080020`].Value[0];
-        scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
+        var tempString = "";
+        if (!study[`00090020`]) {
+          tempString = "20202020";
+        } else {
+          tempString = study[`00080020`].Value[0];
+        }
+        scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) + "/" + tempString.slice(0, 4);
         patientName = study[`00100010`].Value[0][`Alphabetic`];
         MRN = study[`00100020`].Value[0];
         studyID = study[`0020000D`].Value[0];
-        if(patientName != "Patient^Anonymous"){
+        if (patientName != "Patient^Anonymous") {
           allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
         }
       });
@@ -170,9 +178,9 @@ searchBar.addEventListener('keyup', (e) => {
   const filteredSeries = allStudies.filter((series) => {
     return (
       series.patientName.toLowerCase().includes(searchString) ||
-      series.studyID.toLowerCase().includes(searchString)||
-      series.MRN.toLowerCase().includes(searchString)||
-      series.accessionNumber.toLowerCase().includes(searchString)||
+      series.studyID.toLowerCase().includes(searchString) ||
+      series.MRN.toLowerCase().includes(searchString) ||
+      series.accessionNumber.toLowerCase().includes(searchString) ||
       series.scanDate.toLowerCase().includes(searchString)
     );
   });
@@ -210,7 +218,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesList.innerHTML =  '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
+  seriesList.innerHTML = '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
   instances.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
@@ -221,7 +229,7 @@ const displaySeries = (instances) => {
   });
 };
 
-function StudySelect(){
+function StudySelect() {
   console.log("re-displaying study search");
   var studyOverlay = document.getElementById('StudySearch');
   studyOverlay.classList.remove("Hidden");
@@ -229,7 +237,7 @@ function StudySelect(){
   studySearch();
 }
 
-function SeriesSelect(){
+function SeriesSelect() {
   console.log("re-displaying series search");
   var seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
