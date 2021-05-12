@@ -70,15 +70,15 @@ footer{
 }
 #StudySearch{
   position: fixed;
+  display: flex;
+  flex-direction: column;
   z-index: 9;
 }
 #SeriesSearch{
   position: fixed;
+  display: flex;
+  flex-direction: column;
   z-index: 8;
-}
-#seriesList, #studiesList{
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 #searchBar, #searchBarSeries {
   width: 100%;
@@ -107,4 +107,7 @@ footer{
 #studiesList tr.header, #studiesList tr:hover, #seriesList tr.header, #seriesList tr:hover {
   background-color: #f1f1f1;
   color: #000000;
+}
+#studyElements, #seriesElements{
+  overflow: scroll;
 }

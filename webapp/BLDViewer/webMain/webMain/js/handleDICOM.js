@@ -160,7 +160,7 @@ function retrieveStudyHandler(studyID) {
   seriesSearch(studyID);
 
 }
-const studiesList = document.getElementById('studiesList')
+const studyElements = document.getElementById('studyElements')
 const searchBar = document.getElementById('searchBar');
 
 searchBar.addEventListener('keyup', (e) => {
@@ -180,19 +180,19 @@ searchBar.addEventListener('keyup', (e) => {
 });
 
 const displayStudies = (series) => {
-  studiesList.innerHTML = '<tr class="header"><th style="width:25%;">Patient Name/MRN</th><th style="width:50%;">Study UID</th><th style="width:25%;">Accession Number/Scan Date</th></tr>';
+  studyElements.innerHTML = "";
   series.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveStudyHandler(element.studyID)
     });
-    studiesList.append(tableEl);
+    studyElements.append(tableEl);
   });
 };
 
 //Search bar implementation
-const seriesList = document.getElementById('seriesList')
+const seriesElements = document.getElementById('seriesElements')
 const searchBarSeries = document.getElementById('searchBarSeries');
 
 searchBarSeries.addEventListener('keyup', (e) => {
@@ -210,14 +210,14 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesList.innerHTML =  '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
+  seriesElements.innerHTML = '';
   instances.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveSeriesHandler(element.seriesId)
     });
-    seriesList.append(tableEl);
+    seriesElements.append(tableEl);
   });
 };
 

@@ -24,13 +24,27 @@
       <div id = "searchWrapper">
         <input type="text" name="searchBar" id="searchBar" placeholder = "search for a study by ID or patient ID"/>
       </div>
-      <table id="studiesList"></table>
+        <table id="studiesList">
+          <tr class="header">
+            <th style="width:25%;">Patient Name/MRN</th>
+            <th style="width:50%;">Study UID</th>
+            <th style="width:25%;">Accession Number/Scan Date</th>
+          </tr>
+          <tbody id="studyElements"></tbody>
+        </table>
     </div>
     <div class = "Overlay Shown" id = "SeriesSearch">
       <div id = "SeriesSearchWrapper">
         <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder = "search for a series"/>
       </div>
-      <table id="seriesList"></table>
+      <table id="seriesList">
+        <tr class="header">
+          <th style="width:25%;">Modality</th>
+          <th style="width:50%;">Series ID</th>
+          <th style="width:25%;">Description</th>
+        </tr>
+        <tbody id="seriesElements"></tbody>
+      </table>
     </div>
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
