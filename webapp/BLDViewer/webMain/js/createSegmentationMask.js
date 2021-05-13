@@ -2,7 +2,7 @@ let metaData = {};
 
 const switchSegment = document.getElementById("switchSegment");
 
-for (let i = 1; i <= 255; i++) {
+for (let i = 1; i <= 8; i++) {
   const option = document.createElement("option");
   option.text = i;
   option.value = i;
