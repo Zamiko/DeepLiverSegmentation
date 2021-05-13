@@ -45,8 +45,8 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var numInstances = parseInt(xHTTPreq.responseText.substring(1, xHTTPreq.responseText.length - 1));
-      changeSeries(numInstances);
+      var numInstancesJSON = JSON.parse(xHTTPreq.responseText);
+      changeSeries(numInstancesJSON.numInstances);
     }
   });
 
@@ -215,7 +215,7 @@ searchBar.addEventListener('keyup', (e) => {
 });
 
 const displayStudies = (series) => {
-  studyElements.innerHTML = "";
+  studyElements.innerHTML = '';
   series.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;

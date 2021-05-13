@@ -68,7 +68,7 @@ app.get("/store", async (req, res) => {
     },
   });
   //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
-  fileFolder = "webMain/dicoms/"
+  fileFolder = "webMain/DICOM_anon/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -137,6 +137,7 @@ app.post("/retrieve", async (req, res) => {
     return -1;
   });
   setRetrieveOptions(auth);
+  // deletePreviousDICOMs();
   SOPInstances.forEach(async (SOPInstance, index) => {
     const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
     const instanceReq = { parent, dicomWebPath };
@@ -147,6 +148,18 @@ app.post("/retrieve", async (req, res) => {
     const fileBytes = Buffer.from(instance.data);
     const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
     await writeFile(fileName, fileBytes);
+  });
+
+    fileFolder = "webMain/dicoms/";
+    var finishedWriting = false;
+  fs.readdir(fileFolder,  (err, files) => {
+    if (err) {
+      console.error("Could not list the directory.", err);
+      process.exit(1);
+    }
+    files.forEach( (file, index) => {
+      filePath = fileFolder 
+    });
   });
   var numInstances = {
     "numInstances": seriesInstances.data.length
@@ -204,6 +217,30 @@ app.post("/searchSeries", async (req, res) => {
   res.status(200);
 });
 
+app.post("/loadSeg", async (req, res) => {
+  console.log("Beginning study search");
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({
+    auth,
+    params: { includefield: 'all' },
+    headers: { Accept: 'application/dicom+json,multipart/related' },
+  });
+  const { StudyUID, SeriesUID} = req.body;
+  console.log("retrieving from " + StudyUID);
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${StudyUID}/series`;
+  const request = { parent, dicomWebPath };
+
+  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForSeries(
+    request
+  );
+  console.log(`Found ${instances.data.length} instances:`);
+  console.log(JSON.stringify(instances.data));
+  res.json(instances.data);
+  res.status(200);
+});
 //need to get uID through the request
 app.get("/delete", async (req, res) => {
   const auth = await google.auth.getClient({
