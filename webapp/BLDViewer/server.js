@@ -68,7 +68,7 @@ app.get("/store", async (req, res) => {
     },
   });
   //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
-  fileFolder = "webMain/DICOM_anon/"
+  fileFolder = "webMain/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -108,7 +108,7 @@ app.post("/retrieve", async (req, res) => {
     // 00200032 ID for Image Postion Patient in CT DICOM
     // 0020000E ID for Series Instance UID in Referenced Series Sequence in SEG DICOM
     params: { includefield: '00200032, 0020000E' },
-    headers: { Accept: 'application/dicom+json, multipart/related'  },
+    headers: { Accept: 'application/dicom+json, multipart/related' },
   });
 
   const { StudyInstanceUID, SeriesInstanceUID } = req.body;
@@ -137,35 +137,35 @@ app.post("/retrieve", async (req, res) => {
     return -1;
   });
   setRetrieveOptions(auth);
-  // deletePreviousDICOMs();
-  SOPInstances.forEach(async (SOPInstance, index) => {
+  deletePreviousDICOMs();
+  var writingPromises = [];
+  SOPInstances.forEach( async (SOPInstance, index) => {
     const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
     const instanceReq = { parent, dicomWebPath };
 
-    const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
+    const instance =  healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
       instanceReq
     );
     const fileBytes = Buffer.from(instance.data);
     const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
-    await writeFile(fileName, fileBytes);
+    writingPromises.push(writeFile(fileName, fileBytes));
   });
 
-    fileFolder = "webMain/dicoms/";
-    var finishedWriting = false;
-  fs.readdir(fileFolder,  (err, files) => {
-    if (err) {
-      console.error("Could not list the directory.", err);
-      process.exit(1);
-    }
-    files.forEach( (file, index) => {
-      filePath = fileFolder 
-    });
-  });
-  var numInstances = {
-    "numInstances": seriesInstances.data.length
-  }
-  res.json(numInstances);
-  res.status(200);
+  // for (var i = 0; i < SOPInstances.length; i+)
+  // Delay response resolutions
+  console.log(writingPromises.length);
+  Promise.allSettled(writingPromises)
+    .then(resolution => {
+      var numInstances = {
+        "numInstances": seriesInstances.data.length
+      }
+      res.json(numInstances);
+      res.status(200);
+    })
+    .catch(err => {
+      res.status(404);
+      console.error(err);
+    })
 });
 
 app.get("/search", async (req, res) => {
@@ -218,29 +218,54 @@ app.post("/searchSeries", async (req, res) => {
 });
 
 app.post("/loadSeg", async (req, res) => {
-  console.log("Beginning study search");
+  console.log("Loading Segmentations");
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
+  // Search options setting
   google.options({
     auth,
     params: { includefield: 'all' },
-    headers: { Accept: 'application/dicom+json,multipart/related' },
+    headers: { Accept: 'application/dicom+json, multipart/related' },
   });
-  const { StudyUID, SeriesUID} = req.body;
-  console.log("retrieving from " + StudyUID);
+
+  const { StudyInstanceUID, MatchingSeriesInstanceUID } = req.body;
   const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${StudyUID}/series`;
+  const dicomWebPath = `studies/${StudyInstanceUID}/instances`;
   const request = { parent, dicomWebPath };
 
-  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForSeries(
+  const studyInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
     request
-  );
-  console.log(`Found ${instances.data.length} instances:`);
-  console.log(JSON.stringify(instances.data));
-  res.json(instances.data);
+  ).catch(error => {
+    console.log(error);
+    res.status(404);
+  });
+
+  console.log(`Found ${studyInstances.data.length} instances:`);
+
+  var segInstances = [];
+  studyInstances.data.forEach((instance) => {
+    // SOPInstances.push(instance);
+    if (instance[`00081115`]) {
+      console.log(instance[`00081115`]);
+      console.log(instance[`00081115`].Value[0][`0020000E`]);
+      if (instance[`00081115`].Value[0][`0020000E`].Value[0] == MatchingSeriesInstanceUID) {
+        console.log(instance[`00081115`].Value[0][`0020000E`]);
+        console.log(MatchingSeriesInstanceUID);
+        console.log("found match");
+        segInstances.push(instance);
+      }
+    }
+  });
+  console.log(segInstances.length);
+  console.log(segInstances);
+  var numSegs = {
+    "numSegs": segInstances.length,
+  }
+  res.json(numSegs);
   res.status(200);
 });
+
 //need to get uID through the request
 app.get("/delete", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -257,6 +282,7 @@ app.get("/delete", async (req, res) => {
   );
   console.log('Deleted DICOM study');
 });
+
 //this will be used to save segmentation files locally
 app.post("/saveSeg", (req, res) => {
   console.log(req.body);

@@ -120,6 +120,7 @@ function studySearch() {
   });
   xHTTPreq.send();
 }
+
 function seriesSearch(studyID) {
   console.log("Searching for available series in study " + studyID);
   const xHTTPreq = new XMLHttpRequest();
@@ -165,6 +166,31 @@ function seriesSearch(studyID) {
     "StudyUID": studyID
   }
   xHTTPreq.send(JSON.stringify(studyIDJSON));
+}
+
+// Loading thee segmentation stored in the dat
+function loadSegmentation() {
+  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
+  console.log("Searching for matching segmentation");
+  const xHTTPreq = new XMLHttpRequest();
+  xHTTPreq.open("POST", "/loadSeg");
+  xHTTPreq.addEventListener("load", function () {
+    if (xHTTPreq.status != 200) {
+      console.log(xHTTPreq.responseText);
+    } else {
+      var numSegsJSON = JSON.parse(xHTTPreq.responseText);
+      console.log("found " + numSegsJSON.numSegs + "segs that match");
+    }
+  });
+
+   var StudyInstanceUID = studyUrl;
+  var SeriesInstanceUID = seriesUrl;
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  var seriesMetadata = {
+    "StudyInstanceUID": StudyInstanceUID,
+    "MatchingSeriesInstanceUID": SeriesInstanceUID
+  }
+  xHTTPreq.send(JSON.stringify(seriesMetadata));
 }
 //handler for the series searchbar
 function retrieveSeriesHandler(seriesID) {
