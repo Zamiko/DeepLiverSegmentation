@@ -42,6 +42,7 @@ function retrieve() {
   xHTTPreq.open("POST", "/retrieve");
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
+      console.log("failed");
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");

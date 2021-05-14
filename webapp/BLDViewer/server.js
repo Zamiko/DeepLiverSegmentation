@@ -97,6 +97,20 @@ app.get("/store", async (req, res) => {
 }
 );
 
+async function writeSOPInstance(StudyInstanceUID, SeriesInstanceUID, SOPInstance, index) {
+  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  console.log(SOPInstance);
+  const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
+  const instanceReq = { parent, dicomWebPath };
+
+  const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
+    instanceReq
+  );
+  const fileBytes = Buffer.from(instance.data);
+  const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
+  await writeFile(fileName, fileBytes);
+  return 1;
+}
 app.post("/retrieve", async (req, res) => {
   console.log("Beginning retrieve");
   const auth = await google.auth.getClient({
@@ -139,30 +153,34 @@ app.post("/retrieve", async (req, res) => {
   setRetrieveOptions(auth);
   deletePreviousDICOMs();
   var writingPromises = [];
-  SOPInstances.forEach( async (SOPInstance, index) => {
-    const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
-    const instanceReq = { parent, dicomWebPath };
+  SOPInstances.forEach((SOPInstance, index) => {
+    writingPromises.push(writeSOPInstance(StudyInstanceUID, SeriesInstanceUID, SOPInstance, index));
+    // const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
+    // const instanceReq = { parent, dicomWebPath };
 
-    const instance =  healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
-      instanceReq
-    );
-    const fileBytes = Buffer.from(instance.data);
-    const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
-    writingPromises.push(writeFile(fileName, fileBytes));
+    // const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
+    //   instanceReq
+    // );
+    // const fileBytes = Buffer.from(instance.data);
+    // const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
+    // await writeFile(fileName, fileBytes);
   });
 
   // for (var i = 0; i < SOPInstances.length; i+)
   // Delay response resolutions
   console.log(writingPromises.length);
   Promise.allSettled(writingPromises)
-    .then(resolution => {
+    .then(values => {
+      console.log(values);
       var numInstances = {
-        "numInstances": seriesInstances.data.length
+        "numInstances": SOPInstances.length,
       }
+      console.log("finished");
       res.json(numInstances);
       res.status(200);
     })
     .catch(err => {
+      console.log("failed");
       res.status(404);
       console.error(err);
     })
