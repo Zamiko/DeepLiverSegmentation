@@ -1,6 +1,6 @@
 //we'll have to change this later
-studyUrl = '';
-seriesUrl = '';
+let studyUrl = '';
+let seriesUrl = '';
 let allStudies = [];
 let allSeries = [];
 //need to call studySearch on load
@@ -28,8 +28,7 @@ function store() {
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
+    } else {
       console.log("Store successful")
     }
   };
@@ -46,17 +45,17 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var instances = JSON.parse(xHTTPreq.responseText);
+      let instances = JSON.parse(xHTTPreq.responseText);
       changeSeries(instances.instanceIDs);
     }
   });
 
-  var StudyInstanceUID = studyUrl;
-  var SeriesInstanceUID = seriesUrl;
+  const studyInstanceUid = studyUrl;
+  const seriesInstanceUid = seriesUrl;
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
   var seriesMetadata = {
-    "StudyInstanceUID": StudyInstanceUID,
-    "SeriesInstanceUID": SeriesInstanceUID
+    "studyInstanceUid": studyInstanceUid,
+    "seriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
 }
@@ -73,41 +72,36 @@ function studySearch() {
     else {
       allStudies = [];
       let studiesReceived = JSON.parse(xHTTPreq.responseText);
-      var patientName = '';
-      var studyID = '';
-      var accessionNumber = '';
-      var scanDate = '';
-      var MRN = '';
+      let patientName = '';
+      let studyID = '';
+      let accessionNumber = '';
+      let scanDate = '';
+      let MRN = '';
       studiesReceived.forEach(function (study) {
         if (!study[`00080050`] || !study[`00080050`].Value) {
           accessionNumber = "N/A";
-        }
-        else {
+        } else {
           accessionNumber = study[`00080050`].Value[0];
         }
         if (!study[`00080020`] || !study[`00080020`].Value) {
           scanDate = "0/0/0000";
-        }
-        else {
+        } else {
           var tempString = study[`00080020`].Value[0];
           scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) + "/" + tempString.slice(0, 4);
         }
         if (!study[`00100010`] || !study[`00100010`].Value) {
           patientName = "Not Found";
-        }
-        else {
+        } else {
           patientName = study[`00100010`].Value[0][`Alphabetic`];
         }
         if (!study[`00100020`] || !study[`00100020`].Value) {
           MRN = "N/A";
-        }
-        else {
+        } else {
           MRN = study[`00100020`].Value[0];
         }
         if (!study[`0020000D`] || !study[`0020000D`].Value) {
           studyID = "Not Found";
-        }
-        else {
+        } else {
           studyID = study[`0020000D`].Value[0];
         }
         if (patientName != "Patient^Anonymous") {
@@ -183,7 +177,7 @@ function loadSegmentation() {
       console.log("found " + numSegsJSON.numSegs + "segs that match");
 
       if (numSegsJSON.numSegs) {
-        var segURL = "http://" + window.location.host + "/"
+        var segURL = "http://" + window.location.host + "/dicoms/"
           + numSegsJSON.segSOPInstanceUID + ".dcm";
         console.log(segURL);
         

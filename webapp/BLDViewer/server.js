@@ -9,15 +9,16 @@ app.use(express.json());
 
 //was trying to implement all this via a python script--however have to figure out authentication for that
 const { google } = require('googleapis');
+const { resolve } = require("path");
 const healthcare = google.healthcare('v1');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);
-
 
 const cloudRegion = 'us-west2';
 const projectId = 'liversegmentationwebapp';
 const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
+const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
 
 
 function setRetrieveOptions(auth) {
@@ -30,10 +31,8 @@ function setRetrieveOptions(auth) {
   });
 }
 
-// Right now retrieve is too slow to show the newest loaded series because we have to write every time
-// TODO Delay until finished writing and then display 
 function deletePreviousDICOMs() {
-  fileFolder = "webMain/dicoms/";
+  const fileFolder = "webMain/dicoms/";
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -97,20 +96,20 @@ app.get("/store", async (req, res) => {
 }
 );
 
-async function writeSOPInstance(StudyInstanceUID, SeriesInstanceUID, SOPInstance, index) {
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  console.log(SOPInstance);
-  const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
+async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
+  sopInstanceUid) {
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}`;
   const instanceReq = { parent, dicomWebPath };
-
   const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
     instanceReq
   );
   const fileBytes = Buffer.from(instance.data);
-  const fileName = "webMain/dicoms/" + SOPInstance[`00080018`].Value[0] + ".dcm";
+  const fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
   await writeFile(fileName, fileBytes);
   return 1;
 }
+
 app.post("/retrieve", async (req, res) => {
   console.log("Beginning retrieve");
   const auth = await google.auth.getClient({
@@ -120,27 +119,22 @@ app.post("/retrieve", async (req, res) => {
   google.options({
     auth,
     // 00200032 ID for Image Postion Patient in CT DICOM
-    // 0020000E ID for Series Instance UID in Referenced Series Sequence in SEG DICOM
-    params: { includefield: '00200032, 0020000E' },
+    params: { includefield: '00200032' },
     headers: { Accept: 'application/dicom+json, multipart/related' },
   });
 
   const { StudyInstanceUID, SeriesInstanceUID } = req.body;
-  console.log(req.body);
   const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances`;
   const request = { parent, dicomWebPath };
-
   const seriesInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
     request
   ).catch(error => {
     console.log(error);
     res.status(404);
   });
-
   console.log(`Found ${seriesInstances.data.length} instances:`);
-
-  var SOPInstances = [];
+  let SOPInstances = [];
   seriesInstances.data.forEach((instance, index) => {
     SOPInstances.push(instance);
   });
@@ -150,29 +144,20 @@ app.post("/retrieve", async (req, res) => {
     if (a[`00200032`].Value[2] == b[`00200032`].Value[2]) return 0;
     return -1;
   });
-  setRetrieveOptions(auth);
-  deletePreviousDICOMs();
-  var writingPromises = [];
-  SOPInstances.forEach((SOPInstance, index) => {
-    writingPromises.push(writeSOPInstance(StudyInstanceUID, SeriesInstanceUID, SOPInstance, index));
-    // const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances/${SOPInstance[`00080018`].Value[0]}`;
-    // const instanceReq = { parent, dicomWebPath };
 
-    // const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
-    //   instanceReq
-    // );
-    // const fileBytes = Buffer.from(instance.data);
-    // const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
-    // await writeFile(fileName, fileBytes);
+  var writingPromises = [];
+  deletePreviousDICOMs();
+  setRetrieveOptions(auth);
+  SOPInstances.forEach((SOPInstance) => {
+    writingPromises.push(writeSOPInstance(StudyInstanceUID, SeriesInstanceUID,
+      SOPInstance[`00080018`].Value[0]));
   });
 
-  // for (var i = 0; i < SOPInstances.length; i+)
   // Delay response resolutions
   console.log(writingPromises.length);
   Promise.all(writingPromises)
     .then(values => {
       console.log(values);
-
       var instanceIDs = [];
       SOPInstances.forEach(SOPInstance => {
         instanceIDs.push(SOPInstance[`00080018`].Value[0]);
@@ -206,9 +191,11 @@ app.get("/search", async (req, res) => {
   const dicomWebPath = 'studies';
   const request = { parent, dicomWebPath };
 
-  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForStudies(
-    request
-  );
+  const instances = await healthcare.projects.locations.datasets.dicomStores
+    .searchForStudies(
+      request
+    );
+
   console.log(`Found ${instances.data.length} instances:`);
   console.log(JSON.stringify(instances.data));
   res.json(instances.data);
@@ -241,7 +228,7 @@ app.post("/searchSeries", async (req, res) => {
 });
 
 app.post("/loadSeg", async (req, res) => {
-  console.log("Loading Segmentations");
+  console.log("Beginning Segmentation Search");
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
@@ -257,44 +244,39 @@ app.post("/loadSeg", async (req, res) => {
   const dicomWebPath = `studies/${StudyInstanceUID}/instances`;
   const request = { parent, dicomWebPath };
 
-  const studyInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
+  const studySegInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
     request
   ).catch(error => {
     console.log(error);
     res.status(404);
   });
+  console.log(`Found ${studySegInstances.data.length} instances:`);
 
-  console.log(`Found ${studyInstances.data.length} instances:`);
-
-  var segInstances = [];
-  studyInstances.data.forEach((instance) => {
-    // SOPInstances.push(instance);
+  let segInstances = [];
+  studySegInstances.data.forEach((instance) => {
     if (instance[`00081115`]) {
-      console.log(instance[`00081115`]);
-      console.log(instance[`00081115`].Value[0][`0020000E`]);
       if (instance[`00081115`].Value[0][`0020000E`].Value[0] == MatchingSeriesInstanceUID) {
-        console.log(instance[`00081115`].Value[0][`0020000E`]);
-        console.log(MatchingSeriesInstanceUID);
-        console.log("found match");
-        console.log(instance[`0020000E`].Value[0]);
         segInstances.push(instance);
       }
     }
   });
 
-  console.log(segInstances.length);
-  console.log(segInstances);
-  var numSegs = {
+  let numSegs = {
     "numSegs": segInstances.length,
   }
   if (segInstances.length) {
-    writeSOPInstance(StudyInstanceUID, segInstances[0][`0020000E`].Value[0],
-      segInstances[0][`00080018`].Value[0], 0);
-    // numSegs.segSeriesInstanceUID = segInstances[0][`0020000E`].Value[0];
-    numSegs.segSOPInstanceUID = segInstances[0][`00080018`].Value[0];
+    const chosenSeg = segInstances[0];
+    setRetrieveOptions(auth);
+    numSegs.segSOPInstanceUID = chosenSeg[`00080018`].Value[0];
+    writeSOPInstance(StudyInstanceUID, chosenSeg[`0020000E`].Value[0],
+      chosenSeg[`00080018`].Value[0]).then(resolve => {
+        res.json(numSegs);
+        res.status(200);
+      });
+  } else {
+    res.json(numSegs);
+    res.status(200);
   }
-  res.json(numSegs);
-  res.status(200);
 });
 
 //need to get uID through the request
