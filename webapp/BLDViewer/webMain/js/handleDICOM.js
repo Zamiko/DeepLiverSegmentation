@@ -181,6 +181,26 @@ function loadSegmentation() {
     } else {
       var numSegsJSON = JSON.parse(xHTTPreq.responseText);
       console.log("found " + numSegsJSON.numSegs + "segs that match");
+
+      if (numSegsJSON.numSegs) {
+        var segURL = "http://" + window.location.host + "/"
+          + numSegsJSON.segSOPInstanceUID + ".dcm";
+        console.log(segURL);
+        
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", () => {
+          parseSeg(xhr.response);
+        });
+        xhr.addEventListener("error", () => {
+          console.log(`Request returned, status: ${xhr.status}`);
+          console.log(xhr.message);
+        });
+        xhr.open("GET", segURL);
+        xhr.responseType = "arraybuffer"; //Type of file
+        xhr.send();
+      } else {
+        window.alert("no segs found, we'll create one instead");
+      }
     }
   });
 

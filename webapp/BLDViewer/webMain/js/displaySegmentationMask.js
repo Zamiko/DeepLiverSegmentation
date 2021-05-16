@@ -1,8 +1,6 @@
 // let metaData = {};
 
 function getAndLoadSeg() {
-
-    loadSegmentation();
     // This  will change as we select the correct study and series
     var segURL =
         "http://" +

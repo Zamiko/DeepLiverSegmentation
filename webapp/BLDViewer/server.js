@@ -276,14 +276,22 @@ app.post("/loadSeg", async (req, res) => {
         console.log(instance[`00081115`].Value[0][`0020000E`]);
         console.log(MatchingSeriesInstanceUID);
         console.log("found match");
+        console.log(instance[`0020000E`].Value[0]);
         segInstances.push(instance);
       }
     }
   });
+
   console.log(segInstances.length);
   console.log(segInstances);
   var numSegs = {
     "numSegs": segInstances.length,
+  }
+  if (segInstances.length) {
+    writeSOPInstance(StudyInstanceUID, segInstances[0][`0020000E`].Value[0],
+      segInstances[0][`00080018`].Value[0], 0);
+    // numSegs.segSeriesInstanceUID = segInstances[0][`0020000E`].Value[0];
+    numSegs.segSOPInstanceUID = segInstances[0][`00080018`].Value[0];
   }
   res.json(numSegs);
   res.status(200);
