@@ -183,12 +183,12 @@ app.post("/retrieve", async (req, res) => {
       console.log("finished");
       res.json(instances);
       res.status(200);
+    })
+    .catch(err => {
+      console.log("failed");
+      res.status(404);
+      console.error(err);
     });
-    // .catch(err => {
-    //   console.log("failed");
-    //   res.status(404);
-    //   console.error(err);
-    // });
 });
 
 app.get("/search", async (req, res) => {
