@@ -7,7 +7,8 @@ const fs = require("fs");
 app.use(express.static("webMain"));
 app.use(express.json());
 
-//was trying to implement all this via a python script--however have to figure out authentication for that
+//was trying to implement all this via a python script
+// however have to figure out authentication for that
 const { google } = require('googleapis');
 const { resolve } = require("path");
 const healthcare = google.healthcare('v1');
@@ -18,7 +19,8 @@ const cloudRegion = 'us-west2';
 const projectId = 'liversegmentationwebapp';
 const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
-const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/` +
+  `${datasetId}/dicomStores/${dicomStoreId}`;
 
 
 function setRetrieveOptions(auth) {
@@ -66,8 +68,10 @@ app.get("/store", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
-  //Ideally I think we should aim to only have one study held locally (per user???) so we can just link from that location 
-  fileFolder = "webMain/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/"
+  // Ideally I think we should aim to only have one study held locally 
+  // (per user???) so we can just link from that location 
+  fileFolder = "webMain/11-13-2003-threephaseabdomen-49621/" +
+    "5.000000-arterial-92922/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -75,7 +79,7 @@ app.get("/store", async (req, res) => {
     }
 
     files.forEach(async (file, index) => {
-      const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+      // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
@@ -87,9 +91,10 @@ app.get("/store", async (req, res) => {
         requestBody: binaryData,
       };
 
-      const instance = await healthcare.projects.locations.datasets.dicomStores.storeInstances(
-        request
-      );
+      const instance = await healthcare.projects.locations.datasets.dicomStores
+        .storeInstances(
+          request
+        );
       console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
     });
   });
@@ -99,11 +104,13 @@ app.get("/store", async (req, res) => {
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
   sopInstanceUid) {
   // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${studyInstanceUid}/series/${seriesInstanceUid}/instances/${sopInstanceUid}`;
+  const dicomWebPath = `studies/${studyInstanceUid}/series/` +
+    `${seriesInstanceUid}/instances/${sopInstanceUid}`;
   const instanceReq = { parent, dicomWebPath };
-  const instance = await healthcare.projects.locations.datasets.dicomStores.studies.series.instances.retrieveInstance(
-    instanceReq
-  );
+  const instance = await healthcare.projects.locations.datasets.dicomStores
+    .studies.series.instances.retrieveInstance(
+      instanceReq
+    );
   const fileBytes = Buffer.from(instance.data);
   const fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
   await writeFile(fileName, fileBytes);
@@ -123,34 +130,37 @@ app.post("/retrieve", async (req, res) => {
     headers: { Accept: 'application/dicom+json, multipart/related' },
   });
 
-  const { StudyInstanceUID, SeriesInstanceUID } = req.body;
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${StudyInstanceUID}/series/${SeriesInstanceUID}/instances`;
+  const { studyInstanceUid, seriesInstanceUid } = req.body;
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyInstanceUid}/series/` +
+    `${seriesInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
-  const seriesInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
-    request
-  ).catch(error => {
-    console.log(error);
-    res.status(404);
-  });
+  const seriesInstances = await healthcare.projects.locations.datasets
+    .dicomStores.studies.series.searchForInstances(
+      request
+    )
+    .catch(error => {
+      console.log(error);
+      res.status(404);
+    });
   console.log(`Found ${seriesInstances.data.length} instances:`);
-  let SOPInstances = [];
+  let sopInstances = [];
   seriesInstances.data.forEach((instance, index) => {
-    SOPInstances.push(instance);
+    sopInstances.push(instance);
   });
 
-  SOPInstances.sort((a, b) => {
+  sopInstances.sort((a, b) => {
     if (a[`00200032`].Value[2] < b[`00200032`].Value[2]) return 1;
     if (a[`00200032`].Value[2] == b[`00200032`].Value[2]) return 0;
     return -1;
   });
 
-  var writingPromises = [];
+  let writingPromises = [];
   deletePreviousDICOMs();
   setRetrieveOptions(auth);
-  SOPInstances.forEach((SOPInstance) => {
-    writingPromises.push(writeSOPInstance(StudyInstanceUID, SeriesInstanceUID,
-      SOPInstance[`00080018`].Value[0]));
+  sopInstances.forEach((sopInstance) => {
+    writingPromises.push(writeSOPInstance(studyInstanceUid, seriesInstanceUid,
+      sopInstance[`00080018`].Value[0]));
   });
 
   // Delay response resolutions
@@ -158,12 +168,12 @@ app.post("/retrieve", async (req, res) => {
   Promise.all(writingPromises)
     .then(values => {
       console.log(values);
-      var instanceIDs = [];
-      SOPInstances.forEach(SOPInstance => {
-        instanceIDs.push(SOPInstance[`00080018`].Value[0]);
+      let instanceIds = [];
+      sopInstances.forEach(sopInstance => {
+        instanceIds.push(sopInstance[`00080018`].Value[0]);
       });
-      var instances = {
-        "instanceIDs": instanceIDs,
+      let instances = {
+        "instanceIDs": instanceIds,
       }
       console.log("finished");
       res.json(instances);
@@ -187,7 +197,7 @@ app.get("/search", async (req, res) => {
     headers: { Accept: 'application/dicom+json,multipart/related' },
   });
 
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = 'studies';
   const request = { parent, dicomWebPath };
 
@@ -212,15 +222,16 @@ app.post("/searchSeries", async (req, res) => {
     params: { includefield: 'all' },
     headers: { Accept: 'application/dicom+json,multipart/related' },
   });
-  const { StudyUID } = req.body;
-  console.log("retrieving from " + StudyUID);
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${StudyUID}/series`;
+  const { studyInstanceUid } = req.body;
+  console.log("retrieving from " + studyInstanceUid);
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyInstanceUid}/series`;
   const request = { parent, dicomWebPath };
 
-  const instances = await healthcare.projects.locations.datasets.dicomStores.searchForSeries(
-    request
-  );
+  const instances = await healthcare.projects.locations.datasets.dicomStores
+    .searchForSeries(
+      request
+    );
   console.log(`Found ${instances.data.length} instances:`);
   console.log(JSON.stringify(instances.data));
   res.json(instances.data);
@@ -239,36 +250,38 @@ app.post("/loadSeg", async (req, res) => {
     headers: { Accept: 'application/dicom+json, multipart/related' },
   });
 
-  const { StudyInstanceUID, MatchingSeriesInstanceUID } = req.body;
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
-  const dicomWebPath = `studies/${StudyInstanceUID}/instances`;
+  const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  const dicomWebPath = `studies/${studyInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
 
-  const studySegInstances = await healthcare.projects.locations.datasets.dicomStores.studies.series.searchForInstances(
-    request
-  ).catch(error => {
-    console.log(error);
-    res.status(404);
-  });
+  const studySegInstances = await healthcare.projects.locations.datasets
+    .dicomStores.studies.series.searchForInstances(
+      request
+    ).catch(error => {
+      console.log(error);
+      res.status(404);
+    });
   console.log(`Found ${studySegInstances.data.length} instances:`);
 
-  let segInstances = [];
+  let matchingSegInstances = [];
   studySegInstances.data.forEach((instance) => {
     if (instance[`00081115`]) {
-      if (instance[`00081115`].Value[0][`0020000E`].Value[0] == MatchingSeriesInstanceUID) {
-        segInstances.push(instance);
+      if (instance[`00081115`].Value[0][`0020000E`].Value[0]
+        == matchingSeriesInstanceUid) {
+        matchingSegInstances.push(instance);
       }
     }
   });
 
   let numSegs = {
-    "numSegs": segInstances.length,
+    "numSegs": matchingSegInstances.length,
   }
-  if (segInstances.length) {
-    const chosenSeg = segInstances[0];
+  if (matchingSegInstances.length) {
+    const chosenSeg = matchingSegInstances[0];
     setRetrieveOptions(auth);
     numSegs.segSOPInstanceUID = chosenSeg[`00080018`].Value[0];
-    writeSOPInstance(StudyInstanceUID, chosenSeg[`0020000E`].Value[0],
+    writeSOPInstance(studyInstanceUid, chosenSeg[`0020000E`].Value[0],
       chosenSeg[`00080018`].Value[0]).then(resolve => {
         res.json(numSegs);
         res.status(200);
@@ -285,8 +298,9 @@ app.get("/delete", async (req, res) => {
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
   google.options({ auth });
-  var StudyInstanceUID = "1.2.124.113532.192.70.134.138.20051021.154305.4450732";
-  const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  var StudyInstanceUID =
+    "1.2.124.113532.192.70.134.138.20051021.154305.4450732";
+  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${StudyInstanceUID}`;
   const request = { parent, dicomWebPath };
 

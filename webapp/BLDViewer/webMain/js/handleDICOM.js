@@ -21,7 +21,8 @@ function Series(Modality, Notes, seriesId) {
 }
 
 function store() {
-  //we're going to want to store the url of the study to store in the request we send
+  // we're going to want to store the url of the study 
+  // to store in the request we send
   console.log("Storing current instances")
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("GET", "/store", true);
@@ -61,7 +62,8 @@ function retrieve() {
 }
 
 function studySearch() {
-  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
+  //we're going to want to store the url of the study to retrieve, I think. 
+  // Not yet got that working.
   console.log("Searching for available studies")
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("GET", "/search");
@@ -87,7 +89,8 @@ function studySearch() {
           scanDate = "0/0/0000";
         } else {
           var tempString = study[`00080020`].Value[0];
-          scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) + "/" + tempString.slice(0, 4);
+          scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) +
+            "/" + tempString.slice(0, 4);
         }
         if (!study[`00100010`] || !study[`00100010`].Value) {
           patientName = "Not Found";
@@ -105,7 +108,8 @@ function studySearch() {
           studyID = study[`0020000D`].Value[0];
         }
         if (patientName != "Patient^Anonymous") {
-          allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
+          allStudies.push(new Study(accessionNumber, scanDate, patientName,
+            MRN, studyID));
         }
       });
       console.log("Found studies " + JSON.stringify(allStudies));
@@ -124,30 +128,27 @@ function seriesSearch(studyID) {
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
+    } else {
       let seriesReceived = JSON.parse(xHTTPreq.responseText);
-      var Modality = '';
-      var Notes = '';
-      var seriesId = '';
+      let Modality = '';
+      let Notes = '';
+      let seriesId = '';
       allSeries = [];
+      console.log(seriesReceived);
       seriesReceived.forEach(function (study) {
         if (!study[`00080060`] || !study[`00080060`].Value) {
           Modality = "N/A";
-        }
-        else {
+        } else {
           Modality = study[`00080060`].Value[0];
         }
         if (!study[`0008103E`] || !study[`0008103E`].Value) {
           Notes = "No Description";
-        }
-        else {
+        } else {
           Notes = study[`0008103E`].Value[0];
         }
         if (!study[`0020000E`] || !study[`0020000E`].Value) {
           seriesId = "Not Found";
-        }
-        else {
+        } else {
           seriesId = study[`0020000E`].Value[0];
         }
         allSeries.push(new Series(Modality, Notes, seriesId));
@@ -157,30 +158,28 @@ function seriesSearch(studyID) {
       document.getElementById("SeriesSearch").style.display = "block";
     }
   });
-  var studyIDJSON = {
-    "StudyUID": studyID
+  var studyIdJson = {
+    "studyInstanceUid": studyID
   }
-  xHTTPreq.send(JSON.stringify(studyIDJSON));
+  xHTTPreq.send(JSON.stringify(studyIdJson));
 }
 
-// Loading thee segmentation stored in the dat
+// Loading the segmentation stored in the data store
 function loadSegmentation() {
-  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
   console.log("Searching for matching segmentation");
-  const xHTTPreq = new XMLHttpRequest();
-  xHTTPreq.open("POST", "/loadSeg");
-  xHTTPreq.addEventListener("load", function () {
-    if (xHTTPreq.status != 200) {
-      console.log(xHTTPreq.responseText);
+  const XmlHttpReq = new XMLHttpRequest();
+  XmlHttpReq.open("POST", "/loadSeg");
+  XmlHttpReq.addEventListener("load", function () {
+    if (XmlHttpReq.status != 200) {
+      console.log(XmlHttpReq.responseText);
     } else {
-      var numSegsJSON = JSON.parse(xHTTPreq.responseText);
-      console.log("found " + numSegsJSON.numSegs + "segs that match");
-
-      if (numSegsJSON.numSegs) {
-        var segURL = "http://" + window.location.host + "/dicoms/"
-          + numSegsJSON.segSOPInstanceUID + ".dcm";
+      const numSegsJson = JSON.parse(XmlHttpReq.responseText);
+      console.log("found " + numSegsJson.numSegs + "segs that match");
+      
+      if (numSegsJson.numSegs) {
+        const segURL = "http://" + window.location.host + "/dicoms/"
+          + numSegsJson.segSOPInstanceUID + ".dcm";
         console.log(segURL);
-        
         const xhr = new XMLHttpRequest();
         xhr.addEventListener("load", () => {
           parseSeg(xhr.response);
@@ -198,15 +197,16 @@ function loadSegmentation() {
     }
   });
 
-  var StudyInstanceUID = studyUrl;
-  var SeriesInstanceUID = seriesUrl;
-  xHTTPreq.setRequestHeader("Content-Type", "application/json");
-  var seriesMetadata = {
-    "StudyInstanceUID": StudyInstanceUID,
-    "MatchingSeriesInstanceUID": SeriesInstanceUID
+  const studyInstanceUid = studyUrl;
+  const matchingSeriesInstanceUid = seriesUrl;
+  XmlHttpReq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "matchingSeriesInstanceUid": matchingSeriesInstanceUid
   }
-  xHTTPreq.send(JSON.stringify(seriesMetadata));
+  XmlHttpReq.send(JSON.stringify(seriesMetadata));
 }
+
 //handler for the series searchbar
 function retrieveSeriesHandler(seriesID) {
   seriesUrl = seriesID;
