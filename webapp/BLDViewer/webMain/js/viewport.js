@@ -64,19 +64,19 @@ function addLeadingZeroes(index) {
 // }
 
 
-function changeSeries(numInstances) {
-  console.log(numInstances);
+function changeSeries(instanceIDs) {
+  // console.log(numInstances);
   const element = document.getElementById("cornerstoneViewport");
   cornerstone.enable(element);
 
   var imageIds = [];
   // for (var i = 1; i <= 602; i++) {
-  for (var i = 1; i <= numInstances; i++) {
+  for (var i = 0; i < instanceIDs.length; i++) {
     imageIds.push(
       "wadouri://" +
       window.location.host +
       // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" + addLeadingZeroes(i) + ".dcm"
-      "/dicoms/" + i + ".dcm"
+      "/dicoms/" + instanceIDs[i] + ".dcm"
     );
   }
   const stack = {

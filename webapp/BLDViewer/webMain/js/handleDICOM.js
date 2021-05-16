@@ -46,8 +46,8 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var numInstancesJSON = JSON.parse(xHTTPreq.responseText);
-      changeSeries(numInstancesJSON.numInstances);
+      var instances = JSON.parse(xHTTPreq.responseText);
+      changeSeries(instances.instanceIDs);
     }
   });
 
@@ -79,38 +79,38 @@ function studySearch() {
       var scanDate = '';
       var MRN = '';
       studiesReceived.forEach(function (study) {
-        if(!study[`00080050`] || !study[`00080050`].Value){
+        if (!study[`00080050`] || !study[`00080050`].Value) {
           accessionNumber = "N/A";
         }
-        else{
+        else {
           accessionNumber = study[`00080050`].Value[0];
         }
-        if(!study[`00080020`] || !study[`00080020`].Value){
+        if (!study[`00080020`] || !study[`00080020`].Value) {
           scanDate = "0/0/0000";
         }
-        else{
+        else {
           var tempString = study[`00080020`].Value[0];
-          scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
+          scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) + "/" + tempString.slice(0, 4);
         }
-        if(!study[`00100010`] || !study[`00100010`].Value){
+        if (!study[`00100010`] || !study[`00100010`].Value) {
           patientName = "Not Found";
         }
-        else{
+        else {
           patientName = study[`00100010`].Value[0][`Alphabetic`];
         }
-        if(!study[`00100020`] || !study[`00100020`].Value){
+        if (!study[`00100020`] || !study[`00100020`].Value) {
           MRN = "N/A";
         }
-        else{
+        else {
           MRN = study[`00100020`].Value[0];
         }
-        if(!study[`0020000D`] || !study[`0020000D`].Value){
+        if (!study[`0020000D`] || !study[`0020000D`].Value) {
           studyID = "Not Found";
         }
-        else{
+        else {
           studyID = study[`0020000D`].Value[0];
-        }  
-        if(patientName != "Patient^Anonymous"){
+        }
+        if (patientName != "Patient^Anonymous") {
           allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
         }
       });
@@ -138,24 +138,24 @@ function seriesSearch(studyID) {
       var seriesId = '';
       allSeries = [];
       seriesReceived.forEach(function (study) {
-        if(!study[`00080060`] || !study[`00080060`].Value){
+        if (!study[`00080060`] || !study[`00080060`].Value) {
           Modality = "N/A";
         }
-        else{
+        else {
           Modality = study[`00080060`].Value[0];
-        } 
-        if(!study[`0008103E`] || !study[`0008103E`].Value){
+        }
+        if (!study[`0008103E`] || !study[`0008103E`].Value) {
           Notes = "No Description";
         }
-        else{
+        else {
           Notes = study[`0008103E`].Value[0];
         }
-        if(!study[`0020000E`] || !study[`0020000E`].Value){
+        if (!study[`0020000E`] || !study[`0020000E`].Value) {
           seriesId = "Not Found";
         }
-        else{
+        else {
           seriesId = study[`0020000E`].Value[0];
-        }  
+        }
         allSeries.push(new Series(Modality, Notes, seriesId));
       });
       console.log("Found series " + JSON.stringify(allSeries));
@@ -184,7 +184,7 @@ function loadSegmentation() {
     }
   });
 
-   var StudyInstanceUID = studyUrl;
+  var StudyInstanceUID = studyUrl;
   var SeriesInstanceUID = seriesUrl;
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
   var seriesMetadata = {
@@ -232,9 +232,9 @@ searchBar.addEventListener('keyup', (e) => {
   const filteredSeries = allStudies.filter((series) => {
     return (
       series.patientName.toLowerCase().includes(searchString) ||
-      series.studyID.toLowerCase().includes(searchString)||
-      series.MRN.toLowerCase().includes(searchString)||
-      series.accessionNumber.toLowerCase().includes(searchString)||
+      series.studyID.toLowerCase().includes(searchString) ||
+      series.MRN.toLowerCase().includes(searchString) ||
+      series.accessionNumber.toLowerCase().includes(searchString) ||
       series.scanDate.toLowerCase().includes(searchString)
     );
   });
@@ -283,7 +283,7 @@ const displaySeries = (instances) => {
   });
 };
 
-function StudySelect(){
+function StudySelect() {
   console.log("re-displaying study search");
   var studyOverlay = document.getElementById('StudySearch');
   studyOverlay.classList.remove("Hidden");
@@ -291,7 +291,7 @@ function StudySelect(){
   studySearch();
 }
 
-function SeriesSelect(){
+function SeriesSelect() {
   console.log("re-displaying series search");
   var seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");

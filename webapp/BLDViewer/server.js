@@ -107,7 +107,7 @@ async function writeSOPInstance(StudyInstanceUID, SeriesInstanceUID, SOPInstance
     instanceReq
   );
   const fileBytes = Buffer.from(instance.data);
-  const fileName = "webMain/dicoms/" + (index + 1) + ".dcm";
+  const fileName = "webMain/dicoms/" + SOPInstance[`00080018`].Value[0] + ".dcm";
   await writeFile(fileName, fileBytes);
   return 1;
 }
@@ -169,21 +169,26 @@ app.post("/retrieve", async (req, res) => {
   // for (var i = 0; i < SOPInstances.length; i+)
   // Delay response resolutions
   console.log(writingPromises.length);
-  Promise.allSettled(writingPromises)
+  Promise.all(writingPromises)
     .then(values => {
       console.log(values);
-      var numInstances = {
-        "numInstances": SOPInstances.length,
+
+      var instanceIDs = [];
+      SOPInstances.forEach(SOPInstance => {
+        instanceIDs.push(SOPInstance[`00080018`].Value[0]);
+      });
+      var instances = {
+        "instanceIDs": instanceIDs,
       }
       console.log("finished");
-      res.json(numInstances);
+      res.json(instances);
       res.status(200);
-    })
-    .catch(err => {
-      console.log("failed");
-      res.status(404);
-      console.error(err);
-    })
+    });
+    // .catch(err => {
+    //   console.log("failed");
+    //   res.status(404);
+    //   console.error(err);
+    // });
 });
 
 app.get("/search", async (req, res) => {
