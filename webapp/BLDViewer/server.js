@@ -280,7 +280,7 @@ app.post("/loadSeg", async (req, res) => {
   if (matchingSegInstances.length) {
     const chosenSeg = matchingSegInstances[0];
     setRetrieveOptions(auth);
-    numSegs.segSOPInstanceUID = chosenSeg[`00080018`].Value[0];
+    numSegs.segSopInstanceUid = chosenSeg[`00080018`].Value[0];
     writeSOPInstance(studyInstanceUid, chosenSeg[`0020000E`].Value[0],
       chosenSeg[`00080018`].Value[0]).then(resolve => {
         res.json(numSegs);

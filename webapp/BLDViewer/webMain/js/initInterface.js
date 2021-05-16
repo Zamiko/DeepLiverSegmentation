@@ -1,5 +1,4 @@
 (function initToolButtons() {
-  const nameSpace = `.mode-buttons`;
   const toolButtons = document.querySelectorAll(
     `.set-tool-mode`
   );
@@ -10,12 +9,6 @@
       mouseButtonMask: 1
     };
     cornerstoneTools[`setToolActive`](`${action}`, options);
-    if (action == "FreehandScissors") {
-      // viewport-element class comes from dynamic react rendering in react cornerstone viewport
-      const element = document.getElementsByClassName("viewport-element")[0];
-      const activeScissors = cornerstoneTools.getToolForElement(element, "FreehandScissors");
-      activeScissors.activeStrategy = "ERASE_INSIDE";
-    }
     // Remove active style from all buttons
     toolButtons.forEach(btn => {
       btn.classList.remove("is-primary");
@@ -36,8 +29,6 @@
   });
 }());
 
-let brushRadius = 10;
-
 (function initBrushSizeButtons() {
   const brushSlider = document.getElementsByClassName("brush-slider")[0];
   brushSlider.addEventListener("change", evt => {
@@ -50,34 +41,9 @@ let brushRadius = 10;
     evt.stopImmediatePropagation();
     return false;
   });
-  const brushButtons = document.querySelectorAll(
-    `.set-brush-size`
-  );
-
-  const handleClick = function (evt) {
-    const action = this.dataset.action;
-    const { setters } = cornerstoneTools.getModule("segmentation");
-    if (action == "decrement") {
-      setters.radius(--brushRadius);
-    } else {
-      setters.radius(++brushRadius);
-    }
-    console.log(action);
-    evt.preventDefault();
-    evt.stopPropagation();
-    evt.stopImmediatePropagation();
-    return false;
-  };
-
-  brushButtons.forEach(btn => {
-    btn.addEventListener("contextmenu", handleClick);
-    btn.addEventListener("auxclick", handleClick);
-    btn.addEventListener("click", handleClick);
-  });
 }());
 
 (function initHistoryButtons() {
-  const nameSpace = `.mode-buttons`;
   const brushButtons = document.querySelectorAll(
     `.control-history`
   );
@@ -100,3 +66,47 @@ let brushRadius = 10;
     btn.addEventListener("click", handleClick);
   });
 }());
+
+(function initSegButtons() {
+  const switchSegment = document.getElementById("switchSegment");
+  
+  for (let i = 1; i <= 8; i++) {
+    const option = document.createElement("option");
+    option.text = i;
+    option.value = i;
+    switchSegment.add(option);
+  }
+  
+  document.getElementById("switchSegment")[0].selected = true;
+  document.getElementById("switchActiveLabelmap")[0].selected = true;
+}());
+
+function changeSegment() {
+  const segmentIndex = document.getElementById("switchSegment").value;
+  const element = document.getElementsByClassName("viewport-element")[0];
+  console.log("Active Segment index is " + segmentIndex);
+  const { setters } = cornerstoneTools.getModule("segmentation");
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
+}
+
+function changeLabelmap() {
+  const labelmapIndex = document.getElementById("switchActiveLabelmap").value;
+  const segmentIndex = document.getElementById("switchSegment").value;
+  const element = document.getElementsByClassName("viewport-element")[0];
+
+  const { setters } = cornerstoneTools.getModule("segmentation");
+  setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
+  setters.activeSegmentIndex(element, parseInt(segmentIndex));
+  cornerstone.updateImage(element);
+}
+
+function toggleSeg() {
+  segOptions = document.getElementById("segOptions");
+  if (segOptions.className == "Hidden") {
+    segOptions.className = "Shown";
+    cornerstoneTools.setToolActive("Brush", {mouseButtonMask: 1});
+  } else {
+    segOptions.className = "Hidden";
+    cornerstoneTools.setToolActive("Wwwc", {mouseButtonMask: 1});
+  }
+}

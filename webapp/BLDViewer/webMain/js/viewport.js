@@ -1,30 +1,5 @@
 "use strict";
-//TODO: this is where we'd change the image data, I believe
 
-// var imageIds = [];
-// for (var i = 1; i < 242; i++) {
-//   imageIds.push(
-//     "wadouri://" +
-//     window.location.host +
-//     "/dicoms/" + i + ".dcm"
-//   );
-// }
-
-// var exampleData = {
-//   stack: {
-//     currentImageIdIndex: 0,
-//     imageIds
-//   }
-// };
-
-// var CornerstoneViewport = window["react-cornerstone-viewport"];
-// var props = {
-//   viewportData: exampleData,
-//   cornerstone,
-//   cornerstoneTools,
-//   activeTool: "Pan"
-// };
-// var app = React.createElement(CornerstoneViewport, props, null);
 function addLeadingZeroes(index) {
   if (index < 10)
     return "00" + index;
@@ -33,6 +8,8 @@ function addLeadingZeroes(index) {
   return index;
 }
 
+
+// Displaying and interacting with DICOM series using react cornerstone viewport
 function changeSeries(instanceIDs) {
   console.log(instanceIDs.length);
   var newImageIds = [];
@@ -41,7 +18,8 @@ function changeSeries(instanceIDs) {
     newImageIds.push(
       "wadouri://" +
       window.location.host +
-      // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" + addLeadingZeroes(i) + ".dcm"
+      // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" 
+      // + addLeadingZeroes(i) + ".dcm"
       "/dicoms/" + instanceIDs[i] + ".dcm"
     );
   }
@@ -52,18 +30,20 @@ function changeSeries(instanceIDs) {
     }
   };
 
-  var CornerstoneViewport = window["react-cornerstone-viewport"];
+  var cornerstoneViewport = window["react-cornerstone-viewport"];
   var props = {
     viewportData: exampleData,
     cornerstone,
     cornerstoneTools,
     activeTool: "Pan"
   };
-  var app = React.createElement(CornerstoneViewport, props, null);
+  var app = React.createElement(cornerstoneViewport, props, null);
   ReactDOM.render(app, document.getElementById("cornerstoneViewport"));
 }
 
 
+// Displaying and interacting with DICOM series using plain cornerstone 
+// and cornerstoneTools
 // function changeSeries(instanceIDs) {
 //   console.log(instanceIDs.length);
 //   const element = document.getElementById("cornerstoneViewport");
@@ -75,7 +55,8 @@ function changeSeries(instanceIDs) {
 //     imageIds.push(
 //       "wadouri://" +
 //       window.location.host +
-//       // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" + addLeadingZeroes(i) + ".dcm"
+//       // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" 
+//       // + addLeadingZeroes(i) + ".dcm"
 //       "/dicoms/" + instanceIDs[i] + ".dcm"
 //     );
 //   }
