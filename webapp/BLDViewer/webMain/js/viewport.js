@@ -13,11 +13,12 @@ function addLeadingZeroes(index) {
 function changeSeries(instanceIDs) {
   console.log(instanceIDs.length);
   var newImageIds = [];
-  // for (var i = 1; i <= 602; i++) {
+  // for (var i = 1; i <= 91; i++) {
   for (var i = 0; i < instanceIDs.length; i++) {
     newImageIds.push(
       "wadouri://" +
       window.location.host +
+      // "/DICOM_anon/" + i + ".dcm"
       // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" 
       // + addLeadingZeroes(i) + ".dcm"
       "/dicoms/" + instanceIDs[i] + ".dcm"

@@ -32,6 +32,7 @@
       </div>
       <table id="seriesElements"></table>
     </div>
+
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
         <button class="button set-tool-mode is-primary" data-action="Zoom">
@@ -52,7 +53,7 @@
       <div class="Hidden" id="segOptions">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
         <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
-        <button class="button" id="seg-loader" onclick="loadSegmentation()">
+        <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
           Load Segmentation
         </button>
         <label for="switchSegment">Active Segment: </label><select id="switchSegment" onchange="changeSegment()">
@@ -74,6 +75,8 @@
         </button>
       </div>
       <p id="statusLine"></p>
+      <div class=" Shown" id="LoadingScreen">
+      </div>
       <div class="col-xs-9" id="divViewport">
         <div oncontextmenu="return false" class="cornerstone-enabled-image" unselectable="on"
           onselectstart="return false;" onmousedown="return false;">

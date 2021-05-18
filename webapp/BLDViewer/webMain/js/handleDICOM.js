@@ -47,6 +47,7 @@ function retrieve() {
     } else {
       console.log("Retrieve successful");
       let instances = JSON.parse(xHTTPreq.responseText);
+      showViewport();
       changeSeries(instances.instanceIDs);
     }
   });
@@ -59,6 +60,17 @@ function retrieve() {
     "seriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
+  showLoading();
+}
+
+function showLoading() {
+  document.getElementById("LoadingScreen").style.display = "block";
+  document.getElementById("divViewport").style.display = "none";
+}
+
+function showViewport() {
+  document.getElementById("LoadingScreen").style.display = "none";
+  document.getElementById("divViewport").style.display = "block";
 }
 
 function studySearch() {
@@ -114,10 +126,10 @@ function studySearch() {
       });
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
-      document.getElementById("StudySearch").style.display = "block";
     }
   });
   xHTTPreq.send();
+  showLoading();
 }
 
 function seriesSearch(studyID) {
@@ -155,13 +167,13 @@ function seriesSearch(studyID) {
       });
       console.log("Found series " + JSON.stringify(allSeries));
       displaySeries(allSeries);
-      document.getElementById("SeriesSearch").style.display = "block";
     }
   });
   var studyIdJson = {
     "studyInstanceUid": studyID
   }
   xHTTPreq.send(JSON.stringify(studyIdJson));
+  showLoading();
 }
 
 // Loading the segmentation stored in the data store
@@ -234,7 +246,6 @@ function retrieveStudyHandler(studyID) {
   //get the series
   console.log("Retrieving series in study " + studyUrl);
   seriesSearch(studyID);
-
 }
 const studyElements = document.getElementById('studyElements')
 const searchBar = document.getElementById('searchBar');
@@ -265,6 +276,8 @@ const displayStudies = (series) => {
     });
     studyElements.append(tableEl);
   });
+  document.getElementById("StudySearch").style.display = "block";
+  hideViewportLoading();
 };
 
 //Search bar implementation
@@ -295,7 +308,14 @@ const displaySeries = (instances) => {
     });
     seriesElements.append(tableEl);
   });
+  document.getElementById("SeriesSearch").style.display = "block";
+  hideViewportLoading();
 };
+
+function hideViewportLoading() {
+  document.getElementById("LoadingScreen").style.display = "none";
+  document.getElementById("divViewport").style.display = "none";
+}
 
 function StudySelect() {
   console.log("re-displaying study search");
