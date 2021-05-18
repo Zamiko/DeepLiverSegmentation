@@ -1,8 +1,8 @@
 let metaData = {};
 
 function createSeg() {
-  const element = document.getElementsByClassName("viewport-element")[0];
-  // const element = document.getElementById("cornerstoneViewport");
+  const element = document.getElementById("cornerstoneViewport");
+  // const element = document.getElementsByClassName("viewport-element")[0];
   console.log(element);
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;

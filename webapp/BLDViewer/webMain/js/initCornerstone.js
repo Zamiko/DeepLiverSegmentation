@@ -51,8 +51,8 @@ for (var i = 1; i < 72; i++) {
     );
 }
 
-// const element = document.getElementById("cornerstoneViewport");
-// cornerstone.enable(element);
+const element = document.getElementById("cornerstoneViewport");
+cornerstone.enable(element);
 // // define the stack
 // const stack = {
 //     currentImageIdIndex: 0,
@@ -69,6 +69,7 @@ for (var i = 1; i < 72; i++) {
 
 const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 cornerstoneTools.addTool(StackScrollMouseWheelTool);
+cornerstoneTools.addTool(cornerstoneTools.StackScrollTool);
 cornerstoneTools.setToolActive("StackScrollMouseWheel", { mouseButtonMask: 0 });
 
 const PanTool = cornerstoneTools.PanTool;
