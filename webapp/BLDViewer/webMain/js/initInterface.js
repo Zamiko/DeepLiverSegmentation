@@ -104,7 +104,7 @@ function changeLabelmap() {
 }
 
 function toggleSeg() {
-  segOptions = document.getElementById("segOptions");
+  const segOptions = document.getElementById("segOptions");
   if (segOptions.className == "Hidden") {
     segOptions.className = "Shown";
     cornerstoneTools.setToolActive("Brush", { mouseButtonMask: 1 });

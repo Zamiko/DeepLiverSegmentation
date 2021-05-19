@@ -1,4 +1,3 @@
-//we'll have to change this later
 let studyUrl = '';
 let seriesUrl = '';
 let allStudies = [];
@@ -46,7 +45,7 @@ function retrieve() {
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      let instances = JSON.parse(xHTTPreq.responseText);
+      const instances = JSON.parse(xHTTPreq.responseText);
       showViewport();
       changeSeries(instances.instanceIDs);
     }
@@ -55,7 +54,7 @@ function retrieve() {
   const studyInstanceUid = studyUrl;
   const seriesInstanceUid = seriesUrl;
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
-  var seriesMetadata = {
+  const seriesMetadata = {
     "studyInstanceUid": studyInstanceUid,
     "seriesInstanceUid": seriesInstanceUid
   }
@@ -79,18 +78,15 @@ function hideViewportLoading() {
 }
 
 function studySearch() {
-  //we're going to want to store the url of the study to retrieve, I think. 
-  // Not yet got that working.
   console.log("Searching for available studies")
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("GET", "/search");
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
+    } else {
       allStudies = [];
-      let studiesReceived = JSON.parse(xHTTPreq.responseText);
+      const studiesReceived = JSON.parse(xHTTPreq.responseText);
       let patientName = '';
       let studyID = '';
       let accessionNumber = '';
@@ -105,7 +101,7 @@ function studySearch() {
         if (!study[`00080020`] || !study[`00080020`].Value) {
           scanDate = "0/0/0000";
         } else {
-          var tempString = study[`00080020`].Value[0];
+          const tempString = study[`00080020`].Value[0];
           scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) +
             "/" + tempString.slice(0, 4);
         }
@@ -146,7 +142,7 @@ function seriesSearch(studyID) {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
     } else {
-      let seriesReceived = JSON.parse(xHTTPreq.responseText);
+      const seriesReceived = JSON.parse(xHTTPreq.responseText);
       let Modality = '';
       let Notes = '';
       let seriesId = '';
@@ -174,7 +170,7 @@ function seriesSearch(studyID) {
       displaySeries(allSeries);
     }
   });
-  var studyIdJson = {
+  const studyIdJson = {
     "studyInstanceUid": studyID
   }
   xHTTPreq.send(JSON.stringify(studyIdJson));
@@ -228,7 +224,7 @@ function loadSegmentation() {
 function retrieveSeriesHandler(seriesID) {
   seriesUrl = seriesID;
   //close seriesSearch display
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   console.log("Class list is " + seriesOverlay.classList);
   seriesOverlay.style.display = "none";
   seriesOverlay.classList.remove("Shown");
@@ -241,11 +237,11 @@ function retrieveSeriesHandler(seriesID) {
 function retrieveStudyHandler(studyID) {
   studyUrl = studyID;
   //close studySearch display
-  var studyOverlay = document.getElementById('StudySearch');
+  const studyOverlay = document.getElementById('StudySearch');
   studyOverlay.style.display = "none";
   studyOverlay.classList.remove("Shown");
   studyOverlay.classList.add("Hidden");
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
   seriesOverlay.classList.add("Shown");
   //get the series
@@ -274,7 +270,7 @@ searchBar.addEventListener('keyup', (e) => {
 const displayStudies = (series) => {
   studiesList.innerHTML = '';
   series.forEach(element => {
-    var tableEl = document.createElement('tr');
+    const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveStudyHandler(element.studyID)
@@ -306,7 +302,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 const displaySeries = (instances) => {
   seriesList.innerHTML = '';
   instances.forEach(element => {
-    var tableEl = document.createElement('tr');
+    const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveSeriesHandler(element.seriesId)
@@ -319,7 +315,7 @@ const displaySeries = (instances) => {
 
 function StudySelect() {
   console.log("re-displaying study search");
-  var studyOverlay = document.getElementById('StudySearch');
+  const studyOverlay = document.getElementById('StudySearch');
   studyOverlay.classList.remove("Hidden");
   studyOverlay.classList.add("Shown");
   studySearch();
@@ -327,7 +323,7 @@ function StudySelect() {
 
 function SeriesSelect() {
   console.log("re-displaying series search");
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
   seriesOverlay.classList.add("Shown");
   seriesSearch(studyUrl)

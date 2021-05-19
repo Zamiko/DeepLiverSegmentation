@@ -26,7 +26,7 @@ function createSeg() {
     return;
   }
 
-  console.log("label maps 3D length " + labelmaps3D.length);
+  console.log("label maps 3D length is " + labelmaps3D.length);
 
   for (
     let labelmapIndex = 0;
@@ -35,7 +35,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log( "labeel maps 2D length is" + labelmaps2D.length);
+    console.log( "Label maps 2D length is " + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -118,7 +118,8 @@ function addMetaData(type, imageId, data) {
 }
 
 //
-// creates an array of per-frame imageIds in the form needed for cornerstone processing.
+// creates an array of per-frame imageIds in the form needed 
+// for cornerstone processing.
 //
 function getImageIds(multiframe, baseImageId) {
   const imageIds = [];
