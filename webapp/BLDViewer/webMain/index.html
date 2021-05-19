@@ -24,13 +24,13 @@
       <div id="searchWrapper">
         <input type="text" name="searchBar" id="searchBar" placeholder="search for a study by ID or patient ID" />
       </div>
-      <table id="studyElements"></table>
+      <table id="studiesList"></table>
     </div>
     <div class="Overlay Shown" id="SeriesSearch">
       <div id="SeriesSearchWrapper">
         <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder="search for a series" />
       </div>
-      <table id="seriesElements"></table>
+      <table id="seriesList"></table>
     </div>
 
     <div class="main-button-bar">
@@ -48,12 +48,7 @@
           Stack Scroll
         </button>
       </div>
-      <button class="button" id="segmentation" onclick="toggleSeg()">
-        Segmentation
-      </button>
-    </div>
-    <div class="row">
-      <div class="Hidden" id="segOptions">
+      <div class="seg-buttons">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
         <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
         <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
@@ -77,6 +72,14 @@
           Redo
         </button>
       </div>
+      <!-- <button class="button" id="segmentation" onclick="toggleSeg()">
+        Segmentation
+      </button> -->
+    </div>
+    <div class="row">
+      <!-- <div class="Hidden" id="segOptions">
+
+      </div> -->
       <p id="statusLine"></p>
       <div class=" Shown" id="LoadingScreen">
       </div>

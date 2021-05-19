@@ -73,6 +73,11 @@ function showViewport() {
   document.getElementById("divViewport").style.display = "block";
 }
 
+function hideViewportLoading() {
+  document.getElementById("LoadingScreen").style.display = "none";
+  document.getElementById("divViewport").style.display = "none";
+}
+
 function studySearch() {
   //we're going to want to store the url of the study to retrieve, I think. 
   // Not yet got that working.
@@ -247,7 +252,7 @@ function retrieveStudyHandler(studyID) {
   console.log("Retrieving series in study " + studyUrl);
   seriesSearch(studyID);
 }
-const studyElements = document.getElementById('studyElements')
+const studiesList = document.getElementById('studiesList')
 const searchBar = document.getElementById('searchBar');
 
 searchBar.addEventListener('keyup', (e) => {
@@ -267,21 +272,21 @@ searchBar.addEventListener('keyup', (e) => {
 });
 
 const displayStudies = (series) => {
-  studyElements.innerHTML = '';
+  studiesList.innerHTML = '';
   series.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveStudyHandler(element.studyID)
     });
-    studyElements.append(tableEl);
+    studiesList.append(tableEl);
   });
   document.getElementById("StudySearch").style.display = "block";
   hideViewportLoading();
 };
 
 //Search bar implementation
-const seriesElements = document.getElementById('seriesElements')
+const seriesList = document.getElementById('seriesList')
 const searchBarSeries = document.getElementById('searchBarSeries');
 
 searchBarSeries.addEventListener('keyup', (e) => {
@@ -299,23 +304,18 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesElements.innerHTML = '';
+  seriesList.innerHTML = '';
   instances.forEach(element => {
     var tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveSeriesHandler(element.seriesId)
     });
-    seriesElements.append(tableEl);
+    seriesList.append(tableEl);
   });
   document.getElementById("SeriesSearch").style.display = "block";
   hideViewportLoading();
 };
-
-function hideViewportLoading() {
-  document.getElementById("LoadingScreen").style.display = "none";
-  document.getElementById("divViewport").style.display = "none";
-}
 
 function StudySelect() {
   console.log("re-displaying study search");
