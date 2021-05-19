@@ -1,6 +1,5 @@
-//we'll have to change this later
-studyUrl = '';
-seriesUrl = '';
+let studyUrl = '';
+let seriesUrl = '';
 let allStudies = [];
 let allSeries = [];
 //need to call studySearch on load
@@ -21,15 +20,15 @@ function Series(Modality, Notes, seriesId) {
 }
 
 function store() {
-  //we're going to want to store the url of the study to store in the request we send
+  // we're going to want to store the url of the study 
+  // to store in the request we send
   console.log("Storing current instances")
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("GET", "/store", true);
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
+    } else {
       console.log("Store successful")
     }
   };
@@ -42,84 +41,98 @@ function retrieve() {
   xHTTPreq.open("POST", "/retrieve");
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
+      console.log("failed");
       console.log(xHTTPreq.responseText);
     } else {
       console.log("Retrieve successful");
-      var numInstancesJSON = JSON.parse(xHTTPreq.responseText);
-      changeSeries(numInstancesJSON.numInstances);
+      const instances = JSON.parse(xHTTPreq.responseText);
+      showViewport();
+      changeSeries(instances.instanceIDs);
     }
   });
 
-  var StudyInstanceUID = studyUrl;
-  var SeriesInstanceUID = seriesUrl;
+  const studyInstanceUid = studyUrl;
+  const seriesInstanceUid = seriesUrl;
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
-  var seriesMetadata = {
-    "StudyInstanceUID": StudyInstanceUID,
-    "SeriesInstanceUID": SeriesInstanceUID
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "seriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
+  showLoading();
+}
+
+function showLoading() {
+  document.getElementById("LoadingScreen").style.display = "block";
+  document.getElementById("divViewport").style.display = "none";
+}
+
+function showViewport() {
+  document.getElementById("LoadingScreen").style.display = "none";
+  document.getElementById("divViewport").style.display = "block";
+}
+
+function hideViewportLoading() {
+  document.getElementById("LoadingScreen").style.display = "none";
+  document.getElementById("divViewport").style.display = "none";
 }
 
 function studySearch() {
-  //we're going to want to store the url of the study to retrieve, I think. Not yet got that working.
   console.log("Searching for available studies")
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("GET", "/search");
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
+    } else {
       allStudies = [];
-      let studiesReceived = JSON.parse(xHTTPreq.responseText);
-      var patientName = '';
-      var studyID = '';
-      var accessionNumber = '';
-      var scanDate = '';
-      var MRN = '';
+      const studiesReceived = JSON.parse(xHTTPreq.responseText);
+      let patientName = '';
+      let studyID = '';
+      let accessionNumber = '';
+      let scanDate = '';
+      let MRN = '';
       studiesReceived.forEach(function (study) {
-        if(!study[`00080050`] || !study[`00080050`].Value){
+        if (!study[`00080050`] || !study[`00080050`].Value) {
           accessionNumber = "N/A";
-        }
-        else{
+        } else {
           accessionNumber = study[`00080050`].Value[0];
         }
-        if(!study[`00080020`] || !study[`00080020`].Value){
+        if (!study[`00080020`] || !study[`00080020`].Value) {
           scanDate = "0/0/0000";
+        } else {
+          const tempString = study[`00080020`].Value[0];
+          scanDate = tempString.slice(7, 8) + "/" + tempString.slice(5, 6) +
+            "/" + tempString.slice(0, 4);
         }
-        else{
-          var tempString = study[`00080020`].Value[0];
-          scanDate = tempString.slice(7,8) + "/" + tempString.slice(5,6) + "/" + tempString.slice(0,4);
-        }
-        if(!study[`00100010`] || !study[`00100010`].Value){
+        if (!study[`00100010`] || !study[`00100010`].Value) {
           patientName = "Not Found";
-        }
-        else{
+        } else {
           patientName = study[`00100010`].Value[0][`Alphabetic`];
         }
-        if(!study[`00100020`] || !study[`00100020`].Value){
+        if (!study[`00100020`] || !study[`00100020`].Value) {
           MRN = "N/A";
-        }
-        else{
+        } else {
           MRN = study[`00100020`].Value[0];
         }
-        if(!study[`0020000D`] || !study[`0020000D`].Value){
+        if (!study[`0020000D`] || !study[`0020000D`].Value) {
           studyID = "Not Found";
-        }
-        else{
+        } else {
           studyID = study[`0020000D`].Value[0];
-        }  
-        if(patientName != "Patient^Anonymous"){
-          allStudies.push(new Study(accessionNumber, scanDate, patientName, MRN, studyID));
+        }
+        if (patientName != "Patient^Anonymous") {
+          allStudies.push(new Study(accessionNumber, scanDate, patientName,
+            MRN, studyID));
         }
       });
       console.log("Found studies " + JSON.stringify(allStudies));
       displayStudies(allStudies);
-      document.getElementById("StudySearch").style.display = "block";
     }
   });
   xHTTPreq.send();
+  showLoading();
 }
+
 function seriesSearch(studyID) {
   console.log("Searching for available series in study " + studyID);
   const xHTTPreq = new XMLHttpRequest();
@@ -128,49 +141,90 @@ function seriesSearch(studyID) {
   xHTTPreq.addEventListener("load", function () {
     if (xHTTPreq.status != 200) {
       console.log(xHTTPreq.responseText);
-    }
-    else {
-      let seriesReceived = JSON.parse(xHTTPreq.responseText);
-      var Modality = '';
-      var Notes = '';
-      var seriesId = '';
+    } else {
+      const seriesReceived = JSON.parse(xHTTPreq.responseText);
+      let Modality = '';
+      let Notes = '';
+      let seriesId = '';
       allSeries = [];
+      console.log(seriesReceived);
       seriesReceived.forEach(function (study) {
-        if(!study[`00080060`] || !study[`00080060`].Value){
+        if (!study[`00080060`] || !study[`00080060`].Value) {
           Modality = "N/A";
-        }
-        else{
+        } else {
           Modality = study[`00080060`].Value[0];
-        } 
-        if(!study[`0008103E`] || !study[`0008103E`].Value){
-          Notes = "No Description";
         }
-        else{
+        if (!study[`0008103E`] || !study[`0008103E`].Value) {
+          Notes = "No Description";
+        } else {
           Notes = study[`0008103E`].Value[0];
         }
-        if(!study[`0020000E`] || !study[`0020000E`].Value){
+        if (!study[`0020000E`] || !study[`0020000E`].Value) {
           seriesId = "Not Found";
-        }
-        else{
+        } else {
           seriesId = study[`0020000E`].Value[0];
-        }  
+        }
         allSeries.push(new Series(Modality, Notes, seriesId));
       });
       console.log("Found series " + JSON.stringify(allSeries));
       displaySeries(allSeries);
-      document.getElementById("SeriesSearch").style.display = "block";
     }
   });
-  var studyIDJSON = {
-    "StudyUID": studyID
+  const studyIdJson = {
+    "studyInstanceUid": studyID
   }
-  xHTTPreq.send(JSON.stringify(studyIDJSON));
+  xHTTPreq.send(JSON.stringify(studyIdJson));
+  showLoading();
 }
+
+// Loading the segmentation stored in the data store
+function loadSegmentation() {
+  console.log("Searching for matching segmentation");
+  const XmlHttpReq = new XMLHttpRequest();
+  XmlHttpReq.open("POST", "/loadSeg");
+  XmlHttpReq.addEventListener("load", function () {
+    if (XmlHttpReq.status != 200) {
+      console.log(XmlHttpReq.responseText);
+    } else {
+      const numSegsJson = JSON.parse(XmlHttpReq.responseText);
+      console.log("found " + numSegsJson.numSegs + "segs that match");
+
+      if (numSegsJson.numSegs) {
+        const segURL = "http://" + window.location.host + "/dicoms/"
+          + numSegsJson.segSopInstanceUid + ".dcm";
+        console.log(segURL);
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", () => {
+          parseSeg(xhr.response);
+        });
+        xhr.addEventListener("error", () => {
+          console.log(`Request returned, status: ${xhr.status}`);
+          console.log(xhr.message);
+        });
+        xhr.open("GET", segURL);
+        xhr.responseType = "arraybuffer"; //Type of file
+        xhr.send();
+      } else {
+        window.alert("no segs found, we'll create one instead");
+      }
+    }
+  });
+
+  const studyInstanceUid = studyUrl;
+  const matchingSeriesInstanceUid = seriesUrl;
+  XmlHttpReq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "matchingSeriesInstanceUid": matchingSeriesInstanceUid
+  }
+  XmlHttpReq.send(JSON.stringify(seriesMetadata));
+}
+
 //handler for the series searchbar
 function retrieveSeriesHandler(seriesID) {
   seriesUrl = seriesID;
   //close seriesSearch display
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   console.log("Class list is " + seriesOverlay.classList);
   seriesOverlay.style.display = "none";
   seriesOverlay.classList.remove("Shown");
@@ -183,19 +237,18 @@ function retrieveSeriesHandler(seriesID) {
 function retrieveStudyHandler(studyID) {
   studyUrl = studyID;
   //close studySearch display
-  var studyOverlay = document.getElementById('StudySearch');
+  const studyOverlay = document.getElementById('StudySearch');
   studyOverlay.style.display = "none";
   studyOverlay.classList.remove("Shown");
   studyOverlay.classList.add("Hidden");
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
   seriesOverlay.classList.add("Shown");
   //get the series
   console.log("Retrieving series in study " + studyUrl);
   seriesSearch(studyID);
-
 }
-const studyElements = document.getElementById('studyElements')
+const studiesList = document.getElementById('studiesList')
 const searchBar = document.getElementById('searchBar');
 
 searchBar.addEventListener('keyup', (e) => {
@@ -205,9 +258,9 @@ searchBar.addEventListener('keyup', (e) => {
   const filteredSeries = allStudies.filter((series) => {
     return (
       series.patientName.toLowerCase().includes(searchString) ||
-      series.studyID.toLowerCase().includes(searchString)||
-      series.MRN.toLowerCase().includes(searchString)||
-      series.accessionNumber.toLowerCase().includes(searchString)||
+      series.studyID.toLowerCase().includes(searchString) ||
+      series.MRN.toLowerCase().includes(searchString) ||
+      series.accessionNumber.toLowerCase().includes(searchString) ||
       series.scanDate.toLowerCase().includes(searchString)
     );
   });
@@ -215,19 +268,21 @@ searchBar.addEventListener('keyup', (e) => {
 });
 
 const displayStudies = (series) => {
-  studyElements.innerHTML = '';
+  studiesList.innerHTML = '';
   series.forEach(element => {
-    var tableEl = document.createElement('tr');
+    const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveStudyHandler(element.studyID)
     });
-    studyElements.append(tableEl);
+    studiesList.append(tableEl);
   });
+  document.getElementById("StudySearch").style.display = "block";
+  hideViewportLoading();
 };
 
 //Search bar implementation
-const seriesElements = document.getElementById('seriesElements')
+const seriesList = document.getElementById('seriesList')
 const searchBarSeries = document.getElementById('searchBarSeries');
 
 searchBarSeries.addEventListener('keyup', (e) => {
@@ -245,28 +300,30 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const displaySeries = (instances) => {
-  seriesElements.innerHTML = '';
+  seriesList.innerHTML = '';
   instances.forEach(element => {
-    var tableEl = document.createElement('tr');
+    const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
     tableEl.addEventListener('click', function () {
       retrieveSeriesHandler(element.seriesId)
     });
-    seriesElements.append(tableEl);
+    seriesList.append(tableEl);
   });
+  document.getElementById("SeriesSearch").style.display = "block";
+  hideViewportLoading();
 };
 
-function StudySelect(){
+function StudySelect() {
   console.log("re-displaying study search");
-  var studyOverlay = document.getElementById('StudySearch');
+  const studyOverlay = document.getElementById('StudySearch');
   studyOverlay.classList.remove("Hidden");
   studyOverlay.classList.add("Shown");
   studySearch();
 }
 
-function SeriesSelect(){
+function SeriesSelect() {
   console.log("re-displaying series search");
-  var seriesOverlay = document.getElementById('SeriesSearch');
+  const seriesOverlay = document.getElementById('SeriesSearch');
   seriesOverlay.classList.remove("Hidden");
   seriesOverlay.classList.add("Shown");
   seriesSearch(studyUrl)

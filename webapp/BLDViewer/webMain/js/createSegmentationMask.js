@@ -1,53 +1,8 @@
 let metaData = {};
 
-const switchSegment = document.getElementById("switchSegment");
-
-for (let i = 1; i <= 8; i++) {
-  const option = document.createElement("option");
-  option.text = i;
-  option.value = i;
-  switchSegment.add(option);
-}
-
-document.getElementById("switchSegment")[0].selected = true;
-document.getElementById("switchActiveLabelmap")[0].selected = true;
-
-function changeSegment() {
-  const segmentIndex = document.getElementById("switchSegment").value;
-  const element = document.getElementsByClassName("viewport-element")[0];
-  console.log("Active Segment index is " + segmentIndex);
-  const { setters } = cornerstoneTools.getModule("segmentation");
-  setters.activeSegmentIndex(element, parseInt(segmentIndex));
-}
-
-function changeLabelmap() {
-  const labelmapIndex = document.getElementById("switchActiveLabelmap").value;
-  const segmentIndex = document.getElementById("switchSegment").value;
-  const element = document.getElementsByClassName("viewport-element")[0];
-
-  const { setters } = cornerstoneTools.getModule("segmentation");
-  setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
-  setters.activeSegmentIndex(element, parseInt(segmentIndex));
-  cornerstone.updateImage(element);
-}
-
-function toggleSeg() {
-  segOptions = document.getElementById("segOptions");
-  if (segOptions.className == "Hidden") {
-    segOptions.className = "Shown";
-    cornerstoneTools.setToolActive("Brush", {mouseButtonMask: 1});
-  } else {
-    segOptions.className = "Hidden";
-    cornerstoneTools.setToolActive("Wwwc", {mouseButtonMask: 1});
-  }
-}
-//TODO: implement functions to switch between the brush and erase tool
-//REMEMBER: need to establish if the erase tool actually works in this context
-//if not: there is an undo and redo button we can implement instead/additionally
-
 function createSeg() {
-  const element = document.getElementsByClassName("viewport-element")[0];
-  // const element = document.getElementById("cornerstoneViewport");
+  const element = document.getElementById("cornerstoneViewport");
+  // const element = document.getElementsByClassName("viewport-element")[0];
   console.log(element);
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;
@@ -71,7 +26,7 @@ function createSeg() {
     return;
   }
 
-  console.log("label maps 3D length " + labelmaps3D.length);
+  console.log("label maps 3D length is " + labelmaps3D.length);
 
   for (
     let labelmapIndex = 0;
@@ -80,7 +35,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log( "labeel maps 2D length is" + labelmaps2D.length);
+    console.log( "Label maps 2D length is " + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -163,7 +118,8 @@ function addMetaData(type, imageId, data) {
 }
 
 //
-// creates an array of per-frame imageIds in the form needed for cornerstone processing.
+// creates an array of per-frame imageIds in the form needed 
+// for cornerstone processing.
 //
 function getImageIds(multiframe, baseImageId) {
   const imageIds = [];

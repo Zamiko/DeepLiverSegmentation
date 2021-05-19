@@ -24,14 +24,15 @@
       <div id="searchWrapper">
         <input type="text" name="searchBar" id="searchBar" placeholder="search for a study by ID or patient ID" />
       </div>
-      <table id="studyElements"></table>
+      <table id="studiesList"></table>
     </div>
     <div class="Overlay Shown" id="SeriesSearch">
       <div id="SeriesSearchWrapper">
         <input type="text" name="searchBarSeries" id="searchBarSeries" placeholder="search for a series" />
       </div>
-      <table id="seriesElements"></table>
+      <table id="seriesList"></table>
     </div>
+
     <div class="main-button-bar">
       <div class="buttons mode-buttons">
         <button class="button set-tool-mode is-primary" data-action="Zoom">
@@ -43,13 +44,11 @@
         <button class="button set-tool-mode" data-action="Wwwc">
           Wwwc
         </button>
+        <button class="button set-tool-mode" data-action="StackScroll">
+          Stack Scroll
+        </button>
       </div>
-      <button class="button" id="segmentation" onclick="toggleSeg()">
-        Segmentation
-      </button>
-    </div>
-    <div class="row">
-      <div class="Hidden" id="segOptions">
+      <div class="seg-buttons">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
         <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
         <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
@@ -62,15 +61,10 @@
           <option value="0">1</option>
           <option value="1">2</option>
         </select>
-        <!-- TODO add erase buttons -->
-        <!-- add size adjustment to the brush and erase size -->
         <button class="button set-tool-mode" data-action="Brush">
           Brush
         </button>
         <input type="range" class="brush-slider" min="1" max="50" value="10">
-        <!-- <button class="button set-tool-mode" data-action="FreehandScissors">
-          FreehandScissors
-        </button> -->
         <button class="button control-history" data-action="undo">
           Undo
         </button>
@@ -78,7 +72,17 @@
           Redo
         </button>
       </div>
+      <!-- <button class="button" id="segmentation" onclick="toggleSeg()">
+        Segmentation
+      </button> -->
+    </div>
+    <div class="row">
+      <!-- <div class="Hidden" id="segOptions">
+
+      </div> -->
       <p id="statusLine"></p>
+      <div class=" Shown" id="LoadingScreen">
+      </div>
       <div class="col-xs-9" id="divViewport">
         <div oncontextmenu="return false" class="cornerstone-enabled-image" unselectable="on"
           onselectstart="return false;" onmousedown="return false;">
@@ -89,11 +93,8 @@
   </div>
 
   <!-- include the hammer.js library for touch gestures-->
-
-
-  <!-- include the cornerstone library -->
-  <!-- include the hammer.js library for touch gestures-->
   <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+  <!-- include the cornerstone library -->
   <script src="https://unpkg.com/dicom-parser@1.8.3/dist/dicomParser.min.js"></script>
 
   <!-- include the cornerstone library -->
