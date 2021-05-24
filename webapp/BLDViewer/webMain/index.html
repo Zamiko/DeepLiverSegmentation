@@ -18,6 +18,10 @@
         <button class="button" id="saveDICOM" onclick="store()">test save</button>
         <button class="button" id="studySelect" onclick="StudySelect()">Select Study</button>
         <button class="button" id="seriesSelect" onclick="SeriesSelect()">Select Series</button>
+        <!--FIXME: may need to change format of the button here-->
+        <button class="button" id="uploadFiles">Upload Files<input type="file" onchange="selectFolder(event);" webkitdirectory mozdirectory msdirectory odirectory directory multiple="multiple" /></button>
+        <button class="button" id="downloadFiles" onclick="downloadFiles()">Download Files</button>
+        
       </div>
     </div>
     <div class="Overlay Shown" id="StudySearch">
@@ -131,6 +135,7 @@
 
   <script src="./js/viewport.js"></script>
   <script src="./js/handleDICOM.js"></script>
+  <script src="./js/fileHandler.js"></script>
 </body>
 <!--Might attach a footer here in the future with credits-->
 <footer>

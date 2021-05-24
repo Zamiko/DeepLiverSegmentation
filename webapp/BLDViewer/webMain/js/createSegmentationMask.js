@@ -10,7 +10,7 @@ function createSeg() {
 
   const stackToolState = cornerstoneTools.getToolState(element, "stack");
   const imageIds = stackToolState.data[0].imageIds;
-
+  
   let imagePromises = [];
   for (let i = 0; i < imageIds.length; i++) {
     imagePromises.push(cornerstone.loadImage(imageIds[i]));
@@ -51,24 +51,29 @@ function createSeg() {
       });
     }
   }
-
   Promise.all(imagePromises)
     .then(images => {
       //this will convert the segmentation mask to a binary file
-      console.log(images.length);
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         labelmaps3D
       );
-
-      //TODO: we'll want to override this so that it instead saves to the location of the DICOM image it's segmenting?
-      //Create a URL for the binary.
-      console.log("created image");
+      const formData = new FormData();
+      // create a file from the blob
+      //FIXME: nameString should actually be the instanceId or based off the instance id
+      //is this...necessary if store + retrieve are only dependent on metadata and don't care abt file names?
+      //idea being, after saving seg mask to disk, just need to store() and retrieve() same study
+      var nameString = Math.random().toString(20).substr(2, 10);
+      nameString += "-SEG.dcm";
+      //var segFile = new File(segBlob, "test.dcm");
+      formData.append("newSeg", segBlob, nameString);
+      console.log("Saving " + nameString);
+      //FIXME: remove this, only using it to check that the file is being saved to the disc as it should
       var objectUrl = URL.createObjectURL(segBlob);
       console.log(objectUrl);
-      //console.log(window);
-      //window.open(objectUrl);
-      //need an http request again
+      console.log(window);
+      window.open(objectUrl);
+
       const xHTTPreq = new XMLHttpRequest();
       xHTTPreq.open("POST", "/saveSeg");
       xHTTPreq.addEventListener("load", function() {
@@ -79,8 +84,7 @@ function createSeg() {
           console.log("Save successful")
         }
       });
-      //FIXME: I believe I can simply send a Blob to the backend--if not, might have to do a bit of work so it's properly recognized as a file
-      xHTTPreq.send(segBlob);
+      xHTTPreq.send(formData);
     })
     .catch(err => console.log(err));
 }

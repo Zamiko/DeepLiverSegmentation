@@ -2,10 +2,12 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+// need this for the blob saving
+const multer = require('multer');
+var zip = require('express-easy-zip');
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
-app.use(express.json());
 
 //was trying to implement all this via a python script
 // however have to figure out authentication for that
@@ -50,12 +52,55 @@ function deletePreviousDICOMs() {
     });
   });
 }
+//think this will link directly to the storage
+const dcmStorage = multer.diskStorage({
+  // Destination to store dicom     
+  destination: function(req, file, cb) {
+    cb(null, __dirname + "/webMain/dicoms/");
+  },
+    filename: (req, file, cb) => {
+      //Fixme: need to add file name extension
+      cb(null, file.originalname)
+  }
+});
+
+const dcmUpload = multer({
+  storage: dcmStorage,
+  //limits
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(dcm)$/)) { 
+       // upload only dcm
+       return cb(new Error('Please upload a dicom series'))
+    }
+    cb(undefined, true)
+  }
+}) 
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
+app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
+  //res.send(req.file)
+  console.log("files successfully uploaded");
+  res.status(200).send({message: "all good!"})
+}, (error, req, res, next) => {
+  console.log("files unsuccessfully uploaded");
+  res.status(400).send({ error: error.message })
+});
 
+
+app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
+  //res.send(req.file)
+  console.log("seg successfully saved");
+  res.status(200).send({message: "all good!"})
+}, (error, req, res, next) => {
+  console.log("seg unsuccessfully saved");
+  res.status(400).send({ error: error.message })
+});
+
+//all functions below expect to recieve and return JSONs
+app.use(express.json());
 
 app.get("/store", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -70,8 +115,7 @@ app.get("/store", async (req, res) => {
   });
   // Ideally I think we should aim to only have one study held locally 
   // (per user???) so we can just link from that location 
-  fileFolder = "webMain/11-13-2003-threephaseabdomen-49621/" +
-    "5.000000-arterial-92922/"
+  fileFolder = "webMain/dicoms/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
