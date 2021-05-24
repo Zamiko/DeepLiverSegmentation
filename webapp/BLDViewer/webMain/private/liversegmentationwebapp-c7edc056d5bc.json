@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "liversegmentationwebapp",
+  "private_key_id": "c7edc056d5bc32770938cb7a6412f2e12abd77cb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDHPmnXhdv5Q9Az\nlQm/0G5QzAAbtiX02XNjGNXYnSOrF5fIrdgmWodJCmTXBD52cL0O4hQIKNYKmJaX\nNgwf68pjA71LCl714SmJRXBZqLxonw/TIfQ6Hqt+a5maP+4X84V7hWTqiw98CvxX\npMtc+/tMzKxo4i3CMEy4QXKab3UH+xjLzmfUxpvT/cvRodVyMYOUbzzAlwaCVtcM\ndwuTZ+gBzAQJOaOjY+byMaXkcMiiMsvfLkyKMPgkKdBcm6MOhq8BE0dzbVgbnH+T\n8krzqhm3QjmD4gBf7Q661/2YXWlAp1Ug4q7HEGdl9kaeCOH5woSEYMdPG4osgIzi\nMHq2H7ErAgMBAAECggEAJv/Uf9c3w4a+jhoyGlWWAkKsEsCIlXCq4U7PLOM1RBwO\nHb3JfVhi+q0KJ/wwrcZLe0pNWXuEyfYsI9T0cpsYtmDZAIM7Ky2zj6cD4sjgeCoK\nUu1mfKncL5aoLkUtOYr1KcRmiHJHyaPs2Mrs83pvKg02AiGji0sg+T/2SrxeT/1B\nxTegFFY/SiB6ly0rvs4D8ffhB+biP0ZthFWnNyxizi8XFkjqVXoK69InfqEWC/sd\nBDIV+R1wU6QAoEiN3puRKPXNRaUwxGJvoQE1QDMN5vIn/MzM+JdXq5PCTaCiZEKV\nNHOl/D4QCu8A4FWPUy4KSre2wNBWyC3r+RFxod8PYQKBgQDuk6Ji4en5FwoYQJfm\n7umqp2jEgC2aIvOliqL6+OduVOWvDi4M1A7BBQGkeriC6iXn+Y/IRvHoEM4DT9A3\nujzW5qzb5osGPphsVHEOmnEdqdFUkkVmV5lpeoyLf43Kd4gBM1uohiq87bfJP2OX\nt7wPE0TtRumqFQvrGsUBxmg1hwKBgQDVy2wDbsjEQd2nwmAqJJKWwD8qbR2gS7yp\nbffqWcV8GUPIOJcw/BttLGNEXu6KRIUWXEH0rDp75e5vVEtqjDemCsZnzz/oJKKb\nrkknPx0VZaWZsHVfQNY8EBdxHIESWt00BFcpDz6qXrgRTKLm8LxZ936laqM8R5OF\ndgyqcRmQPQKBgQC1xdxqtK/87jXtxoE2HYABWy3y0aptDwZOcbO9vpkuMhcR6p7h\nfUyEehkHRc2BSX96IGYRdSRo6SzdzxjY7Nff8L9xiFUSe+zMVQYS108qB7ILWqrv\nz/x+JjYhLx1MTwhbydKjMx4q9oAaIGb0OLRbVBYnJulvgjujdLD3qkDJzwKBgQC+\nLSKa9xweAB0k0nHqavf+o2pM2h1FbrmW2VxzmYFjP7Ic08Ih79CRz69JrUxxsDvW\nxSBifiXT+pebbpdbYvlJeUI+K4xEevouk908zRaY5v9k9COkJK+tY/8GPf3Ojwc/\n8zB5NLdgo7sGoG40EibpvI9qo64qu9zNFlJz9wFvXQKBgBNd5D7fnfcXiCpdP1l6\nnnIv5Tho9T68D7amN4R7OPvaZOlmPIJGre07WNqG0BDC1wX3St6aF4EPpFCnOEEE\nm5ADAaksuQAwUqnS9C67N1BR0J/Bo6vftIXRa1mzexoFpVtAbefRwvZwWGdIWrl4\nA4P0F0uTh1QIhhOiOEyQgXdG\n-----END PRIVATE KEY-----\n",
+  "client_email": "bld-732@liversegmentationwebapp.iam.gserviceaccount.com",
+  "client_id": "106975064713341818577",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bld-732%40liversegmentationwebapp.iam.gserviceaccount.com"
+}

@@ -1,0 +1,144 @@
+/* this file is loaded by index.html and styles the page */
+html, body{
+  margin:0;
+  height: 100%;
+  font-family: Helvetica, sans-serif;
+  background-color: #161616;
+  color: #cecaca;
+}
+footer{
+  margin:0;
+  background-color: #497c3a;
+  color: #cecece;
+  padding: 10px;
+}
+.container{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.page-header{
+  display: flex;
+  flex-direction: row;
+  height: 10%;
+}
+.main-button-bar, #segoptions{
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  padding-bottom: 5px;
+}
+.row{
+  height: 75%;
+}
+.col-xs-9{
+  height: 100%;
+}
+.cornerstone-enabled-image ,#cornerstoneViewport{
+  height: 100%;
+}
+.button{
+  background-color: #497c3a;
+  border-radius: 10px;
+  color: #000000;
+  padding: 5px 5px;
+  text-align: center;
+  margin-right: 15px;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+.brush-slider {
+  -webkit-appearance: none;
+  /* width: 100%; */
+  height: 10px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.brush-slider:hover {
+  opacity: 1;
+}
+.brush-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #497c3a;
+  cursor: pointer;
+}
+.brush-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: #497c3a;
+  cursor: pointer;
+}
+.Hidden {
+  display: none;
+  opacity: 0;
+}
+.Shown {
+  display: block;
+  opacity: 1;
+}
+.Overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,1.0);
+  z-index: 2;
+}
+#LoadingScreen{
+  width: 300px;
+  height: 300px;
+  margin: auto;
+  /* position: relative; */
+  background: url('./Liver_03_animation_tranparent.gif') center;
+}
+#StudySearch{
+  position: fixed;
+  z-index: 9;
+}
+#SeriesSearch{
+  position: fixed;
+  z-index: 8;
+}
+#seriesList, #studiesList{
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+#searchBar, #searchBarSeries {
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#studiesList, #seriesList {
+  border-collapse: collapse;
+  width: 100%; 
+  border: 1px solid #ddd;
+  font-size: 18px;
+}
+
+#studiesList th, #studiesList td, #seriesList th, #seriesList td{
+  text-align: left;
+  padding: 12px;
+}
+
+#studiesList tr, #seriesList tr {
+  border-bottom: 1px solid #ddd;
+}
+
+#studiesList tr.header, #studiesList tr:hover, #seriesList tr.header, #seriesList tr:hover {
+  background-color: #f1f1f1;
+  color: #000000;
+}
