@@ -27,9 +27,10 @@ function store() {
   xHTTPreq.open("GET", "/store", true);
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
+      console.log("Something went wrong");
       console.log(xHTTPreq.responseText);
     } else {
-      console.log("Store successful")
+      console.log("Stored successfully");
     }
   };
   xHTTPreq.send();

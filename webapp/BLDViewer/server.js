@@ -2,10 +2,12 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+// need this for the blob saving
+const multer = require('multer');
+var zip = require('express-easy-zip');
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
-app.use(express.json());
 
 //was trying to implement all this via a python script
 // however have to figure out authentication for that
@@ -50,12 +52,55 @@ function deletePreviousDICOMs() {
     });
   });
 }
+//think this will link directly to the storage
+const dcmStorage = multer.diskStorage({
+  // Destination to store dicom     
+  destination: function(req, file, cb) {
+    cb(null, __dirname + "/webMain/dicoms/");
+  },
+    filename: (req, file, cb) => {
+      //Fixme: need to add file name extension
+      cb(null, file.originalname)
+  }
+});
+
+const dcmUpload = multer({
+  storage: dcmStorage,
+  //limits
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(dcm)$/)) { 
+       // upload only dcm
+       return cb(new Error('Please upload a dicom series'))
+    }
+    cb(undefined, true)
+  }
+}) 
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
+app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
+  //res.send(req.file)
+  console.log("files successfully uploaded");
+  res.status(200).send({message: "all good!"})
+}, (error, req, res, next) => {
+  console.log("files unsuccessfully uploaded");
+  res.status(400).send({ error: error.message })
+});
 
+
+app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
+  //res.send(req.file)
+  console.log("seg successfully saved");
+  res.status(200).send({message: "all good!"})
+}, (error, req, res, next) => {
+  console.log("seg unsuccessfully saved");
+  res.status(400).send({ error: error.message })
+});
+
+//all functions below expect to recieve and return JSONs
+app.use(express.json());
 
 app.get("/store", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -70,20 +115,19 @@ app.get("/store", async (req, res) => {
   });
   // Ideally I think we should aim to only have one study held locally 
   // (per user???) so we can just link from that location 
-  fileFolder = "webMain/11-13-2003-threephaseabdomen-49621/" +
-    "5.000000-arterial-92922/"
+  fileFolder = "webMain/dicoms/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
       process.exit(1);
     }
-
+    numFilesSaved = 1;
     files.forEach(async (file, index) => {
-      // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+      //FIXME: seems to be only saving last file over and over and over again
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
-      filePath = fileFolder + "/" + file
+      filePath = fileFolder + file
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -96,10 +140,13 @@ app.get("/store", async (req, res) => {
           request
         );
       console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+      console.log("Stored file number " + numFilesSaved);
+      numFilesSaved += 1;
     });
   });
-}
-);
+  res.status(200);
+  console.log("Done")
+});
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
   sopInstanceUid) {
@@ -310,21 +357,6 @@ app.get("/delete", async (req, res) => {
   console.log('Deleted DICOM study');
 });
 
-//this will be used to save segmentation files locally
-app.post("/saveSeg", (req, res) => {
-  console.log(req.body);
-  const { objectUrl } = req.body;
-  console.log("Saving " + objectUrl);
-  filePlace = "/dicoms/";
-  filePlace + `${objectUrl}`
-  console.log(" to " + filePlace);
-  fs.writeFile(filePlace, objectUrl, function (err) {
-    if (err) {
-      return console.error(err);
-    }
-    console.log("Data written successfully");
-  });
-});
 
 //check for invalid function calls
 app.all("*", function (request, response) {

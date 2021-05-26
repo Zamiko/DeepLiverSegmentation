@@ -10,7 +10,7 @@ function createSeg() {
 
   const stackToolState = cornerstoneTools.getToolState(element, "stack");
   const imageIds = stackToolState.data[0].imageIds;
-
+  
   let imagePromises = [];
   for (let i = 0; i < imageIds.length; i++) {
     imagePromises.push(cornerstone.loadImage(imageIds[i]));
@@ -51,24 +51,18 @@ function createSeg() {
       });
     }
   }
-
   Promise.all(imagePromises)
     .then(images => {
       //this will convert the segmentation mask to a binary file
-      console.log(images.length);
       const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
         images,
         labelmaps3D
       );
-
-      //TODO: we'll want to override this so that it instead saves to the location of the DICOM image it's segmenting?
-      //Create a URL for the binary.
-      console.log("created image");
-      var objectUrl = URL.createObjectURL(segBlob);
-      console.log(objectUrl);
-      //console.log(window);
-      //window.open(objectUrl);
-      //need an http request again
+      const formData = new FormData();
+      // create a file from the blob
+      var nameString = "SEG.dcm";
+      formData.append("newSeg", segBlob, nameString);
+      console.log("Saving " + nameString);
       const xHTTPreq = new XMLHttpRequest();
       xHTTPreq.open("POST", "/saveSeg");
       xHTTPreq.addEventListener("load", function() {
@@ -77,10 +71,10 @@ function createSeg() {
         }
         else{
           console.log("Save successful")
+          //store()?--need to find a way to delete segmentation masks previously saved for this series
         }
       });
-      //FIXME: I believe I can simply send a Blob to the backend--if not, might have to do a bit of work so it's properly recognized as a file
-      xHTTPreq.send(segBlob);
+      xHTTPreq.send(formData);
     })
     .catch(err => console.log(err));
 }
