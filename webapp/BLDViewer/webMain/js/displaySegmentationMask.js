@@ -3,7 +3,7 @@ function getAndLoadSeg() {
     var segURL =
         "http://" +
         window.location.host +
-        "/segmentation3.dcm";
+        "/dicoms/SEG.dcm";
     // "/11-13-2003-threephaseabdomen-49621/300.000000-Segmentation-44409/1-1.dcm";
     console.log(segURL);
     const xhr = new XMLHttpRequest();

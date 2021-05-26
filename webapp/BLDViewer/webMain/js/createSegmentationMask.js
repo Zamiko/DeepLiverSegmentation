@@ -60,20 +60,9 @@ function createSeg() {
       );
       const formData = new FormData();
       // create a file from the blob
-      //FIXME: nameString should actually be the instanceId or based off the instance id
-      //is this...necessary if store + retrieve are only dependent on metadata and don't care abt file names?
-      //idea being, after saving seg mask to disk, just need to store() and retrieve() same study
-      var nameString = Math.random().toString(20).substr(2, 10);
-      nameString += "-SEG.dcm";
-      //var segFile = new File(segBlob, "test.dcm");
+      var nameString = "SEG.dcm";
       formData.append("newSeg", segBlob, nameString);
       console.log("Saving " + nameString);
-      //FIXME: remove this, only using it to check that the file is being saved to the disc as it should
-      var objectUrl = URL.createObjectURL(segBlob);
-      console.log(objectUrl);
-      console.log(window);
-      window.open(objectUrl);
-
       const xHTTPreq = new XMLHttpRequest();
       xHTTPreq.open("POST", "/saveSeg");
       xHTTPreq.addEventListener("load", function() {
@@ -82,6 +71,7 @@ function createSeg() {
         }
         else{
           console.log("Save successful")
+          //store()?--need to find a way to delete segmentation masks previously saved for this series
         }
       });
       xHTTPreq.send(formData);

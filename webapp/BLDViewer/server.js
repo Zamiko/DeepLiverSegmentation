@@ -121,13 +121,13 @@ app.get("/store", async (req, res) => {
       console.error("Could not list the directory.", err);
       process.exit(1);
     }
-
+    numFilesSaved = 1;
     files.forEach(async (file, index) => {
-      // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+      //FIXME: seems to be only saving last file over and over and over again
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
-      filePath = fileFolder + "/" + file
+      filePath = fileFolder + file
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -140,10 +140,13 @@ app.get("/store", async (req, res) => {
           request
         );
       console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+      console.log("Stored file number " + numFilesSaved);
+      numFilesSaved += 1;
     });
   });
-}
-);
+  res.status(200);
+  console.log("Done")
+});
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
   sopInstanceUid) {
@@ -354,21 +357,6 @@ app.get("/delete", async (req, res) => {
   console.log('Deleted DICOM study');
 });
 
-//this will be used to save segmentation files locally
-app.post("/saveSeg", (req, res) => {
-  console.log(req.body);
-  const { objectUrl } = req.body;
-  console.log("Saving " + objectUrl);
-  filePlace = "/dicoms/";
-  filePlace + `${objectUrl}`
-  console.log(" to " + filePlace);
-  fs.writeFile(filePlace, objectUrl, function (err) {
-    if (err) {
-      return console.error(err);
-    }
-    console.log("Data written successfully");
-  });
-});
 
 //check for invalid function calls
 app.all("*", function (request, response) {
