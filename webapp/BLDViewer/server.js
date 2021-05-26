@@ -89,6 +89,30 @@ app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
   res.status(400).send({ error: error.message })
 });
 
+app.get('/launchMachine', (req, res) => {
+  // TODO check if series exists in our folder
+  // 
+  let dataToSend;
+  // hardcoded dicom folder into the python script 
+  const spawn = require("child_process").spawn;
+  const python = spawn('python3', ['./SeriesToSeg.py']);
+  //We can only retrieve data sent to a stream in the python script
+  // I don't know that this might be necessary for our purposes
+  //but could be nice to get a message indicating the model is finished
+  python.stdout.on('data', function (data) {
+    console.log('Pipe data from python script ...');
+    dataToSend = data.toString();
+  });
+  // in close event we are sure that stream from child process is closed
+  python.on('close', (code) => {
+    console.log(`child process close all stdio with code ${code}`);
+    console.log(dataToSend);
+    //send the data back to the browser, as we have before
+    // once browser receives this, it can load the seg created
+    res.status(200);
+    res.send(dataToSend)
+  });
+})
 
 app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
   //res.send(req.file)
@@ -309,7 +333,7 @@ app.post("/loadSeg", async (req, res) => {
       console.log(error);
       res.status(404);
     });
-  console.log(`Found ${studySegInstances.data.length} instances:`);
+  console.log(`Found ${studySegInstances.data.length} instances in same study`);
 
   let matchingSegInstances = [];
   studySegInstances.data.forEach((instance) => {

@@ -1,9 +1,8 @@
 function getAndLoadSeg() {
     // This  will change as we select the correct study and series
     var segURL =
-        "http://" +
-        window.location.host +
-        "/dicoms/SEG.dcm";
+        window.location.origin +
+        "/seg/segmentation.dcm";
     // "/11-13-2003-threephaseabdomen-49621/300.000000-Segmentation-44409/1-1.dcm";
     console.log(segURL);
     const xhr = new XMLHttpRequest();

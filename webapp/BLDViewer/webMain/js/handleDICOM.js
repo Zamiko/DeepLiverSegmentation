@@ -134,8 +134,22 @@ function studySearch() {
   showLoading();
 }
 
-function seriesSearch(studyID) {
-  console.log("Searching for available series in study " + studyID);
+function launchMachine() {
+  console.log("Launching machine");
+  const xHttpReq = new XMLHttpRequest();
+  xHttpReq.open("GET", "/launchMachine");
+  xHttpReq.addEventListener("load", function () {
+    if (xHttpReq.status != 200) {
+      console.log(xHttpReq.responseText);
+    } else {
+      getAndLoadSeg();
+    }
+  });
+  xHttpReq.send();
+}
+
+function seriesSearch(studyInstanceUid) {
+  console.log("Searching for available series in study " + studyInstanceUid);
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/searchSeries");
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
@@ -171,8 +185,9 @@ function seriesSearch(studyID) {
       displaySeries(allSeries);
     }
   });
+  const studyId = studyUrl;
   const studyIdJson = {
-    "studyInstanceUid": studyID
+    "studyInstanceUid": studyId
   }
   xHTTPreq.send(JSON.stringify(studyIdJson));
   showLoading();
@@ -206,7 +221,8 @@ function loadSegmentation() {
         xhr.responseType = "arraybuffer"; //Type of file
         xhr.send();
       } else {
-        window.alert("no segs found, we'll create one instead");
+        window.alert("No segmentation masks were found. We will create one :)");
+        launchMachine();
       }
     }
   });
