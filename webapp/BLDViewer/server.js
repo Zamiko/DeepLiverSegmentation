@@ -114,6 +114,27 @@ app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
   res.status(400).send({ error: error.message })
 });
 
+app.use(zip());
+app.get('/zip', function(req, res, next) {
+  var dirPath = `${__dirname}/webMain/dicoms`;
+  var nameString = 'bld-dicoms';
+  nameString += '.zip'
+  res.zip({
+       files: [
+           {   
+                content: 'DICOM images',      
+                name: 'bld-dicoms',
+                mode: 0755,
+                comment: 'DICOM images downloaded from BLDs liver segmenter',
+                date: new Date(),
+                type: 'file' },
+           { path: dirPath, name: 'dicoms' }    
+       ],
+         filename: nameString
+    });
+  console.log("All zipped");
+});
+
 // All functions below expect to recieve and return JSONs
 app.use(express.json());
 
@@ -158,7 +179,7 @@ app.get("/store", async (req, res) => {
     });
   });
   res.status(200);
-  console.log("Done")
+  console.log("Done storing")
 });
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
