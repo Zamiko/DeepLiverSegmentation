@@ -9,8 +9,6 @@ var zip = require('express-easy-zip');
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
 
-//was trying to implement all this via a python script
-// however have to figure out authentication for that
 const { google } = require('googleapis');
 const { resolve } = require("path");
 const healthcare = google.healthcare('v1');
@@ -23,7 +21,6 @@ const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
 const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/` +
   `${datasetId}/dicomStores/${dicomStoreId}`;
-
 
 function setRetrieveOptions(auth) {
   google.options({
@@ -52,7 +49,7 @@ function deletePreviousDICOMs() {
     });
   });
 }
-//think this will link directly to the storage
+
 const dcmStorage = multer.diskStorage({
   // Destination to store dicom     
   destination: function(req, file, cb) {
@@ -80,6 +77,7 @@ const dcmUpload = multer({
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
+
 app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
   //res.send(req.file)
   console.log("files successfully uploaded");
@@ -90,32 +88,25 @@ app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
 });
 
 app.get('/launchMachine', (req, res) => {
-  // TODO check if series exists in our folder
-  // 
   let dataToSend;
-  // hardcoded dicom folder into the python script 
   const spawn = require("child_process").spawn;
   const python = spawn('python', ['./SeriesToSeg.py']);
-  //We can only retrieve data sent to a stream in the python script
-  // I don't know that this might be necessary for our purposes
-  //but could be nice to get a message indicating the model is finished
+  // Send python stdout back to server
   python.stdout.on('data', function (data) {
     console.log('Pipe data from python script ...');
     dataToSend = data.toString();
   });
-  // in close event we are sure that stream from child process is closed
+  // In close event we are sure that stream from child process is closed
   python.on('close', (code) => {
     console.log(`child process close all stdio with code ${code}`);
     console.log(dataToSend);
-    //send the data back to the browser, as we have before
-    // once browser receives this, it can load the seg created
+    // Once browser receives this, it can load created segmentation
     res.status(200);
     res.send(dataToSend)
   });
 })
 
 app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
-  //res.send(req.file)
   console.log("seg successfully saved");
   res.status(200).send({message: "all good!"})
 }, (error, req, res, next) => {
@@ -123,7 +114,7 @@ app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
   res.status(400).send({ error: error.message })
 });
 
-//all functions below expect to recieve and return JSONs
+// All functions below expect to recieve and return JSONs
 app.use(express.json());
 
 app.get("/store", async (req, res) => {
@@ -137,8 +128,6 @@ app.get("/store", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
-  // Ideally I think we should aim to only have one study held locally 
-  // (per user???) so we can just link from that location 
   fileFolder = "webMain/dicoms/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
@@ -174,7 +163,6 @@ app.get("/store", async (req, res) => {
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
   sopInstanceUid) {
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/series/` +
     `${seriesInstanceUid}/instances/${sopInstanceUid}`;
   const instanceReq = { parent, dicomWebPath };
@@ -202,7 +190,6 @@ app.post("/retrieve", async (req, res) => {
   });
 
   const { studyInstanceUid, seriesInstanceUid } = req.body;
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/series/` +
     `${seriesInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
@@ -262,13 +249,11 @@ app.get("/search", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  // console.log()
   google.options({
     auth,
     headers: { Accept: 'application/dicom+json,multipart/related' },
   });
 
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = 'studies';
   const request = { parent, dicomWebPath };
 
@@ -295,7 +280,6 @@ app.post("/searchSeries", async (req, res) => {
   });
   const { studyInstanceUid } = req.body;
   console.log("retrieving from " + studyInstanceUid);
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/series`;
   const request = { parent, dicomWebPath };
 
@@ -322,7 +306,6 @@ app.post("/loadSeg", async (req, res) => {
   });
 
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
 
@@ -371,7 +354,6 @@ app.get("/delete", async (req, res) => {
   google.options({ auth });
   var StudyInstanceUID =
     "1.2.124.113532.192.70.134.138.20051021.154305.4450732";
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${StudyInstanceUID}`;
   const request = { parent, dicomWebPath };
 

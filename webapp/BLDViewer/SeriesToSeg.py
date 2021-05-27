@@ -67,7 +67,7 @@ def getSliceLocation(slice):
   return float(slice.SliceLocation)
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
-metainfo = './metainfo.json' # TODO: Modify metainfo.json according to the needs of the user
+metainfo = './metainfo.json' 
 series_path = './webMain/dicoms/'
 model_path = './machineModel'
 seriesNii_path = './nii/seriesNii.nii'
@@ -97,14 +97,12 @@ source_images = [
     for x in dicom_series_paths_new
 ]
 
-# TODO: Sort the Pydicom files by z position on image position patient attributes
 # Sort by Slice location
 source_images = sorted(source_images, key = getSliceLocation)
 # Create and save a nifti volume of the DICOM series
 dicom2nifti.dicom_series_to_nifti(series_path, seriesNii_path)
 
 # Transpose the input series matrix to the correct orientation
-# TODO: Modify this so that it flips it to the correct orientation for any input orientation
 
 # Load the series and the model
 model = load_model(model_path)
@@ -141,10 +139,10 @@ segmentation = sitk.ReadImage(predNii_path)
 # Write a multi-class segmentation DICOM seg file
 template = pydicom_seg.template.from_dcmqi_metainfo(metainfo)
 writer = pydicom_seg.MultiClassWriter(
-    template = template,
-   inplane_cropping = False,
-    skip_empty_slices = False,
-    skip_missing_segment=True,
+  template = template,
+  inplane_cropping = False,
+  skip_empty_slices = False,
+  skip_missing_segment=True,
 )
 dcm = writer.write(segmentation, source_images)
 
