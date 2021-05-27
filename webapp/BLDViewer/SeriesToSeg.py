@@ -63,6 +63,8 @@ def Scale_to_Original(imgs):
 
   return scaled_images
 
+def getSliceLocation(slice):
+  return float(slice.SliceLocation)
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
 metainfo = './metainfo.json' # TODO: Modify metainfo.json according to the needs of the user
@@ -96,7 +98,8 @@ source_images = [
 ]
 
 # TODO: Sort the Pydicom files by z position on image position patient attributes
-
+# Sort by Slice location
+source_images = sorted(source_images, key = getSliceLocation)
 # Create and save a nifti volume of the DICOM series
 dicom2nifti.dicom_series_to_nifti(series_path, seriesNii_path)
 
