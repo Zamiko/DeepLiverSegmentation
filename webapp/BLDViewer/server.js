@@ -95,7 +95,7 @@ app.get('/launchMachine', (req, res) => {
   let dataToSend;
   // hardcoded dicom folder into the python script 
   const spawn = require("child_process").spawn;
-  const python = spawn('python3', ['./SeriesToSeg.py']);
+  const python = spawn('python', ['./SeriesToSeg.py']);
   //We can only retrieve data sent to a stream in the python script
   // I don't know that this might be necessary for our purposes
   //but could be nice to get a message indicating the model is finished
