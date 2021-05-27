@@ -203,10 +203,10 @@ function loadSegmentation() {
       console.log(XmlHttpReq.responseText);
     } else {
       const numSegsJson = JSON.parse(XmlHttpReq.responseText);
-      console.log("found " + numSegsJson.numSegs + "segs that match");
+      console.log("found " + numSegsJson.numSegs + " segs that match");
 
       if (numSegsJson.numSegs) {
-        const segURL = "http://" + window.location.host + "/dicoms/"
+        const segURL = window.location.origin + "/dicoms/"
           + numSegsJson.segSopInstanceUid + ".dcm";
         console.log(segURL);
         const xhr = new XMLHttpRequest();

@@ -52,12 +52,12 @@ function deletePreviousDICOMs() {
 
 const dcmStorage = multer.diskStorage({
   // Destination to store dicom     
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     cb(null, __dirname + "/webMain/dicoms/");
   },
-    filename: (req, file, cb) => {
-      //Fixme: need to add file name extension
-      cb(null, file.originalname)
+  filename: (req, file, cb) => {
+    //Fixme: need to add file name extension
+    cb(null, file.originalname)
   }
 });
 
@@ -65,23 +65,23 @@ const dcmUpload = multer({
   storage: dcmStorage,
   //limits
   fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(dcm)$/)) { 
-       // upload only dcm
-       return cb(new Error('Please upload a dicom series'))
+    if (!file.originalname.match(/\.(dcm)$/)) {
+      // upload only dcm
+      return cb(new Error('Please upload a dicom series'))
     }
     cb(undefined, true)
   }
-}) 
+});
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
 });
 
-app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
+app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
   //res.send(req.file)
   console.log("files successfully uploaded");
-  res.status(200).send({message: "all good!"})
+  res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
   console.log("files unsuccessfully uploaded");
   res.status(400).send({ error: error.message })
@@ -106,9 +106,9 @@ app.get('/launchMachine', (req, res) => {
   });
 })
 
-app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
+app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
   console.log("seg successfully saved");
-  res.status(200).send({message: "all good!"})
+  res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
   console.log("seg unsuccessfully saved");
   res.status(400).send({ error: error.message })
@@ -361,6 +361,23 @@ app.get("/delete", async (req, res) => {
     request
   );
   console.log('Deleted DICOM study');
+});
+
+app.post("/deleteSeries", async (req, res) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({ auth });
+  const { studyInstanceUid, seriesInstanceUid } = req.body;
+  const dicomWebPath = `studies/${studyInstanceUid}/`
+    + `series/${seriesInstanceUid}`;
+  const request = { parent, dicomWebPath };
+
+  await healthcare.projects.locations.datasets.dicomStores.studies.series
+    .delete(
+      request
+    );
+  console.log('Deleted DICOM series');
 });
 
 
