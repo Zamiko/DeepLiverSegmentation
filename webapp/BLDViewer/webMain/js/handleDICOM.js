@@ -72,8 +72,6 @@ function retrieve() {
 }
 
 function showLoading() {
-  // document.getElementById("LoadingScreen").style.display = "block";
-  // document.getElementById("divViewport").style.display = "none";
   document.getElementById("LoadingScreen").classList.add("Shown");
   document.getElementById("LoadingScreen").classList.remove("Hidden");
   document.getElementById("divViewport").classList.remove("Shown");
@@ -85,8 +83,6 @@ function showViewport() {
   document.getElementById("LoadingScreen").classList.add("Hidden");
   document.getElementById("divViewport").classList.add("Shown");
   document.getElementById("divViewport").classList.remove("Hidden");
-  // document.getElementById("LoadingScreen").style.display = "none";
-  // document.getElementById("divViewport").style.display = "block";
 }
 
 function hideViewportLoading() {
@@ -94,8 +90,6 @@ function hideViewportLoading() {
   document.getElementById("LoadingScreen").classList.add("Hidden");
   document.getElementById("divViewport").classList.remove("Shown");
   document.getElementById("divViewport").classList.add("Hidden");
-  // document.getElementById("LoadingScreen").style.display = "none";
-  // document.getElementById("divViewport").style.display = "none";
 }
 
 function studySearch() {
@@ -162,7 +156,7 @@ function launchMachine() {
     if (xHttpReq.status != 200) {
       console.log(xHttpReq.responseText);
     } else {
-      getAndLoadSeg("segmentation");
+      getAndLoadSeg();
     }
   });
   xHttpReq.send();
@@ -226,22 +220,7 @@ function loadSegmentation() {
       console.log("found " + numSegsJson.numSegs + " segs that match");
 
       if (numSegsJson.numSegs) {
-        // TODO Refactor with whats in displaySegmentationMask
-        getAndLoadSeg("segmentation");
-        // const segURL = window.location.origin + "/dicoms/"
-        //   + numSegsJson.segSopInstanceUid + ".dcm";
-        // console.log(segURL);
-        // const xhr = new XMLHttpRequest();
-        // xhr.addEventListener("load", () => {
-        //   parseSeg(xhr.response);
-        // });
-        // xhr.addEventListener("error", () => {
-        //   console.log(`Request returned, status: ${xhr.status}`);
-        //   console.log(xhr.message);
-        // });
-        // xhr.open("GET", segURL);
-        // xhr.responseType = "arraybuffer"; //Type of file
-        // xhr.send();
+        getAndLoadSeg();
       } else {
         window.alert("No segmentation masks were found. We will create one :)");
         launchMachine();

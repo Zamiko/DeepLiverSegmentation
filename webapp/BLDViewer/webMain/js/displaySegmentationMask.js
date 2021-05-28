@@ -1,7 +1,7 @@
-function getAndLoadSeg(segmentation) {
+function getAndLoadSeg() {
     var segURL =
         window.location.origin +
-        "/seg/" + segmentation + ".dcm";
+        "/seg/segmentation.dcm";
     console.log(segURL);
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
@@ -18,7 +18,6 @@ function getAndLoadSeg(segmentation) {
 
 function parseSeg(arrayBuffer) {
     const element = document.getElementById("cornerstoneViewport");
-    // const element = document.getElementsByClassName("viewport-element")[0];
     const stackToolState = cornerstoneTools.getToolState(
         element,
         "stack"
