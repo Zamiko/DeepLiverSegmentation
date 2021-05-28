@@ -22,7 +22,7 @@ function selectFolder(e) {
         else{
           console.log("Save successful");
           //now that files have returned, store them all
-          store();
+          uploadToDicomStore();
           //Now, we have three options:
             //expect client to go back to study search to access new files
                 //PROBLEM: uploaded DICOM instances and the retrieved DICOM instances will both be in the dicoms folder

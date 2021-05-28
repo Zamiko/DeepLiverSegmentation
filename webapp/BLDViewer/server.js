@@ -53,7 +53,7 @@ function deletePreviousDICOMs() {
 const dcmStorage = multer.diskStorage({
   // Destination to store dicom     
   destination: function (req, file, cb) {
-    cb(null, __dirname + "/webMain/dicoms/");
+    cb(null, __dirname + "/webMain/upload/");
   },
   filename: (req, file, cb) => {
     //Fixme: need to add file name extension
@@ -83,7 +83,8 @@ app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
   res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
   console.log("files unsuccessfully uploaded");
-  res.status(400).send({ error: error.message })
+  res.status(400).send({ error: error.message });
+  console.log(error.message);
 });
 
 app.get('/launchMachine', (req, res) => {
@@ -116,9 +117,8 @@ app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
 
 app.use(zip());
 app.get('/zip', function (req, res, next) {
-  var dirPath = `${__dirname}/webMain/dicoms`;
-  var nameString = 'bld-dicoms';
-  nameString += '.zip'
+  const dirPath = `${__dirname}/webMain/dicoms`;
+  const nameString = 'bld-dicoms.zip';
   res.zip({
     files: [
       //  {   
@@ -128,7 +128,7 @@ app.get('/zip', function (req, res, next) {
       //       comment: 'DICOM images downloaded from BLDs liver segmenter',
       //       date: new Date(),
       //       type: 'file' },
-      { path: `${__dirname}/webmain/seg/segmentation.dcm`, name: 'segmentation.txt' },
+      { path: `${__dirname}/webmain/seg`, name: 'segmentation' },
       { path: dirPath, name: 'Series' }
     ],
     filename: nameString
@@ -140,7 +140,7 @@ app.get('/zip', function (req, res, next) {
 // All functions below expect to recieve and return JSONs
 app.use(express.json());
 
-app.post("/store", async (req, res) => {
+app.post("/upload", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
@@ -153,7 +153,7 @@ app.post("/store", async (req, res) => {
   });
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
   deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
-  fileFolder = "webMain/dicoms/"
+  fileFolder = "webMain/upload/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -165,7 +165,7 @@ app.post("/store", async (req, res) => {
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
-      filePath = fileFolder + file
+      const filePath = fileFolder + file;
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -197,8 +197,8 @@ async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
     );
   const fileBytes = Buffer.from(instance.data);
   let fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
-  if (typeof name !== 'undefined') {
-    fileName = "webMain/dicoms/" + name + ".dcm";
+  if (name === "segmentation") {
+    fileName = "webMain/seg/segmentation.dcm";
   }
   await writeFile(fileName, fileBytes);
   return 1;
@@ -364,7 +364,7 @@ app.post("/loadSeg", async (req, res) => {
     setRetrieveOptions(auth);
     numSegs.segSopInstanceUid = chosenSeg[`00080018`].Value[0];
     writeSOPInstance(studyInstanceUid, chosenSeg[`0020000E`].Value[0],
-      chosenSeg[`00080018`].Value[0]).then(resolve => {
+      chosenSeg[`00080018`].Value[0], "segmentation").then(resolve => {
         res.json(numSegs);
         res.status(200);
       });
@@ -408,12 +408,15 @@ async function deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid) 
     }
   });
   google.options({ auth });
-
-  
-  // await healthcare.projects.locations.datasets.dicomStores.studies.series
-  //   .delete(
-  //     request
-  //   );
+  matchingSegInstances.forEach(async (segInstance) => {
+    const dicomWebPath = `studies/${studyInstanceUid}/`
+      + `series/${segInstance[`0020000E`].Value[0]}`;
+    const request = { parent, dicomWebPath };
+    await healthcare.projects.locations.datasets.dicomStores.studies.series
+      .delete(
+        request
+      );
+  });
 }
 //need to get uID through the request
 app.get("/delete", async (req, res) => {

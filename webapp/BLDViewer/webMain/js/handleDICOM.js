@@ -19,12 +19,11 @@ function Series(Modality, Notes, seriesId) {
   this.seriesId = seriesId;
 }
 
-function store() {
+function uploadToDicomStore() {
   // we're going to want to store the url of the study 
   // to store in the request we send
-  console.log("Storing current instances")
   const xHTTPreq = new XMLHttpRequest();
-  xHTTPreq.open("POST", "/store");
+  xHTTPreq.open("POST", "/upload");
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
       console.log("Something went wrong");
@@ -33,12 +32,13 @@ function store() {
       console.log("Stored successfully");
     }
   };
+
   const studyInstanceUid = studyUrl;
-  const matchingSeriesInstanceUid = seriesUrl;
+  const seriesInstanceUid = seriesUrl;
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
   const seriesMetadata = {
     "studyInstanceUid": studyInstanceUid,
-    "matchingSeriesInstanceUid": matchingSeriesInstanceUid
+    "matchingSeriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
   // xHTTPreq.send();
@@ -227,7 +227,7 @@ function loadSegmentation() {
 
       if (numSegsJson.numSegs) {
         // TODO Refactor with whats in displaySegmentationMask
-        getAndLoadSeg(numSegsJson.segSopInstanceUid);
+        getAndLoadSeg("segmentation");
         // const segURL = window.location.origin + "/dicoms/"
         //   + numSegsJson.segSopInstanceUid + ".dcm";
         // console.log(segURL);

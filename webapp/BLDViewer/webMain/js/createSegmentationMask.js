@@ -66,7 +66,7 @@ function createSeg() {
         else {
           console.log("Save successful")
           //?--need to find a way to delete segmentation masks previously saved for this series
-          store();
+          uploadToDicomStore();
         }
       });
       xHTTPreq.send(formData);
