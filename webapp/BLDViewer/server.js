@@ -79,7 +79,6 @@ app.get("/", (request, response) => {
 });
 
 app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
-  //res.send(req.file)
   console.log("files successfully uploaded");
   res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
@@ -129,7 +128,8 @@ app.get('/zip', function (req, res, next) {
       //       comment: 'DICOM images downloaded from BLDs liver segmenter',
       //       date: new Date(),
       //       type: 'file' },
-      { path: dirPath, name: 'dicoms' }
+      { path: `${__dirname}/webmain/seg/segmentation.dcm`, name: 'segmentation.txt' },
+      { path: dirPath, name: 'Series' }
     ],
     filename: nameString
   });
@@ -140,7 +140,7 @@ app.get('/zip', function (req, res, next) {
 // All functions below expect to recieve and return JSONs
 app.use(express.json());
 
-app.get("/store", async (req, res) => {
+app.post("/store", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
@@ -151,6 +151,8 @@ app.get("/store", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
+  const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
+  deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
   fileFolder = "webMain/dicoms/"
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
@@ -175,7 +177,7 @@ app.get("/store", async (req, res) => {
         .storeInstances(
           request
         );
-      console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+      // console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
       console.log("Stored file number " + numFilesSaved);
       numFilesSaved += 1;
     });
@@ -185,7 +187,7 @@ app.get("/store", async (req, res) => {
 });
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
-  sopInstanceUid) {
+  sopInstanceUid, name) {
   const dicomWebPath = `studies/${studyInstanceUid}/series/` +
     `${seriesInstanceUid}/instances/${sopInstanceUid}`;
   const instanceReq = { parent, dicomWebPath };
@@ -194,7 +196,10 @@ async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
       instanceReq
     );
   const fileBytes = Buffer.from(instance.data);
-  const fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
+  let fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
+  if (typeof name !== 'undefined') {
+    fileName = "webMain/dicoms/" + name + ".dcm";
+  }
   await writeFile(fileName, fileBytes);
   return 1;
 }
@@ -369,6 +374,47 @@ app.post("/loadSeg", async (req, res) => {
   }
 });
 
+async function deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid) {
+  console.log("searching for segs to delete")
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  // Search options setting
+  google.options({
+    auth,
+    params: { includefield: 'all' },
+    headers: { Accept: 'application/dicom+json, multipart/related' },
+  });
+
+  const dicomWebPath = `studies/${studyInstanceUid}/instances`;
+  const request = { parent, dicomWebPath };
+
+  const studySegInstances = await healthcare.projects.locations.datasets
+    .dicomStores.studies.series.searchForInstances(
+      request
+    ).catch(error => {
+      console.log(error);
+      res.status(404);
+    });
+
+  let matchingSegInstances = [];
+  studySegInstances.data.forEach((instance) => {
+    if (instance[`00081115`]) {
+      if (instance[`00081115`].Value[0][`0020000E`].Value[0]
+        == matchingSeriesInstanceUid) {
+        console.log(instance[`0020000E`].Value[0]);
+        matchingSegInstances.push(instance);
+      }
+    }
+  });
+  google.options({ auth });
+
+  
+  // await healthcare.projects.locations.datasets.dicomStores.studies.series
+  //   .delete(
+  //     request
+  //   );
+}
 //need to get uID through the request
 app.get("/delete", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -419,4 +465,3 @@ const cleanseString = function (string) {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
-

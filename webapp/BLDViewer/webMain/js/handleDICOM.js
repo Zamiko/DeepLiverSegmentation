@@ -24,7 +24,7 @@ function store() {
   // to store in the request we send
   console.log("Storing current instances")
   const xHTTPreq = new XMLHttpRequest();
-  xHTTPreq.open("GET", "/store", true);
+  xHTTPreq.open("POST", "/store");
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
       console.log("Something went wrong");
@@ -33,7 +33,15 @@ function store() {
       console.log("Stored successfully");
     }
   };
-  xHTTPreq.send();
+  const studyInstanceUid = studyUrl;
+  const matchingSeriesInstanceUid = seriesUrl;
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "matchingSeriesInstanceUid": matchingSeriesInstanceUid
+  }
+  xHTTPreq.send(JSON.stringify(seriesMetadata));
+  // xHTTPreq.send();
 }
 
 function retrieve() {
@@ -64,18 +72,30 @@ function retrieve() {
 }
 
 function showLoading() {
-  document.getElementById("LoadingScreen").style.display = "block";
-  document.getElementById("divViewport").style.display = "none";
+  // document.getElementById("LoadingScreen").style.display = "block";
+  // document.getElementById("divViewport").style.display = "none";
+  document.getElementById("LoadingScreen").classList.add("Shown");
+  document.getElementById("LoadingScreen").classList.remove("Hidden");
+  document.getElementById("divViewport").classList.remove("Shown");
+  document.getElementById("divViewport").classList.add("Hidden");
 }
 
 function showViewport() {
-  document.getElementById("LoadingScreen").style.display = "none";
-  document.getElementById("divViewport").style.display = "block";
+  document.getElementById("LoadingScreen").classList.remove("Shown");
+  document.getElementById("LoadingScreen").classList.add("Hidden");
+  document.getElementById("divViewport").classList.add("Shown");
+  document.getElementById("divViewport").classList.remove("Hidden");
+  // document.getElementById("LoadingScreen").style.display = "none";
+  // document.getElementById("divViewport").style.display = "block";
 }
 
 function hideViewportLoading() {
-  document.getElementById("LoadingScreen").style.display = "none";
-  document.getElementById("divViewport").style.display = "none";
+  document.getElementById("LoadingScreen").classList.remove("Shown");
+  document.getElementById("LoadingScreen").classList.add("Hidden");
+  document.getElementById("divViewport").classList.remove("Shown");
+  document.getElementById("divViewport").classList.add("Hidden");
+  // document.getElementById("LoadingScreen").style.display = "none";
+  // document.getElementById("divViewport").style.display = "none";
 }
 
 function studySearch() {

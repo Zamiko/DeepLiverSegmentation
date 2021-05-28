@@ -34,7 +34,6 @@
   brushSlider.addEventListener("change", evt => {
     const { setters } = cornerstoneTools.getModule("segmentation");
 
-    console.log(brushSlider.value);
     setters.radius(brushSlider.value);
     evt.preventDefault();
     evt.stopPropagation();
@@ -50,11 +49,10 @@
 
   const handleClick = function (evt) {
     const element = document.getElementById("cornerstoneViewport");
-    // const element = document.getElementsByClassName("viewport-element")[0];
     const action = this.dataset.action;
     const { setters } = cornerstoneTools.getModule("segmentation");
-    setters[`${action}`](element);
 
+    setters[`${action}`](element);
     evt.preventDefault();
     evt.stopPropagation();
     evt.stopImmediatePropagation();
@@ -85,9 +83,8 @@
 function changeSegment() {
   const segmentIndex = document.getElementById("switchSegment").value;
   const element = document.getElementById("cornerstoneViewport");
-  // const element = document.getElementsByClassName("viewport-element")[0];
-  console.log("Active Segment index is " + segmentIndex);
   const { setters } = cornerstoneTools.getModule("segmentation");
+
   setters.activeSegmentIndex(element, parseInt(segmentIndex));
 }
 
@@ -95,21 +92,9 @@ function changeLabelmap() {
   const labelmapIndex = document.getElementById("switchActiveLabelmap").value;
   const segmentIndex = document.getElementById("switchSegment").value;
   const element = document.getElementById("cornerstoneViewport");
-  // const element = document.getElementsByClassName("viewport-element")[0];
-
   const { setters } = cornerstoneTools.getModule("segmentation");
+
   setters.activeLabelmapIndex(element, parseInt(labelmapIndex));
   setters.activeSegmentIndex(element, parseInt(segmentIndex));
   cornerstone.updateImage(element);
-}
-
-function toggleSeg() {
-  const segOptions = document.getElementById("segOptions");
-  if (segOptions.className == "Hidden") {
-    segOptions.className = "Shown";
-    cornerstoneTools.setToolActive("Brush", { mouseButtonMask: 1 });
-  } else {
-    segOptions.className = "Hidden";
-    cornerstoneTools.setToolActive("Wwwc", { mouseButtonMask: 1 });
-  }
 }

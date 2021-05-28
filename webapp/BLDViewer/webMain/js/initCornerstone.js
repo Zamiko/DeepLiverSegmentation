@@ -9,7 +9,6 @@ function getBlobUrl(url) {
     const blob = new Blob([`importScripts("${url}")`], {
         type: "application/javascript"
     });
-
     return baseUrl.createObjectURL(blob);
 }
 
@@ -32,6 +31,7 @@ const config = {
         }
     }
 };
+
 cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
 cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
 cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
@@ -41,13 +41,9 @@ cornerstoneTools.init({
 
 const element = document.getElementById("cornerstoneViewport");
 cornerstone.enable(element);
-const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
-cornerstoneTools.addTool(StackScrollMouseWheelTool);
+cornerstoneTools.addTool(cornerstoneTools.StackScrollMouseWheelTool);
 cornerstoneTools.addTool(cornerstoneTools.StackScrollTool);
-cornerstoneTools.setToolActive("StackScrollMouseWheel", { mouseButtonMask: 0 });
-const PanTool = cornerstoneTools.PanTool;
-cornerstoneTools.addTool(PanTool);
-const ZoomTool = cornerstoneTools.ZoomTool;
+cornerstoneTools.addTool(cornerstoneTools.PanTool);
 cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
     // Optional configuration
     configuration: {
@@ -57,10 +53,9 @@ cornerstoneTools.addTool(cornerstoneTools.ZoomTool, {
         maxScale: 20.0
     }
 });
-const WwwcTool = cornerstoneTools.WwwcTool;
-cornerstoneTools.addTool(WwwcTool);
-const BrushTool = cornerstoneTools.BrushTool;
-cornerstoneTools.addTool(BrushTool);
+cornerstoneTools.addTool(cornerstoneTools.WwwcTool);
+cornerstoneTools.addTool(cornerstoneTools.BrushTool);
+cornerstoneTools.setToolActive("StackScrollMouseWheel", { mouseButtonMask: 0 });
 cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 4 });
 cornerstoneTools.setToolActive("Zoom", { mouseButtonMask: 2 });
 cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 1 });
