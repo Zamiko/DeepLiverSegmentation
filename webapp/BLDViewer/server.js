@@ -90,7 +90,8 @@ app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
 app.get('/launchMachine', (req, res) => {
   let dataToSend;
   const spawn = require("child_process").spawn;
-  const python = spawn('python', ['./SeriesToSeg.py']);
+  // TODO change back to python for deployment
+  const python = spawn('python3', ['./SeriesToSeg.py']);
   // Send python stdout back to server
   python.stdout.on('data', function (data) {
     console.log('Pipe data from python script ...');
@@ -115,23 +116,24 @@ app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
 });
 
 app.use(zip());
-app.get('/zip', function(req, res, next) {
+app.get('/zip', function (req, res, next) {
   var dirPath = `${__dirname}/webMain/dicoms`;
   var nameString = 'bld-dicoms';
   nameString += '.zip'
   res.zip({
-       files: [
-           {   
-                content: 'DICOM images',      
-                name: 'bld-dicoms',
-                mode: 0755,
-                comment: 'DICOM images downloaded from BLDs liver segmenter',
-                date: new Date(),
-                type: 'file' },
-           { path: dirPath, name: 'dicoms' }    
-       ],
-         filename: nameString
-    });
+    files: [
+      //  {   
+      //       content: 'DICOM images',      
+      //       name: 'bld-dicoms',
+      //       mode: 0755,
+      //       comment: 'DICOM images downloaded from BLDs liver segmenter',
+      //       date: new Date(),
+      //       type: 'file' },
+      { path: dirPath, name: 'dicoms' }
+    ],
+    filename: nameString
+  });
+  res.status(200);
   console.log("All zipped");
 });
 

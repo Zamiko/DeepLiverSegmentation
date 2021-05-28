@@ -65,6 +65,7 @@ def Scale_to_Original(imgs):
 
 def getSliceLocation(slice):
   return float(slice.SliceLocation)
+
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
 metainfo = './metainfo.json' 

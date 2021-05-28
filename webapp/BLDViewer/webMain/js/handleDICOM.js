@@ -206,6 +206,7 @@ function loadSegmentation() {
       console.log("found " + numSegsJson.numSegs + " segs that match");
 
       if (numSegsJson.numSegs) {
+        // TODO Refactor with whats in displaySegmentationMask
         const segURL = window.location.origin + "/dicoms/"
           + numSegsJson.segSopInstanceUid + ".dcm";
         console.log(segURL);
@@ -316,6 +317,30 @@ searchBarSeries.addEventListener('keyup', (e) => {
   displaySeries(filteredInstances);
 });
 
+const deleteSeries = () => {
+console.log("deleting current series");
+  const xHTTPreq = new XMLHttpRequest();
+  xHTTPreq.open("POST", "/deleteSeries");
+  xHTTPreq.addEventListener("load", function () {
+    if (xHTTPreq.status != 200) {
+      console.log("failed");
+      console.log(xHTTPreq.responseText);
+    } else {
+      console.log("Delete successful");
+      const instances = JSON.parse(xHTTPreq.responseText);
+    }
+  });
+
+  const studyInstanceUid = studyUrl;
+  const seriesInstanceUid = seriesUrl;
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "seriesInstanceUid": seriesInstanceUid
+  }
+  xHTTPreq.send(JSON.stringify(seriesMetadata));
+  StudySelect();
+}
 const displaySeries = (instances) => {
   seriesList.innerHTML = '';
   instances.forEach(element => {
