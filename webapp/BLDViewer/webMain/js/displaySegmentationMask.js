@@ -1,7 +1,7 @@
-function getAndLoadSeg() {
+function getAndLoadSeg(segmentation) {
     var segURL =
         window.location.origin +
-        "/seg/segmentation.dcm";
+        "/dicoms/" + segmentation + ".dcm";
     console.log(segURL);
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {

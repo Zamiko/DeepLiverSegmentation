@@ -142,7 +142,7 @@ function launchMachine() {
     if (xHttpReq.status != 200) {
       console.log(xHttpReq.responseText);
     } else {
-      getAndLoadSeg();
+      getAndLoadSeg("segmentation");
     }
   });
   xHttpReq.send();
@@ -207,20 +207,21 @@ function loadSegmentation() {
 
       if (numSegsJson.numSegs) {
         // TODO Refactor with whats in displaySegmentationMask
-        const segURL = window.location.origin + "/dicoms/"
-          + numSegsJson.segSopInstanceUid + ".dcm";
-        console.log(segURL);
-        const xhr = new XMLHttpRequest();
-        xhr.addEventListener("load", () => {
-          parseSeg(xhr.response);
-        });
-        xhr.addEventListener("error", () => {
-          console.log(`Request returned, status: ${xhr.status}`);
-          console.log(xhr.message);
-        });
-        xhr.open("GET", segURL);
-        xhr.responseType = "arraybuffer"; //Type of file
-        xhr.send();
+        getAndLoadSeg(numSegsJson.segSopInstanceUid);
+        // const segURL = window.location.origin + "/dicoms/"
+        //   + numSegsJson.segSopInstanceUid + ".dcm";
+        // console.log(segURL);
+        // const xhr = new XMLHttpRequest();
+        // xhr.addEventListener("load", () => {
+        //   parseSeg(xhr.response);
+        // });
+        // xhr.addEventListener("error", () => {
+        //   console.log(`Request returned, status: ${xhr.status}`);
+        //   console.log(xhr.message);
+        // });
+        // xhr.open("GET", segURL);
+        // xhr.responseType = "arraybuffer"; //Type of file
+        // xhr.send();
       } else {
         window.alert("No segmentation masks were found. We will create one :)");
         launchMachine();

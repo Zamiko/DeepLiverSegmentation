@@ -73,7 +73,7 @@ series_path = './webMain/dicoms/'
 model_path = './machineModel'
 seriesNii_path = './nii/seriesNii.nii'
 predNii_path = './nii/predNii.nii'
-DICOM_seg_path = './webMain/seg/segmentation.dcm'
+DICOM_seg_path = './webMain/dicoms/segmentation.dcm'
 
 # Image variables
 IMAGE_HEIGHT = 192
