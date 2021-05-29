@@ -1,8 +1,5 @@
 function getAndLoadSeg() {
-    var segURL =
-        window.location.origin +
-        "/seg/segmentation.dcm";
-    console.log(segURL);
+    var segURL = window.location.origin + "/seg/segmentation.dcm";
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
         parseSeg(xhr.response);
@@ -32,7 +29,7 @@ function parseSeg(arrayBuffer) {
         arrayBuffer,
         cornerstone.metaData,
     );
-    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    const { setters } = cornerstoneTools.getModule("segmentation");
     setters.labelmap3DByFirstImageId(
         imageIds[0],
         labelmapBufferArray[0],

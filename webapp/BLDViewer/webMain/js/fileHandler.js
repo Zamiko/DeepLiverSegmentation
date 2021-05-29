@@ -16,7 +16,7 @@ function selectFolder(e) {
         }
         else{
           console.log("Save successful");
-          //now that files have returned, store them all
+          // Now that files have returned, store them all
           uploadToDicomStore();
           //Now, we have three options:
             //expect client to go back to study search to access new files
@@ -26,7 +26,6 @@ function selectFolder(e) {
                 //Problem: need to find way to wait until store() is called before calling studySearch()
             //directly retrieve the newly uploaded files
                 //Problem: need to find way to wait until store() is called before calling retrieve()
-
         }
     });
     xHTTPreq.send(formData);

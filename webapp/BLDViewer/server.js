@@ -10,7 +10,6 @@ var zip = require('express-easy-zip');
 app.use(express.static("webMain"));
 
 const { google } = require('googleapis');
-const { resolve } = require("path");
 const healthcare = google.healthcare('v1');
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile);
@@ -138,6 +137,10 @@ app.post("/upload", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
+  const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
+  const fileFolder = "webMain/upload/";
+
+  deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
   google.options({
     auth,
     headers: {
@@ -145,10 +148,6 @@ app.post("/upload", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
-  const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
-  const fileFolder = "webMain/upload/";
-
-  deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -159,7 +158,6 @@ app.post("/upload", async (req, res) => {
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
-
       const filePath = fileFolder + file;
       const binaryData = fs.createReadStream(filePath);
       const request = {
@@ -172,7 +170,7 @@ app.post("/upload", async (req, res) => {
         .storeInstances(
           request
         );
-      
+
       console.log("Stored file number " + numFilesSaved);
       numFilesSaved += 1;
     });
