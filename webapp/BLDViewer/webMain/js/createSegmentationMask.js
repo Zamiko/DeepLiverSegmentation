@@ -2,27 +2,22 @@ let metaData = {};
 
 function createSeg() {
   const element = document.getElementById("cornerstoneViewport");
-  // const element = document.getElementsByClassName("viewport-element")[0];
-  console.log(element);
   const globalToolStateManager =
     cornerstoneTools.globalImageIdSpecificToolStateManager;
   const toolState = globalToolStateManager.saveToolState();
-
   const stackToolState = cornerstoneTools.getToolState(element, "stack");
   const imageIds = stackToolState.data[0].imageIds;
-  
+
+  const { getters } = cornerstoneTools.getModule("segmentation");
+  const { labelmaps3D } = getters.labelmaps3D(element);
   let imagePromises = [];
+
   for (let i = 0; i < imageIds.length; i++) {
     imagePromises.push(cornerstone.loadImage(imageIds[i]));
   }
 
-  const segments = [];
-
-  const { getters } = cornerstoneTools.getModule("segmentation");
-  const { labelmaps3D } = getters.labelmaps3D(element);
-
   if (!labelmaps3D) {
-    console.log("no labelmaps 3D");
+    console.log("no 3D labelmaps");
     return;
   }
 
@@ -35,7 +30,7 @@ function createSeg() {
   ) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log( "Label maps 2D length is " + labelmaps2D.length);
+    console.log("Label maps 2D length is " + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -65,13 +60,15 @@ function createSeg() {
       console.log("Saving " + nameString);
       const xHTTPreq = new XMLHttpRequest();
       xHTTPreq.open("POST", "/saveSeg");
-      xHTTPreq.addEventListener("load", function() {
+      xHTTPreq.addEventListener("load", function () {
         if (xHTTPreq.status != 200) {
           console.log(xHTTPreq.responseText);
         }
-        else{
-          console.log("Save successful")
-          //store()?--need to find a way to delete segmentation masks previously saved for this series
+        else {
+          console.log("Save successful");
+          //?--need to find a way to delete segmentation masks previously saved for this series
+          uploadToDicomStore();
+
         }
       });
       xHTTPreq.send(formData);
@@ -141,9 +138,9 @@ function getImageIds(multiframe, baseImageId) {
 // metadata for the per-frame imageIDs.
 //
 function loadMultiFrameAndPopulateMetadata(baseImageId) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var multiframe;
-    cornerstone.loadAndCacheImage(baseImageId).then(function(image) {
+    cornerstone.loadAndCacheImage(baseImageId).then(function (image) {
       var arrayBuffer = image.data.byteArray.buffer;
 
       dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);

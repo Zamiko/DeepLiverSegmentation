@@ -9,8 +9,6 @@ var zip = require('express-easy-zip');
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("webMain"));
 
-//was trying to implement all this via a python script
-// however have to figure out authentication for that
 const { google } = require('googleapis');
 const { resolve } = require("path");
 const healthcare = google.healthcare('v1');
@@ -23,7 +21,6 @@ const datasetId = 'DICOM_data';
 const dicomStoreId = 'testing_data';
 const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/` +
   `${datasetId}/dicomStores/${dicomStoreId}`;
-
 
 function setRetrieveOptions(auth) {
   google.options({
@@ -76,6 +73,29 @@ const dcmUpload = multer({
   }
 }) 
 
+const dcmStorage = multer.diskStorage({
+  // Destination to store dicom     
+  destination: function (req, file, cb) {
+    cb(null, __dirname + "/webMain/upload/");
+  },
+  filename: (req, file, cb) => {
+    //Fixme: need to add file name extension
+    cb(null, file.originalname)
+  }
+});
+
+const dcmUpload = multer({
+  storage: dcmStorage,
+  //limits
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(dcm)$/)) {
+      // upload only dcm
+      return cb(new Error('Please upload a dicom series'))
+    }
+    cb(undefined, true)
+  }
+});
+
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
@@ -89,20 +109,70 @@ app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
   res.status(400).send({ error: error.message })
 });
 
+app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
+  console.log("files successfully uploaded");
+  res.status(200).send({ message: "all good!" })
+}, (error, req, res, next) => {
+  console.log("files unsuccessfully uploaded");
+  res.status(400).send({ error: error.message });
+  console.log(error.message);
+});
 
-app.post("/saveSeg", dcmUpload.single("newSeg"),function(req, res) {
-  //res.send(req.file)
+app.get('/launchMachine', (req, res) => {
+  let dataToSend;
+  const spawn = require("child_process").spawn;
+  // TODO change back to python for deployment
+  const python = spawn('python3', ['./SeriesToSeg.py']);
+  // Send python stdout back to server
+  python.stdout.on('data', function (data) {
+    console.log('Pipe data from python script ...');
+    dataToSend = data.toString();
+  });
+  // In close event we are sure that stream from child process is closed
+  python.on('close', (code) => {
+    console.log(`child process close all stdio with code ${code}`);
+    console.log(dataToSend);
+    // Once browser receives this, it can load created segmentation
+    res.status(200);
+    res.send(dataToSend)
+  });
+})
+
+app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
   console.log("seg successfully saved");
-  res.status(200).send({message: "all good!"})
+  res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
   console.log("seg unsuccessfully saved");
   res.status(400).send({ error: error.message })
 });
 
-//all functions below expect to recieve and return JSONs
+app.use(zip());
+app.get('/zip', function (req, res, next) {
+  const dirPath = `${__dirname}/webMain/dicoms`;
+  const nameString = 'bld-dicoms.zip';
+  res.zip({
+    files: [
+      //  {   
+      //       content: 'DICOM images',      
+      //       name: 'bld-dicoms',
+      //       mode: 0755,
+      //       comment: 'DICOM images downloaded from BLDs liver segmenter',
+      //       date: new Date(),
+      //       type: 'file' },
+      { path: `${__dirname}/webmain/seg`, name: 'segmentation' },
+      { path: dirPath, name: 'Series' }
+    ],
+    filename: nameString
+  });
+  res.status(200);
+  console.log("All zipped");
+});
+
+// All functions below expect to recieve and return JSONs
 app.use(express.json());
 
-app.get("/store", async (req, res) => {
+
+app.post("/upload", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
@@ -113,9 +183,10 @@ app.get("/store", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
-  // Ideally I think we should aim to only have one study held locally 
-  // (per user???) so we can just link from that location 
-  fileFolder = "webMain/dicoms/"
+
+  const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
+  deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
+  fileFolder = "webMain/upload/";
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -127,7 +198,9 @@ app.get("/store", async (req, res) => {
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
-      filePath = fileFolder + file
+
+      const filePath = fileFolder + file;
+
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -139,18 +212,19 @@ app.get("/store", async (req, res) => {
         .storeInstances(
           request
         );
-      console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
+      
+      // console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
       console.log("Stored file number " + numFilesSaved);
       numFilesSaved += 1;
     });
   });
   res.status(200);
-  console.log("Done")
+  console.log("Done storing");
+
 });
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
-  sopInstanceUid) {
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
+  sopInstanceUid, name) {
   const dicomWebPath = `studies/${studyInstanceUid}/series/` +
     `${seriesInstanceUid}/instances/${sopInstanceUid}`;
   const instanceReq = { parent, dicomWebPath };
@@ -159,7 +233,10 @@ async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
       instanceReq
     );
   const fileBytes = Buffer.from(instance.data);
-  const fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
+  let fileName = "webMain/dicoms/" + sopInstanceUid + ".dcm";
+  if (name === "segmentation") {
+    fileName = "webMain/seg/segmentation.dcm";
+  }
   await writeFile(fileName, fileBytes);
   return 1;
 }
@@ -178,7 +255,6 @@ app.post("/retrieve", async (req, res) => {
   });
 
   const { studyInstanceUid, seriesInstanceUid } = req.body;
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/series/` +
     `${seriesInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
@@ -238,13 +314,11 @@ app.get("/search", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  // console.log()
   google.options({
     auth,
     headers: { Accept: 'application/dicom+json,multipart/related' },
   });
 
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = 'studies';
   const request = { parent, dicomWebPath };
 
@@ -271,7 +345,6 @@ app.post("/searchSeries", async (req, res) => {
   });
   const { studyInstanceUid } = req.body;
   console.log("retrieving from " + studyInstanceUid);
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/series`;
   const request = { parent, dicomWebPath };
 
@@ -298,7 +371,6 @@ app.post("/loadSeg", async (req, res) => {
   });
 
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${studyInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
 
@@ -309,7 +381,7 @@ app.post("/loadSeg", async (req, res) => {
       console.log(error);
       res.status(404);
     });
-  console.log(`Found ${studySegInstances.data.length} instances:`);
+  console.log(`Found ${studySegInstances.data.length} instances in same study`);
 
   let matchingSegInstances = [];
   studySegInstances.data.forEach((instance) => {
@@ -329,7 +401,7 @@ app.post("/loadSeg", async (req, res) => {
     setRetrieveOptions(auth);
     numSegs.segSopInstanceUid = chosenSeg[`00080018`].Value[0];
     writeSOPInstance(studyInstanceUid, chosenSeg[`0020000E`].Value[0],
-      chosenSeg[`00080018`].Value[0]).then(resolve => {
+      chosenSeg[`00080018`].Value[0], "segmentation").then(resolve => {
         res.json(numSegs);
         res.status(200);
       });
@@ -339,6 +411,50 @@ app.post("/loadSeg", async (req, res) => {
   }
 });
 
+async function deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid) {
+  console.log("searching for segs to delete")
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  // Search options setting
+  google.options({
+    auth,
+    params: { includefield: 'all' },
+    headers: { Accept: 'application/dicom+json, multipart/related' },
+  });
+
+  const dicomWebPath = `studies/${studyInstanceUid}/instances`;
+  const request = { parent, dicomWebPath };
+
+  const studySegInstances = await healthcare.projects.locations.datasets
+    .dicomStores.studies.series.searchForInstances(
+      request
+    ).catch(error => {
+      console.log(error);
+      res.status(404);
+    });
+
+  let matchingSegInstances = [];
+  studySegInstances.data.forEach((instance) => {
+    if (instance[`00081115`]) {
+      if (instance[`00081115`].Value[0][`0020000E`].Value[0]
+        == matchingSeriesInstanceUid) {
+        console.log(instance[`0020000E`].Value[0]);
+        matchingSegInstances.push(instance);
+      }
+    }
+  });
+  google.options({ auth });
+  matchingSegInstances.forEach(async (segInstance) => {
+    const dicomWebPath = `studies/${studyInstanceUid}/`
+      + `series/${segInstance[`0020000E`].Value[0]}`;
+    const request = { parent, dicomWebPath };
+    await healthcare.projects.locations.datasets.dicomStores.studies.series
+      .delete(
+        request
+      );
+  });
+}
 //need to get uID through the request
 app.get("/delete", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -347,7 +463,6 @@ app.get("/delete", async (req, res) => {
   google.options({ auth });
   var StudyInstanceUID =
     "1.2.124.113532.192.70.134.138.20051021.154305.4450732";
-  // const parent = `projects/${projectId}/locations/${cloudRegion}/datasets/${datasetId}/dicomStores/${dicomStoreId}`;
   const dicomWebPath = `studies/${StudyInstanceUID}`;
   const request = { parent, dicomWebPath };
 
@@ -355,6 +470,23 @@ app.get("/delete", async (req, res) => {
     request
   );
   console.log('Deleted DICOM study');
+});
+
+app.post("/deleteSeries", async (req, res) => {
+  const auth = await google.auth.getClient({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  google.options({ auth });
+  const { studyInstanceUid, seriesInstanceUid } = req.body;
+  const dicomWebPath = `studies/${studyInstanceUid}/`
+    + `series/${seriesInstanceUid}`;
+  const request = { parent, dicomWebPath };
+
+  await healthcare.projects.locations.datasets.dicomStores.studies.series
+    .delete(
+      request
+    );
+  console.log('Deleted DICOM series');
 });
 
 
@@ -373,4 +505,3 @@ const cleanseString = function (string) {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
-

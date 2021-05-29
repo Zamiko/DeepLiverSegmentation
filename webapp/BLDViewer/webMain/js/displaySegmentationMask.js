@@ -1,10 +1,7 @@
 function getAndLoadSeg() {
-    // This  will change as we select the correct study and series
     var segURL =
-        "http://" +
-        window.location.host +
-        "/dicoms/SEG.dcm";
-    // "/11-13-2003-threephaseabdomen-49621/300.000000-Segmentation-44409/1-1.dcm";
+        window.location.origin +
+        "/seg/segmentation.dcm";
     console.log(segURL);
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
@@ -21,7 +18,6 @@ function getAndLoadSeg() {
 
 function parseSeg(arrayBuffer) {
     const element = document.getElementById("cornerstoneViewport");
-    // const element = document.getElementsByClassName("viewport-element")[0];
     const stackToolState = cornerstoneTools.getToolState(
         element,
         "stack"

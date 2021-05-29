@@ -19,12 +19,11 @@ function Series(Modality, Notes, seriesId) {
   this.seriesId = seriesId;
 }
 
-function store() {
+function uploadToDicomStore() {
   // we're going to want to store the url of the study 
   // to store in the request we send
-  console.log("Storing current instances")
   const xHTTPreq = new XMLHttpRequest();
-  xHTTPreq.open("GET", "/store", true);
+  xHTTPreq.open("POST", "/upload");
   xHTTPreq.onloadend = function (e) {
     if (xHTTPreq.status != 200) {
       console.log("Something went wrong");
@@ -33,7 +32,16 @@ function store() {
       console.log("Stored successfully");
     }
   };
-  xHTTPreq.send();
+
+  const studyInstanceUid = studyUrl;
+  const seriesInstanceUid = seriesUrl;
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "matchingSeriesInstanceUid": seriesInstanceUid
+  }
+  xHTTPreq.send(JSON.stringify(seriesMetadata));
+  // xHTTPreq.send();
 }
 
 function retrieve() {
@@ -64,18 +72,24 @@ function retrieve() {
 }
 
 function showLoading() {
-  document.getElementById("LoadingScreen").style.display = "block";
-  document.getElementById("divViewport").style.display = "none";
+  document.getElementById("LoadingScreen").classList.add("Shown");
+  document.getElementById("LoadingScreen").classList.remove("Hidden");
+  document.getElementById("divViewport").classList.remove("Shown");
+  document.getElementById("divViewport").classList.add("Hidden");
 }
 
 function showViewport() {
-  document.getElementById("LoadingScreen").style.display = "none";
-  document.getElementById("divViewport").style.display = "block";
+  document.getElementById("LoadingScreen").classList.remove("Shown");
+  document.getElementById("LoadingScreen").classList.add("Hidden");
+  document.getElementById("divViewport").classList.add("Shown");
+  document.getElementById("divViewport").classList.remove("Hidden");
 }
 
 function hideViewportLoading() {
-  document.getElementById("LoadingScreen").style.display = "none";
-  document.getElementById("divViewport").style.display = "none";
+  document.getElementById("LoadingScreen").classList.remove("Shown");
+  document.getElementById("LoadingScreen").classList.add("Hidden");
+  document.getElementById("divViewport").classList.remove("Shown");
+  document.getElementById("divViewport").classList.add("Hidden");
 }
 
 function studySearch() {
@@ -134,8 +148,22 @@ function studySearch() {
   showLoading();
 }
 
-function seriesSearch(studyID) {
-  console.log("Searching for available series in study " + studyID);
+function launchMachine() {
+  console.log("Launching machine");
+  const xHttpReq = new XMLHttpRequest();
+  xHttpReq.open("GET", "/launchMachine");
+  xHttpReq.addEventListener("load", function () {
+    if (xHttpReq.status != 200) {
+      console.log(xHttpReq.responseText);
+    } else {
+      getAndLoadSeg();
+    }
+  });
+  xHttpReq.send();
+}
+
+function seriesSearch(studyInstanceUid) {
+  console.log("Searching for available series in study " + studyInstanceUid);
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/searchSeries");
   xHTTPreq.setRequestHeader("Content-Type", "application/json");
@@ -171,8 +199,9 @@ function seriesSearch(studyID) {
       displaySeries(allSeries);
     }
   });
+  const studyId = studyUrl;
   const studyIdJson = {
-    "studyInstanceUid": studyID
+    "studyInstanceUid": studyId
   }
   xHTTPreq.send(JSON.stringify(studyIdJson));
   showLoading();
@@ -188,25 +217,13 @@ function loadSegmentation() {
       console.log(XmlHttpReq.responseText);
     } else {
       const numSegsJson = JSON.parse(XmlHttpReq.responseText);
-      console.log("found " + numSegsJson.numSegs + "segs that match");
+      console.log("found " + numSegsJson.numSegs + " segs that match");
 
       if (numSegsJson.numSegs) {
-        const segURL = "http://" + window.location.host + "/dicoms/"
-          + numSegsJson.segSopInstanceUid + ".dcm";
-        console.log(segURL);
-        const xhr = new XMLHttpRequest();
-        xhr.addEventListener("load", () => {
-          parseSeg(xhr.response);
-        });
-        xhr.addEventListener("error", () => {
-          console.log(`Request returned, status: ${xhr.status}`);
-          console.log(xhr.message);
-        });
-        xhr.open("GET", segURL);
-        xhr.responseType = "arraybuffer"; //Type of file
-        xhr.send();
+        getAndLoadSeg();
       } else {
-        window.alert("no segs found, we'll create one instead");
+        window.alert("No segmentation masks were found. We will create one :)");
+        launchMachine();
       }
     }
   });
@@ -300,6 +317,30 @@ searchBarSeries.addEventListener('keyup', (e) => {
   displaySeries(filteredInstances);
 });
 
+const deleteSeries = () => {
+console.log("deleting current series");
+  const xHTTPreq = new XMLHttpRequest();
+  xHTTPreq.open("POST", "/deleteSeries");
+  xHTTPreq.addEventListener("load", function () {
+    if (xHTTPreq.status != 200) {
+      console.log("failed");
+      console.log(xHTTPreq.responseText);
+    } else {
+      console.log("Delete successful");
+      const instances = JSON.parse(xHTTPreq.responseText);
+    }
+  });
+
+  const studyInstanceUid = studyUrl;
+  const seriesInstanceUid = seriesUrl;
+  xHTTPreq.setRequestHeader("Content-Type", "application/json");
+  const seriesMetadata = {
+    "studyInstanceUid": studyInstanceUid,
+    "seriesInstanceUid": seriesInstanceUid
+  }
+  xHTTPreq.send(JSON.stringify(seriesMetadata));
+  StudySelect();
+}
 const displaySeries = (instances) => {
   seriesList.innerHTML = '';
   instances.forEach(element => {

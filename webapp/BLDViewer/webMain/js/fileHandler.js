@@ -10,7 +10,10 @@ function selectFolder(e) {
        formData.append("newDICOM[]", file, nameString);
     }
     //all files in e.target.files
-    //send these to the server for purposes of saving with multer--unless mitchell expresses need to change from multer usage
+
+    //send these to the server for purposes of saving with multer
+    //--unless mitchell expresses need to change from multer usage
+
     //console.log("Saving " + nameString);
     const xHTTPreq = new XMLHttpRequest();
     xHTTPreq.open("POST", "/saveUpload");
@@ -21,7 +24,7 @@ function selectFolder(e) {
         else{
           console.log("Save successful");
           //now that files have returned, store them all
-          store();
+          uploadToDicomStore();
           //Now, we have three options:
             //expect client to go back to study search to access new files
                 //PROBLEM: uploaded DICOM instances and the retrieved DICOM instances will both be in the dicoms folder

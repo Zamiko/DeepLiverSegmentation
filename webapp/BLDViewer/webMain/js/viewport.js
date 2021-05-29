@@ -7,7 +7,7 @@ function changeSeries(instanceIDs) {
   const element = document.getElementById("cornerstoneViewport");
   cornerstone.enable(element);
 
-  var imageIds = [];
+  let imageIds = [];
   // for (var i = 1; i <= 602; i++) {
   for (var i = 0; i < instanceIDs.length; i++) {
     imageIds.push(
@@ -18,6 +18,7 @@ function changeSeries(instanceIDs) {
       "/dicoms/" + instanceIDs[i] + ".dcm"
     );
   }
+
   const stack = {
     currentImageIdIndex: 0,
     imageIds: imageIds

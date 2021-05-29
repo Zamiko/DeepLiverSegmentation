@@ -18,9 +18,11 @@
         <button class="button" id="saveDICOM" onclick="store()">test save</button>
         <button class="button" id="studySelect" onclick="StudySelect()">Select Study</button>
         <button class="button" id="seriesSelect" onclick="SeriesSelect()">Select Series</button>
+
+        <button class="button" id="seriesSelect" onclick="deleteSeries()">Delete Series</button>
         <!--FIXME: may need to change format of the button here-->
         <button class="button" id="uploadFiles">Upload Files<input type="file" onchange="selectFolder(event);" webkitdirectory mozdirectory msdirectory odirectory directory multiple="multiple" /></button>
-        <button class="button" id="downloadFiles" onclick="downloadFiles()">Download Files</button>
+        <a class="button" id="downloadFiles" href="/zip">Download Files</a>
         
       </div>
     </div>
@@ -55,7 +57,7 @@
       <div class="seg-buttons">
         <!--TODO: add button to load segmentation mask (or automatically load any present segmentation mask)-->
         <button class="button" id="sampleData" onclick="createSeg()">Create Seg</button>
-        <button class="button" id="seg-loader" onclick="getAndLoadSeg()">
+        <button class="button" id="seg-loader" onclick="loadSegmentation()">
           Load Segmentation
         </button>
         <label for="switchSegment">Active Segment: </label><select id="switchSegment" onchange="changeSegment()">
@@ -76,14 +78,9 @@
           Redo
         </button>
       </div>
-      <!-- <button class="button" id="segmentation" onclick="toggleSeg()">
-        Segmentation
-      </button> -->
     </div>
     <div class="row">
-      <!-- <div class="Hidden" id="segOptions">
-
-      </div> -->
+      
       <p id="statusLine"></p>
       <div class=" Shown" id="LoadingScreen">
       </div>
