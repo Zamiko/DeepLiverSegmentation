@@ -7,6 +7,7 @@ function createSeg() {
   const toolState = globalToolStateManager.saveToolState();
   const stackToolState = cornerstoneTools.getToolState(element, "stack");
   const imageIds = stackToolState.data[0].imageIds;
+
   const { getters } = cornerstoneTools.getModule("segmentation");
   const { labelmaps3D } = getters.labelmaps3D(element);
   let imagePromises = [];
@@ -64,9 +65,10 @@ function createSeg() {
           console.log(xHTTPreq.responseText);
         }
         else {
-          console.log("Save successful")
+          console.log("Save successful");
           //?--need to find a way to delete segmentation masks previously saved for this series
           uploadToDicomStore();
+
         }
       });
       xHTTPreq.send(formData);

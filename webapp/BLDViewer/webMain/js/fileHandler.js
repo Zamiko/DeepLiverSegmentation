@@ -10,8 +10,10 @@ function selectFolder(e) {
        formData.append("newDICOM[]", file, nameString);
     }
     //all files in e.target.files
+
     //send these to the server for purposes of saving with multer
     //--unless mitchell expresses need to change from multer usage
+
     //console.log("Saving " + nameString);
     const xHTTPreq = new XMLHttpRequest();
     xHTTPreq.open("POST", "/saveUpload");

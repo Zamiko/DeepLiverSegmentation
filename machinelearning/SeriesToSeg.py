@@ -65,6 +65,9 @@ def Scale_to_Original(imgs):
 
   return scaled_images
 
+def getSliceLocation(slice):
+  return int(slice.SliceLocation)
+  
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
 metainfo = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/metainfo.json' # TODO: Modify metainfo.json according to the needs of the user
@@ -91,13 +94,14 @@ HOUNSFIELD_RANGE = HOUNSFIELD_MAX - HOUNSFIELD_MIN
 
 # Generate variables of the source images
 dicom_series_paths = os.listdir(series_path)
-dicom_series_paths_new = [os.path.join(series, x) for x in dicom_series_paths]
+dicom_series_paths_new = [os.path.join(series_path, x) for x in dicom_series_paths]
 source_images = [
     pydicom.dcmread(x, stop_before_pixels=True)
     for x in dicom_series_paths_new
 ]
 
-# TODO: Sort the Pydicom files by z position on image position patient attributes
+# Sort by Slice location
+source_images = sorted(source_images, key = getSliceLocation)
 
 # Create and save a nifti volume of the DICOM series
 dicom2nifti.dicom_series_to_nifti(series_path, seriesNii_path)

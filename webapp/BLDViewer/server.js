@@ -49,6 +49,29 @@ function deletePreviousDICOMs() {
     });
   });
 }
+//think this will link directly to the storage
+const dcmStorage = multer.diskStorage({
+  // Destination to store dicom     
+  destination: function(req, file, cb) {
+    cb(null, __dirname + "/webMain/dicoms/");
+  },
+    filename: (req, file, cb) => {
+      //Fixme: need to add file name extension
+      cb(null, file.originalname)
+  }
+});
+
+const dcmUpload = multer({
+  storage: dcmStorage,
+  //limits
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(dcm)$/)) { 
+       // upload only dcm
+       return cb(new Error('Please upload a dicom series'))
+    }
+    cb(undefined, true)
+  }
+}) 
 
 const dcmStorage = multer.diskStorage({
   // Destination to store dicom     
@@ -76,6 +99,14 @@ const dcmUpload = multer({
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
+});
+app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
+  //res.send(req.file)
+  console.log("files successfully uploaded");
+  res.status(200).send({message: "all good!"})
+}, (error, req, res, next) => {
+  console.log("files unsuccessfully uploaded");
+  res.status(400).send({ error: error.message })
 });
 
 app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
@@ -140,6 +171,7 @@ app.get('/zip', function (req, res, next) {
 // All functions below expect to recieve and return JSONs
 app.use(express.json());
 
+
 app.post("/upload", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
@@ -151,9 +183,10 @@ app.post("/upload", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
+
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
   deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
-  fileFolder = "webMain/upload/"
+  fileFolder = "webMain/upload/";
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -165,7 +198,9 @@ app.post("/upload", async (req, res) => {
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
+
       const filePath = fileFolder + file;
+
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -177,13 +212,15 @@ app.post("/upload", async (req, res) => {
         .storeInstances(
           request
         );
+      
       // console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
       console.log("Stored file number " + numFilesSaved);
       numFilesSaved += 1;
     });
   });
   res.status(200);
-  console.log("Done storing")
+  console.log("Done storing");
+
 });
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
