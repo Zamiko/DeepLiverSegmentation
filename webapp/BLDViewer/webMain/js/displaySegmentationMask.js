@@ -23,7 +23,6 @@ function parseSeg(arrayBuffer) {
         "stack"
     );
     const imageIds = stackToolState.data[0].imageIds;
-    const t0 = performance.now();
     const {
         labelmapBufferArray,
         segMetadata,
@@ -33,7 +32,6 @@ function parseSeg(arrayBuffer) {
         arrayBuffer,
         cornerstone.metaData,
     );
-    const t1 = performance.now();
     const { setters, state } = cornerstoneTools.getModule("segmentation");
     setters.labelmap3DByFirstImageId(
         imageIds[0],
@@ -49,7 +47,6 @@ function metaDataProvider(type, imageId) {
     if (!metaData[imageId]) {
         return;
     }
-
     return metaData[imageId][type];
 }
 

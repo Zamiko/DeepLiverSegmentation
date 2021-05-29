@@ -52,29 +52,6 @@ function deletePreviousDICOMs() {
 //think this will link directly to the storage
 const dcmStorage = multer.diskStorage({
   // Destination to store dicom     
-  destination: function(req, file, cb) {
-    cb(null, __dirname + "/webMain/dicoms/");
-  },
-    filename: (req, file, cb) => {
-      //Fixme: need to add file name extension
-      cb(null, file.originalname)
-  }
-});
-
-const dcmUpload = multer({
-  storage: dcmStorage,
-  //limits
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(dcm)$/)) { 
-       // upload only dcm
-       return cb(new Error('Please upload a dicom series'))
-    }
-    cb(undefined, true)
-  }
-}) 
-
-const dcmStorage = multer.diskStorage({
-  // Destination to store dicom     
   destination: function (req, file, cb) {
     cb(null, __dirname + "/webMain/upload/");
   },
@@ -94,26 +71,18 @@ const dcmUpload = multer({
     }
     cb(undefined, true)
   }
-});
+})
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
   response.sendFile(`${__dirname}/webMain/index.html`);
-});
-app.post("/saveUpload", dcmUpload.array("newDICOM[]"),function(req, res) {
-  //res.send(req.file)
-  console.log("files successfully uploaded");
-  res.status(200).send({message: "all good!"})
-}, (error, req, res, next) => {
-  console.log("files unsuccessfully uploaded");
-  res.status(400).send({ error: error.message })
 });
 
 app.post("/saveUpload", dcmUpload.array("newDICOM[]"), function (req, res) {
   console.log("files successfully uploaded");
   res.status(200).send({ message: "all good!" })
 }, (error, req, res, next) => {
-  console.log("files unsuccessfully uploaded");
+  console.log("files failed to upload");
   res.status(400).send({ error: error.message });
   console.log(error.message);
 });
@@ -148,19 +117,13 @@ app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {
 
 app.use(zip());
 app.get('/zip', function (req, res, next) {
-  const dirPath = `${__dirname}/webMain/dicoms`;
+  const seriesPath = `${__dirname}/webMain/dicoms`;
+  const segmentationPath = `${__dirname}/webmain/seg`;
   const nameString = 'bld-dicoms.zip';
   res.zip({
     files: [
-      //  {   
-      //       content: 'DICOM images',      
-      //       name: 'bld-dicoms',
-      //       mode: 0755,
-      //       comment: 'DICOM images downloaded from BLDs liver segmenter',
-      //       date: new Date(),
-      //       type: 'file' },
-      { path: `${__dirname}/webmain/seg`, name: 'segmentation' },
-      { path: dirPath, name: 'Series' }
+      { path: segmentationPath, name: 'segmentation' },
+      { path: seriesPath, name: 'series' }
     ],
     filename: nameString
   });
@@ -170,7 +133,6 @@ app.get('/zip', function (req, res, next) {
 
 // All functions below expect to recieve and return JSONs
 app.use(express.json());
-
 
 app.post("/upload", async (req, res) => {
   const auth = await google.auth.getClient({
@@ -183,10 +145,10 @@ app.post("/upload", async (req, res) => {
       Accept: 'application/dicom+json',
     },
   });
-
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
+  const fileFolder = "webMain/upload/";
+
   deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid);
-  fileFolder = "webMain/upload/";
   fs.readdir(fileFolder, async (err, files) => {
     if (err) {
       console.error("Could not list the directory.", err);
@@ -194,13 +156,11 @@ app.post("/upload", async (req, res) => {
     }
     numFilesSaved = 1;
     files.forEach(async (file, index) => {
-      //FIXME: seems to be only saving last file over and over and over again
       const dicomWebPath = 'studies';
       // Use a stream because other types of reads overwrite the client's HTTP
       // headers and cause storeInstances to fail.
 
       const filePath = fileFolder + file;
-
       const binaryData = fs.createReadStream(filePath);
       const request = {
         parent,
@@ -213,14 +173,12 @@ app.post("/upload", async (req, res) => {
           request
         );
       
-      // console.log('Stored DICOM instance:\n', JSON.stringify(instance.data));
       console.log("Stored file number " + numFilesSaved);
       numFilesSaved += 1;
     });
   });
   res.status(200);
   console.log("Done storing");
-
 });
 
 async function writeSOPInstance(studyInstanceUid, seriesInstanceUid,
@@ -246,7 +204,6 @@ app.post("/retrieve", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
-  // Search options setting
   google.options({
     auth,
     // 00200032 ID for Image Postion Patient in CT DICOM
@@ -266,7 +223,7 @@ app.post("/retrieve", async (req, res) => {
       console.log(error);
       res.status(404);
     });
-  console.log(`Found ${seriesInstances.data.length} instances:`);
+  console.log(`Found ${seriesInstances.data.length} instances`);
   let sopInstances = [];
   seriesInstances.data.forEach((instance, index) => {
     sopInstances.push(instance);
@@ -290,7 +247,6 @@ app.post("/retrieve", async (req, res) => {
   console.log(writingPromises.length);
   Promise.all(writingPromises)
     .then(values => {
-      console.log(values);
       let instanceIds = [];
       sopInstances.forEach(sopInstance => {
         instanceIds.push(sopInstance[`00080018`].Value[0]);
@@ -298,7 +254,7 @@ app.post("/retrieve", async (req, res) => {
       let instances = {
         "instanceIDs": instanceIds,
       }
-      console.log("finished");
+      console.log("Finished writing all instances");
       res.json(instances);
       res.status(200);
     })
@@ -327,8 +283,7 @@ app.get("/search", async (req, res) => {
       request
     );
 
-  console.log(`Found ${instances.data.length} instances:`);
-  console.log(JSON.stringify(instances.data));
+  console.log(`Found ${instances.data.length} studies`);
   res.json(instances.data);
   res.status(200);
 });
@@ -347,14 +302,13 @@ app.post("/searchSeries", async (req, res) => {
   console.log("retrieving from " + studyInstanceUid);
   const dicomWebPath = `studies/${studyInstanceUid}/series`;
   const request = { parent, dicomWebPath };
-
-  const instances = await healthcare.projects.locations.datasets.dicomStores
+  const series = await healthcare.projects.locations.datasets.dicomStores
     .searchForSeries(
       request
     );
-  console.log(`Found ${instances.data.length} instances:`);
-  console.log(JSON.stringify(instances.data));
-  res.json(instances.data);
+
+  console.log(`Found ${series.data.length} series`);
+  res.json(series.data);
   res.status(200);
 });
 
@@ -369,11 +323,9 @@ app.post("/loadSeg", async (req, res) => {
     params: { includefield: 'all' },
     headers: { Accept: 'application/dicom+json, multipart/related' },
   });
-
   const { studyInstanceUid, matchingSeriesInstanceUid } = req.body;
   const dicomWebPath = `studies/${studyInstanceUid}/instances`;
   const request = { parent, dicomWebPath };
-
   const studySegInstances = await healthcare.projects.locations.datasets
     .dicomStores.studies.series.searchForInstances(
       request
@@ -381,7 +333,8 @@ app.post("/loadSeg", async (req, res) => {
       console.log(error);
       res.status(404);
     });
-  console.log(`Found ${studySegInstances.data.length} instances in same study`);
+  console.log(`Found ${studySegInstances.data.length} instances in `
+    + `study ${studyInstanceUid}`);
 
   let matchingSegInstances = [];
   studySegInstances.data.forEach((instance) => {
@@ -444,18 +397,18 @@ async function deleteSegsForSeries(studyInstanceUid, matchingSeriesInstanceUid) 
       }
     }
   });
+
   google.options({ auth });
   matchingSegInstances.forEach(async (segInstance) => {
     const dicomWebPath = `studies/${studyInstanceUid}/`
       + `series/${segInstance[`0020000E`].Value[0]}`;
     const request = { parent, dicomWebPath };
     await healthcare.projects.locations.datasets.dicomStores.studies.series
-      .delete(
-        request
-      );
+      .delete(request);
+    console.log(`done deleting seg ${segInstance[`0020000E`].Value[0]}`);
   });
 }
-//need to get uID through the request
+
 app.get("/delete", async (req, res) => {
   const auth = await google.auth.getClient({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'],

@@ -7,7 +7,6 @@ function createSeg() {
   const toolState = globalToolStateManager.saveToolState();
   const stackToolState = cornerstoneTools.getToolState(element, "stack");
   const imageIds = stackToolState.data[0].imageIds;
-
   const { getters } = cornerstoneTools.getModule("segmentation");
   const { labelmaps3D } = getters.labelmaps3D(element);
   let imagePromises = [];
@@ -21,16 +20,10 @@ function createSeg() {
     return;
   }
 
-  console.log("label maps 3D length is " + labelmaps3D.length);
-
-  for (
-    let labelmapIndex = 0;
-    labelmapIndex < labelmaps3D.length;
-    labelmapIndex++
-  ) {
+  for (let labelmapIndex = 0; labelmapIndex < labelmaps3D.length;
+    labelmapIndex++) {
     const labelmap3D = labelmaps3D[labelmapIndex];
     const labelmaps2D = labelmap3D.labelmaps2D;
-    console.log("Label maps 2D length is " + labelmaps2D.length);
 
     for (let i = 0; i < labelmaps2D.length; i++) {
       if (!labelmaps2D[i]) {
@@ -46,15 +39,13 @@ function createSeg() {
       });
     }
   }
+
   Promise.all(imagePromises)
     .then(images => {
-      //this will convert the segmentation mask to a binary file
-      const segBlob = dcmjs.adapters.Cornerstone.Segmentation.generateSegmentation(
-        images,
-        labelmaps3D
-      );
+      // This will convert the segmentation mask to a binary file
+      const segBlob = dcmjs.adapters.Cornerstone.Segmentation
+        .generateSegmentation(images, labelmaps3D);
       const formData = new FormData();
-      // create a file from the blob
       var nameString = "SEG.dcm";
       formData.append("newSeg", segBlob, nameString);
       console.log("Saving " + nameString);
@@ -66,9 +57,7 @@ function createSeg() {
         }
         else {
           console.log("Save successful");
-          //?--need to find a way to delete segmentation masks previously saved for this series
           uploadToDicomStore();
-
         }
       });
       xHTTPreq.send(formData);

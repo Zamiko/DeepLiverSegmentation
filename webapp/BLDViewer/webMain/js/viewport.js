@@ -8,13 +8,10 @@ function changeSeries(instanceIDs) {
   cornerstone.enable(element);
 
   let imageIds = [];
-  // for (var i = 1; i <= 602; i++) {
   for (var i = 0; i < instanceIDs.length; i++) {
     imageIds.push(
       "wadouri://" +
       window.location.host +
-      // "/11-13-2003-threephaseabdomen-49621/5.000000-arterial-92922/1-" 
-      // + addLeadingZeroes(i) + ".dcm"
       "/dicoms/" + instanceIDs[i] + ".dcm"
     );
   }

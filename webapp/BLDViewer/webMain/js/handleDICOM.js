@@ -41,7 +41,6 @@ function uploadToDicomStore() {
     "matchingSeriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
-  // xHTTPreq.send();
 }
 
 function retrieve() {
