@@ -1,6 +1,6 @@
 # Deep Liver Segmentation 
 ## User Guide 
-Please visit the link to view the user guide: https://docs.google.com/document/d/1ZcIswXt-kr9g7uuD6gu_oQC5xXah5jLWzvIlC97OUlA/edit?usp=sharing
+Please visit the [here](https://docs.google.com/document/d/1ZcIswXt-kr9g7uuD6gu_oQC5xXah5jLWzvIlC97OUlA/edit?usp=sharing) to view the user guide.
 ## Description 
 Web-based liver segmentation provides all the standard features of a medical image viewer. Users are able to interact with DICOM series and segmentation masks. In addition to the normal segmentation mask creation, they can use the machine learning model to produce predicted segmentation masks for a series.
 ## Authors
