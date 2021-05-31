@@ -24,9 +24,30 @@ together into one folder as we determine their interactions.
 │   └── 
 │
 ├── machinelearning
-│   ├──
-│   ├──
-│   ├──
-│   ├──
-└── README.md                   # This file
+│   ├── Couinaud_Annotation_Data
+|       └── Couinaud_Annotation_Data
+|           └── data_splits_raw                       #Raw data with corresponding train/test/validate splits (.nii format)
+|               └── training
+|                   ├── couinaud_raw ...
+|                   └── img_raw      ...
+|               └── testing
+|                   ├── couinaud_raw ...
+|                   └── img_raw      ...
+|               └── validate
+|                   ├── couinaud_raw ...
+|                   └── img_raw      ...
+|           ├── model_notebooks
+|               └── CompleteDataSet
+|                   ├── 2-Models_0-4 and 0,5-8
+|                   ├── 4-Models_0-2,3-4,5-6,7-8
+|                   ├── 0527_04_51                                  #Model's weights
+|                   ├── HounsfieldRange_Comparisons.ipynb 
+|                   ├── MultipleModels_DifferentBatchSize-1000_1000RESIZE_192INITfeat32.ipynb       #Training Multiple Models  
+|                   └── partitionExploration.ipynb 
+|           ├── unet_architecture
+|               └── unet.py
+|           ├── data_preprocessing.ipynb
+|           └── helpers.py 
+│   ├── SeriesToSeg.py         # Converting a DICOM series to a Seg
+└── README.md                  # This file
 ```
