@@ -1,4 +1,7 @@
 # Deep Liver Segmentation 
+
+## Description 
+Web-based liver segmentation provides all the standard features of a medical image viewer. Users are able to interact with DICOM series and segmentation masks. In addition to the normal segmentation mask creation, they can use the machine learning model to produce predicted segmentation masks for a series.
 ## Authors
 - Catharina Castillo 
 - Samuel Becerra Martinez
