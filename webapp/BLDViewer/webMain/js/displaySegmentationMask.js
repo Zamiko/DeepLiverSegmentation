@@ -1,8 +1,5 @@
 function getAndLoadSeg() {
-    var segURL =
-        window.location.origin +
-        "/seg/segmentation.dcm";
-    console.log(segURL);
+    const segURL = window.location.origin + "/seg/segmentation.dcm";
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
         parseSeg(xhr.response);
@@ -23,7 +20,6 @@ function parseSeg(arrayBuffer) {
         "stack"
     );
     const imageIds = stackToolState.data[0].imageIds;
-    const t0 = performance.now();
     const {
         labelmapBufferArray,
         segMetadata,
@@ -33,8 +29,7 @@ function parseSeg(arrayBuffer) {
         arrayBuffer,
         cornerstone.metaData,
     );
-    const t1 = performance.now();
-    const { setters, state } = cornerstoneTools.getModule("segmentation");
+    const { setters } = cornerstoneTools.getModule("segmentation");
     setters.labelmap3DByFirstImageId(
         imageIds[0],
         labelmapBufferArray[0],
@@ -49,7 +44,6 @@ function metaDataProvider(type, imageId) {
     if (!metaData[imageId]) {
         return;
     }
-
     return metaData[imageId][type];
 }
 
