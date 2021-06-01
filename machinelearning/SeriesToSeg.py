@@ -66,7 +66,7 @@ def Scale_to_Original(imgs):
   return scaled_images
 
 def getSliceLocation(slice):
-  return int(slice.SliceLocation)
+  return float(slice.SliceLocation)
   
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
@@ -112,7 +112,7 @@ dicom2nifti.dicom_series_to_nifti(series_path, seriesNii_path)
 # Load the series and the model
 model = load_model(model_path)
 niiFile = nib.load(seriesNii_path)
-imgTarget = nib.load(seriesNii).get_fdata()
+imgTarget = nib.load(seriesNii_path).get_fdata()
 
 # Generate the segmentation of the DICOM series
 
@@ -134,7 +134,7 @@ for i in range(0,scale_up_images_transposed.shape[2]):
   scale_up_images_transposed[:,:,i] = matrixflip(img,'v')
 for i in range(0,scale_up_images_transposed.shape[2]):
   img = scale_up_images_transposed[:,:,i]
-  scale_up_images_transposed[:,:,i] = matrixflip(img,'h'
+  scale_up_images_transposed[:,:,i] = matrixflip(img,'h')
   
 # Convert the predicted volume to Niftii format such that it can be transformed to an SimpleITK image
 predImg = nib.Nifti1Image(scale_up_images_transposed, affine=np.eye(4))
@@ -176,15 +176,24 @@ try:
   dcm.ClinicalTrialSeriesID = source_images[0].ClinicalTrialSeriesID # TODO: Connect this to "PatientName"
 except:
   print("Warning: Clinical Trial Attributes not present in referenced DICOM series")
-  
+
+# Determine wether the series is ascending or desceding based on ImagePositionPatient
+seriesAscending = False
+pos1 = source_images[0].ImagePositionPatient[2]
+pos2 = source_images[1].ImagePositionPatient[2]
+if(pos1 < pos2):
+  seriesAscending = True
+
 # Manually add the Source Image Sequence
 for i in range(len(source_images)):
-  i_reverse = len(source_images) - i - 1 # ReferencedSOPInstanceIUD Item #0 Corresponds to the last image in the source images series
+  i_reverse = len(source_images) - i - 1 # ReferencedSOPInstanceIUD Item #0 Corresponds to the last image in the source images series if series is descending
   for j in range(i, i + 8 * len(source_images), len(source_images)):
-
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence = Sequence([Dataset()])
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPClassUID = source_images[0].SOPClassUID
-    dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i_reverse].SOPInstanceUID
+    if seriesAscending:
+      dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i].SOPInstanceUID
+    else:
+      dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i_reverse].SOPInstanceUID
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence = Sequence([Dataset()])
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence[0].CodeValue = "121322"
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence[0].CodingSchemeDesignator = "DCM"
