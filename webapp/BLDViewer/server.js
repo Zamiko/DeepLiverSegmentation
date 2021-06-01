@@ -32,21 +32,23 @@ function setRetrieveOptions(auth) {
 }
 
 function deletePreviousDICOMs() {
-  const fileFolder = "webMain/dicoms/";
-  fs.readdir(fileFolder, async (err, files) => {
-    if (err) {
-      console.error("Could not list the directory.", err);
-      process.exit(1);
-    }
-    files.forEach(async (file, index) => {
-      filePath = fileFolder + "/" + file;
-      try {
-        fs.unlinkSync(filePath);
-      } catch (error) {
-        console.error(error);
+  const fileFolders = ["webMain/dicoms/", "webMain/seg/"];
+  fileFolders.forEach(fileFolder => {
+    fs.readdir(fileFolder, async (err, files) => {
+      if (err) {
+        console.error("Could not list the directory.", err);
+        process.exit(1);
       }
+      files.forEach(async (file, index) => {
+        filePath = fileFolder + "/" + file;
+        try {
+          fs.unlinkSync(filePath);
+        } catch (error) {
+          console.error(error);
+        }
+      });
     });
-  });
+  })
 }
 //think this will link directly to the storage
 const dcmStorage = multer.diskStorage({
@@ -101,9 +103,9 @@ app.get('/launchMachine', (req, res) => {
     console.log(`child process close all stdio with code ${code}`);
     console.log(dataToSend);
     // Once browser receives this, it can load created segmentation
-    res.status(200);
-    res.send(dataToSend)
   });
+  res.status(200);
+  res.send(dataToSend);
 })
 
 app.post("/saveSeg", dcmUpload.single("newSeg"), function (req, res) {

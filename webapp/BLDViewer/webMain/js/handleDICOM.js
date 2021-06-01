@@ -153,9 +153,21 @@ function launchMachine() {
   xHttpReq.open("GET", "/launchMachine");
   xHttpReq.addEventListener("load", function () {
     if (xHttpReq.status != 200) {
-      console.log(xHttpReq.responseText);
+      console.log(xHttpReq.status);
     } else {
-      getAndLoadSeg();
+      console.log("we got 200");
+      const pollingForSeg = setInterval(function () {
+        var xhr = new XMLHttpRequest();
+        xhr.open('HEAD', window.location.origin + "/seg/segmentation.dcm", false);
+        xhr.send();
+
+        if (xhr.status == "404") {
+          console.log("the seg has not been created yet");
+        } else {
+          clearInterval(pollingForSeg);
+          getAndLoadSeg();
+        }
+      }, 10000);
     }
   });
   xHttpReq.send();
@@ -317,7 +329,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const deleteSeries = () => {
-console.log("deleting current series");
+  console.log("deleting current series");
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/deleteSeries");
   xHTTPreq.addEventListener("load", function () {

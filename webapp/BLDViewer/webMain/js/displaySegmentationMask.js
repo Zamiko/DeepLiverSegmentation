@@ -1,5 +1,5 @@
 function getAndLoadSeg() {
-    var segURL = window.location.origin + "/seg/segmentation.dcm";
+    const segURL = window.location.origin + "/seg/segmentation.dcm";
     const xhr = new XMLHttpRequest();
     xhr.addEventListener("load", () => {
         parseSeg(xhr.response);
