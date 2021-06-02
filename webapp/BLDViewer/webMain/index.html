@@ -37,12 +37,14 @@
       </div>
       <table id="seriesList"></table>
     </div>
-
     <div class="main-button-bar">
       <div class = "seg-buttons">
         <button class="button" id="sampleData" onclick="createSeg()"><span title = "This will overwrite existing segmentation masks in the data storage">Save Seg Mask <br> to Data Store</span></button>
         <button class="button" id="seg-loader" onclick="loadSegmentation()">
-          <span title = "This will overwrite existing segmentation masks when saved">Load New <br> Segmentation Mask</span>
+          <span title = "This will only search for existing segmentation masks">Load Existing <br> Segmentation Mask</span>
+        </button>
+        <button class="button" id="seg-loader" onclick="launchMachine()">
+          <span title = "This will overwrite existing segmentation masks when saved">Create Segmentation <br> from Machine Model</span>
         </button>
       </div>
       <div class="buttons mode-buttons">
