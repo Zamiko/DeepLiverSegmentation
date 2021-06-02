@@ -44,7 +44,7 @@ def Scale_Images(imgTarget):
     img = imgTarget[i,:,:]
     img = np.uint8(img * 255)
     img = matrixflip(img,'v')
-    scaled_images.append(cv2.resize(img, IMG_SIZE, interpolation = cv2.INTER_LINEAR))
+    scaled_images.append(cv2.resize(img, IMG_SIZE, interpolation = cv2.INTER_NEAREST))
 
   #Convert list to array
   scaled_images = np.array(scaled_images)
@@ -57,7 +57,7 @@ def Scale_to_Original(imgs):
   for i in range(0,imgs.shape[0]):
     img = imgs[i,:,:]
     img = np.uint8(img)
-    scaled_images.append(cv2.resize(img, OG_IMG_SIZE, interpolation = cv2.INTER_LINEAR))
+    scaled_images.append(cv2.resize(img, OG_IMG_SIZE, interpolation = cv2.INTER_NEAREST))
 
   #Convert list to array
   scaled_images = np.array(scaled_images)
@@ -78,8 +78,8 @@ predNii_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_D
 DICOM_seg_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/segmentation.dcm'
 
 # Image variables
-IMAGE_HEIGHT = int(512/4)
-IMAGE_WIDTH = int(512/4)
+IMAGE_HEIGHT = 192
+IMAGE_WIDTH = 192
 IMG_SIZE = (IMAGE_HEIGHT, IMAGE_WIDTH)
 
 #Original Image size
