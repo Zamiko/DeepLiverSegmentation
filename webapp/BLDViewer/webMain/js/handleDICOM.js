@@ -156,6 +156,7 @@ function launchMachine() {
     if (xHttpReq.status != 200) {
       console.log(xHttpReq.status);
     } else {
+      showLoading();
       console.log("we got 200");
       const pollingForSeg = setInterval(function () {
         var xhr = new XMLHttpRequest();
@@ -165,6 +166,7 @@ function launchMachine() {
         if (xhr.status == "404") {
           console.log("the seg has not been created yet");
         } else {
+          showViewport();
           clearInterval(pollingForSeg);
           getAndLoadSeg();
         }
@@ -230,7 +232,6 @@ function loadSegmentation() {
     } else {
       const numSegsJson = JSON.parse(XmlHttpReq.responseText);
       console.log("found " + numSegsJson.numSegs + " segs that match");
-
       if (numSegsJson.numSegs) {
         getAndLoadSeg();
       } else {
