@@ -41,6 +41,7 @@ function uploadToDicomStore() {
     "matchingSeriesInstanceUid": seriesInstanceUid
   }
   xHTTPreq.send(JSON.stringify(seriesMetadata));
+  // xHTTPreq.send();
 }
 
 function retrieve() {
@@ -153,21 +154,9 @@ function launchMachine() {
   xHttpReq.open("GET", "/launchMachine");
   xHttpReq.addEventListener("load", function () {
     if (xHttpReq.status != 200) {
-      console.log(xHttpReq.status);
+      console.log(xHttpReq.responseText);
     } else {
-      console.log("we got 200");
-      const pollingForSeg = setInterval(function () {
-        var xhr = new XMLHttpRequest();
-        xhr.open('HEAD', window.location.origin + "/seg/segmentation.dcm", false);
-        xhr.send();
-
-        if (xhr.status == "404") {
-          console.log("the seg has not been created yet");
-        } else {
-          clearInterval(pollingForSeg);
-          getAndLoadSeg();
-        }
-      }, 10000);
+      getAndLoadSeg();
     }
   });
   xHttpReq.send();
@@ -297,7 +286,7 @@ searchBar.addEventListener('keyup', (e) => {
 });
 
 const displayStudies = (series) => {
-  studiesList.innerHTML = '';
+  studiesList.innerHTML = '<tr class="header"><th style="width:25%;">Patient Name/MRN</th><th style="width:50%;">Study UID</th><th style="width:25%;">Accession Number/Scan Date</th></tr>';
   series.forEach(element => {
     const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.patientName} <br> ${element.MRN}</td><td>${element.studyID}</td><td>${element.accessionNumber} <br>${element.scanDate}</td>`;
@@ -329,7 +318,7 @@ searchBarSeries.addEventListener('keyup', (e) => {
 });
 
 const deleteSeries = () => {
-  console.log("deleting current series");
+console.log("deleting current series");
   const xHTTPreq = new XMLHttpRequest();
   xHTTPreq.open("POST", "/deleteSeries");
   xHTTPreq.addEventListener("load", function () {
@@ -353,7 +342,7 @@ const deleteSeries = () => {
   StudySelect();
 }
 const displaySeries = (instances) => {
-  seriesList.innerHTML = '';
+  seriesList.innerHTML = '<tr class="header"><th style="width:25%;">Modality</th><th style="width:50%;">Series ID</th><th style="width:25%;">Description</th></tr>';
   instances.forEach(element => {
     const tableEl = document.createElement('tr');
     tableEl.innerHTML = `<td>${element.Modality}</td><td>${element.seriesId}</td><td>${element.Notes}</td>`;
