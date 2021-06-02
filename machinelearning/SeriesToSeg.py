@@ -138,8 +138,8 @@ for i in range(0,scale_up_images_transposed.shape[2]):
   
 # Convert the predicted volume to Niftii format such that it can be transformed to an SimpleITK image
 predImg = nib.Nifti1Image(scale_up_images_transposed, affine=np.eye(4))
-nib.save(predImg, predNii)
-segmentation = sitk.ReadImage(predNii)
+nib.save(predImg, predNii_path)
+segmentation = sitk.ReadImage(predNii_path)
 
 # Write a multi-class segmentation DICOM seg file
 template = pydicom_seg.template.from_dcmqi_metainfo(metainfo)
