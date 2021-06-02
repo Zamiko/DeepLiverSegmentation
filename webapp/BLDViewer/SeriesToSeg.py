@@ -65,7 +65,7 @@ def Scale_to_Original(imgs):
 
 def getSliceLocation(slice):
   return float(slice.SliceLocation)
-
+  
 # Constants
 # Metainfo generated from http://qiicr.org/dcmqi/#/seg
 metainfo = './metainfo.json' 
@@ -94,16 +94,18 @@ HOUNSFIELD_RANGE = HOUNSFIELD_MAX - HOUNSFIELD_MIN
 dicom_series_paths = os.listdir(series_path)
 dicom_series_paths_new = [os.path.join(series_path, x) for x in dicom_series_paths]
 source_images = [
-    pydicom.dcmread(x, stop_before_pixels=True )
+    pydicom.dcmread(x, stop_before_pixels=True)
     for x in dicom_series_paths_new
 ]
 
 # Sort by Slice location
 source_images = sorted(source_images, key = getSliceLocation)
+
 # Create and save a nifti volume of the DICOM series
 dicom2nifti.dicom_series_to_nifti(series_path, seriesNii_path)
 
 # Transpose the input series matrix to the correct orientation
+# TODO: Modify this so that it flips it to the correct orientation for any input orientation
 
 # Load the series and the model
 model = load_model(model_path)
@@ -140,10 +142,10 @@ segmentation = sitk.ReadImage(predNii_path)
 # Write a multi-class segmentation DICOM seg file
 template = pydicom_seg.template.from_dcmqi_metainfo(metainfo)
 writer = pydicom_seg.MultiClassWriter(
-  template = template,
-  inplane_cropping = False,
-  skip_empty_slices = False,
-  skip_missing_segment=True,
+    template = template,
+    inplane_cropping = False,
+    skip_empty_slices = False,
+    skip_missing_segment=True,
 )
 dcm = writer.write(segmentation, source_images)
 
@@ -172,15 +174,24 @@ try:
   dcm.ClinicalTrialSeriesID = source_images[0].ClinicalTrialSeriesID # TODO: Connect this to "PatientName"
 except:
   print("Warning: Clinical Trial Attributes not present in referenced DICOM series")
-  
+
+# Determine wether the series is ascending or desceding based on ImagePositionPatient
+seriesAscending = False
+pos1 = source_images[0].ImagePositionPatient[2]
+pos2 = source_images[1].ImagePositionPatient[2]
+if(pos1 < pos2):
+  seriesAscending = True
+
 # Manually add the Source Image Sequence
 for i in range(len(source_images)):
-  i_reverse = len(source_images) - i - 1 # ReferencedSOPInstanceIUD Item #0 Corresponds to the last image in the source images series
+  i_reverse = len(source_images) - i - 1 # ReferencedSOPInstanceIUD Item #0 Corresponds to the last image in the source images series if series is descending
   for j in range(i, i + 8 * len(source_images), len(source_images)):
-
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence = Sequence([Dataset()])
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPClassUID = source_images[0].SOPClassUID
-    dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i_reverse].SOPInstanceUID
+    if seriesAscending:
+      dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i].SOPInstanceUID
+    else:
+      dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID = source_images[i_reverse].SOPInstanceUID
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence = Sequence([Dataset()])
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence[0].CodeValue = "121322"
     dcm.PerFrameFunctionalGroupsSequence[j].DerivationImageSequence[0].SourceImageSequence[0].PurposeOfReferenceCodeSequence[0].CodingSchemeDesignator = "DCM"
