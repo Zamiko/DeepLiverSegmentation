@@ -235,8 +235,8 @@ function loadSegmentation() {
       if (numSegsJson.numSegs) {
         getAndLoadSeg();
       } else {
-        window.alert("No segmentation masks were found. We will create one :)");
-        launchMachine();
+        window.alert("No segmentation masks were found. Press the create segmentation button to launch the model");
+        //do nothing else
       }
     }
   });
