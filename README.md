@@ -1,6 +1,13 @@
-# Web-Based Liver Image Segmentation <a href="url"><img src="https://user-images.githubusercontent.com/42310747/120238880-f96f8500-c211-11eb-84ef-48722bc0caeb.gif" align="right" height="300" width="350" ></a>
+# Web-Based Liver Image Segmentation 
+<p align="center">
+  <img width="450" height="207" src="https://user-images.githubusercontent.com/42310747/120549064-ec849a00-c3a7-11eb-902d-bc8d335af8d1.png">
+</p>
+
+
 ## Description 
+<a href="url"><img src="https://user-images.githubusercontent.com/42310747/120238880-f96f8500-c211-11eb-84ef-48722bc0caeb.gif" align="right" height="125" width="175" ></a>
 Web-based liver segmentation provides all the standard features of a medical image viewer. Users are able to interact with DICOM series and segmentation masks. In addition to the normal segmentation mask creation, they can use the machine learning model to produce predicted segmentation masks for a series.
+
 ## Authors
 - Catharina Castillo 
 - Samuel Becerra Martinez
