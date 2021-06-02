@@ -73,6 +73,7 @@ def getSliceLocation(slice):
 metainfo = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/metainfo.json' # TODO: Modify metainfo.json according to the needs of the user
 series_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/DICOM_anon/'
 model_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/Couinaud_Annotation_Data/models/All_Slices/0502_2:40pm/'
+# Best model location on Github: DeepLiverSegmentation/machinelearning/Couinaud_Annotation_Data/Couinaud_Annotation_Data/model_notebooks/CompleteDataSet/0527_04_51
 seriesNii_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/ABDPANC.nii'
 predNii_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/pred.nii'
 DICOM_seg_path = '/content/drive/Shareddrives/Banana Leaf Development/Data/DICOM_Data/segmentation.dcm'
